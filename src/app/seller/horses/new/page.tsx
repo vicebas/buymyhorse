@@ -1,47 +1,88 @@
 "use client"
 
-import { useState } from "react"
 import { useRouter } from "next/navigation"
+import { useState } from "react"
 
-export default function NewHorse() {
+import AppHeader from "@/components/layout/app-header"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Textarea } from "@/components/ui/textarea"
+
+export default function NewHorsePage() {
+
   const router = useRouter()
 
-  const [name, setName] = useState("")
-  const [breed, setBreed] = useState("")
-  const [age, setAge] = useState("")
-  const [price, setPrice] = useState("")
+  const [loading,setLoading] = useState(false)
 
-  async function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e:any){
     e.preventDefault()
 
-    const res = await fetch("/api/horses/create", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        name,
-        breed,
-        age: Number(age),
-        price: Number(price),
-      }),
+    const form = new FormData(e.target)
+
+    setLoading(true)
+
+    const res = await fetch("/api/horses/create",{
+      method:"POST",
+      body:form
     })
 
-    if (res.ok) router.push("/seller/horses")
+    setLoading(false)
+
+    if(res.ok){
+      router.push("/seller/horses")
+    }
   }
 
   return (
-    <main style={{ padding: 40 }}>
-      <h1>Add Horse</h1>
+    <main className="min-h-screen bg-stone-50">
+      <AppHeader variant="seller"/>
 
-      <form onSubmit={handleSubmit}>
-        <input placeholder="Name" onChange={(e) => setName(e.target.value)} />
-        <input placeholder="Breed" onChange={(e) => setBreed(e.target.value)} />
-        <input placeholder="Age" onChange={(e) => setAge(e.target.value)} />
-        <input placeholder="Price" onChange={(e) => setPrice(e.target.value)} />
+      <section className="mx-auto max-w-3xl px-6 py-10">
 
-        <button>Create</button>
-      </form>
+        <h1 className="font-serif text-3xl mb-8">
+          Add Horse
+        </h1>
+
+        <form onSubmit={handleSubmit} className="space-y-6">
+
+          <div>
+            <Label>Name</Label>
+            <Input name="name" required />
+          </div>
+
+          <div>
+            <Label>Breed</Label>
+            <Input name="breed" />
+          </div>
+
+          <div>
+            <Label>Age</Label>
+            <Input name="age" />
+          </div>
+
+          <div>
+            <Label>Price</Label>
+            <Input name="price" />
+          </div>
+
+          <div>
+            <Label>Description</Label>
+            <Textarea name="description" />
+          </div>
+
+          <div>
+            <Label>Horse Image</Label>
+            <Input type="file" name="image"/>
+          </div>
+
+          <Button type="submit">
+            {loading ? "Creating..." : "Create Horse"}
+          </Button>
+
+        </form>
+
+      </section>
     </main>
   )
 }
