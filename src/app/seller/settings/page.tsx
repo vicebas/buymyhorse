@@ -30,11 +30,11 @@ export default async function SellerSettingsPage() {
       <section className="mx-auto max-w-5xl px-6 py-10">
         <div className="mb-8">
           <p className="text-sm font-medium uppercase tracking-[0.18em] text-stone-500">
-            Seller Settings
+            Barn Settings
           </p>
-          <h1 className="mt-2 font-serif text-4xl">Edit Seller Profile</h1>
+          <h1 className="mt-2 font-serif text-4xl">Edit Barn Profile</h1>
           <p className="mt-3 max-w-2xl text-stone-600">
-            Update your public marketplace presence, branding, and seller information.
+            Update your public barn identity, branding, and marketplace information.
           </p>
         </div>
 

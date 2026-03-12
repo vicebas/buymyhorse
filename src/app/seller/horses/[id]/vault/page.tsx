@@ -15,6 +15,15 @@ interface PageProps {
   }>;
 }
 
+function formatBytes(bytes: number | null) {
+  if (!bytes) return "Unknown size";
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+  if (bytes < 1024 * 1024 * 1024) return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+
+  return `${(bytes / (1024 * 1024 * 1024)).toFixed(1)} GB`;
+}
+
 export default async function SellerHorseVaultPage({ params }: PageProps) {
   const { id } = await params;
   const session = await getServerSession(authOptions);
@@ -44,8 +53,19 @@ export default async function SellerHorseVaultPage({ params }: PageProps) {
     },
     include: {
       documents: {
+        where: {
+          deletedAt: null,
+        },
         orderBy: {
           createdAt: "desc",
+        },
+        include: {
+          uploadedBy: {
+            select: {
+              name: true,
+              email: true,
+            },
+          },
         },
       },
     },
@@ -115,14 +135,25 @@ export default async function SellerHorseVaultPage({ params }: PageProps) {
                         <div>
                           <h3 className="font-medium text-stone-900">{doc.title}</h3>
                           <p className="mt-1 text-sm text-stone-500">{doc.fileName}</p>
-                          <p className="mt-1 text-xs text-stone-400">
-                            {doc.mimeType || "Unknown file type"}
+                          <div className="mt-2 flex flex-wrap gap-2 text-xs uppercase tracking-[0.16em] text-stone-400">
+                            <span>{doc.category.replaceAll("_", " ")}</span>
+                            <span>{formatBytes(doc.fileSizeBytes)}</span>
+                            <span>{doc.mimeType || "Unknown file type"}</span>
+                          </div>
+                          <p className="mt-2 text-xs text-stone-500">
+                            Uploaded by {doc.uploadedBy.name || doc.uploadedBy.email || "Unknown user"} on{" "}
+                            {new Date(doc.createdAt).toLocaleString()}
                           </p>
                         </div>
 
-                        <span className="rounded-full bg-stone-200 px-3 py-1 text-xs font-medium text-stone-700">
-                          Private
-                        </span>
+                        <div className="flex flex-col items-end gap-2">
+                          <span className="rounded-full bg-stone-200 px-3 py-1 text-xs font-medium text-stone-700">
+                            Private
+                          </span>
+                          <span className="rounded-full bg-white px-3 py-1 text-xs font-medium text-stone-600">
+                            Category: {doc.category.replaceAll("_", " ")}
+                          </span>
+                        </div>
                       </div>
                     </div>
                   ))}

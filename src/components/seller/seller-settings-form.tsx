@@ -86,7 +86,7 @@ export default function SellerSettingsForm({
         <form onSubmit={handleSubmit} className="space-y-8">
           <div className="grid gap-8 lg:grid-cols-[220px_1fr]">
             <div className="space-y-4">
-              <Label>Seller logo</Label>
+              <Label>Barn logo</Label>
 
               <div className="overflow-hidden rounded-2xl border border-stone-200 bg-white">
                 <Image

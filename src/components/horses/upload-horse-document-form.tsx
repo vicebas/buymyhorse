@@ -12,11 +12,23 @@ interface UploadHorseDocumentFormProps {
   horseId: string;
 }
 
+const documentCategories = [
+  { value: "XRAYS", label: "X-Rays" },
+  { value: "PPE", label: "PPE" },
+  { value: "VET_REPORTS", label: "Vet Reports" },
+  { value: "CONTRACTS", label: "Contracts" },
+  { value: "PASSPORT", label: "Passport" },
+  { value: "COMPETITION_RECORDS", label: "Competition Records" },
+  { value: "CARE", label: "Care" },
+  { value: "OTHER", label: "Other" },
+];
+
 export default function UploadHorseDocumentForm({
   horseId,
 }: UploadHorseDocumentFormProps) {
   const router = useRouter();
   const [title, setTitle] = useState("");
+  const [category, setCategory] = useState("OTHER");
   const [file, setFile] = useState<File | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
@@ -37,6 +49,7 @@ export default function UploadHorseDocumentForm({
 
     const formData = new FormData();
     formData.append("title", title);
+    formData.append("category", category);
     formData.append("file", file);
 
     setSubmitting(true);
@@ -55,6 +68,7 @@ export default function UploadHorseDocumentForm({
     }
 
     setTitle("");
+    setCategory("OTHER");
     setFile(null);
     router.refresh();
   }
@@ -74,6 +88,22 @@ export default function UploadHorseDocumentForm({
             required
           />
         </div>
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="category">Category</Label>
+        <select
+          id="category"
+          value={category}
+          onChange={(e) => setCategory(e.target.value)}
+          className="flex h-10 w-full rounded-lg border border-stone-300 bg-white px-3 py-2 text-sm"
+        >
+          {documentCategories.map((option) => (
+            <option key={option.value} value={option.value}>
+              {option.label}
+            </option>
+          ))}
+        </select>
       </div>
 
       <div className="space-y-2">

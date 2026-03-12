@@ -10,7 +10,7 @@ interface RouteContext {
   }>;
 }
 
-type DenyBody = {
+type RevokeBody = {
   note?: string;
 };
 
@@ -36,10 +36,10 @@ export async function POST(req: Request, { params }: RouteContext) {
       return NextResponse.json({ error: "Seller profile not found." }, { status: 404 });
     }
 
-    const body = (await req.json()) as DenyBody;
+    const body = (await req.json()) as RevokeBody;
     const note = body.note?.trim() || null;
 
-    const accessRequest = await prisma.accessRequest.findUnique({
+    const grant = await prisma.accessGrant.findUnique({
       where: {
         id,
       },
@@ -53,52 +53,72 @@ export async function POST(req: Request, { params }: RouteContext) {
       },
     });
 
-    if (!accessRequest) {
-      return NextResponse.json({ error: "Request not found." }, { status: 404 });
+    if (!grant) {
+      return NextResponse.json({ error: "Grant not found." }, { status: 404 });
     }
 
-    if (accessRequest.horse.sellerProfileId !== seller.id) {
+    if (grant.horse.sellerProfileId !== seller.id) {
       return NextResponse.json({ error: "Unauthorized." }, { status: 403 });
     }
 
-    if (accessRequest.status !== "PENDING") {
-      return NextResponse.json(
-        { error: "Only pending requests can be denied." },
-        { status: 400 }
-      );
+    if (grant.revokedAt) {
+      return NextResponse.json({ error: "Grant is already revoked." }, { status: 400 });
     }
 
-    const updatedRequest = await prisma.$transaction(async (tx) => {
-      const deniedRequest = await tx.accessRequest.update({
+    const revokedAt = new Date();
+
+    const result = await prisma.$transaction(async (tx) => {
+      const revokedGrant = await tx.accessGrant.update({
         where: {
-          id: accessRequest.id,
+          id: grant.id,
         },
         data: {
-          status: "DENIED",
+          revokedAt,
+          note,
+        },
+        select: {
+          id: true,
+          horseId: true,
+          buyerId: true,
+          expiresAt: true,
+          revokedAt: true,
+          note: true,
+        },
+      });
+
+      await tx.accessRequest.updateMany({
+        where: {
+          horseId: grant.horseId,
+          buyerId: grant.buyerId,
+          status: "APPROVED",
+        },
+        data: {
+          status: "REVOKED",
           decisionNote: note,
         },
       });
 
       await tx.vaultActivityLog.create({
         data: {
-          horseId: accessRequest.horseId,
-          accessRequestId: accessRequest.id,
+          horseId: grant.horseId,
+          accessGrantId: grant.id,
           actorUserId: session.user.id,
-          activityType: "ACCESS_REQUEST_DENIED",
+          activityType: "ACCESS_GRANT_REVOKED",
           metadata: {
             note,
+            revokedAt: revokedAt.toISOString(),
           },
         },
       });
 
-      return deniedRequest;
+      return revokedGrant;
     });
 
-    return NextResponse.json(updatedRequest);
+    return NextResponse.json(result);
   } catch (error) {
-    console.error("Access request denial failed:", error);
+    console.error("Grant revoke failed:", error);
     return NextResponse.json(
-      { error: "Unable to deny access request right now." },
+      { error: "Unable to revoke grant right now." },
       { status: 500 }
     );
   }

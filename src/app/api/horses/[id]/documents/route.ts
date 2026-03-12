@@ -16,6 +16,19 @@ function safeFileName(name: string) {
   return name.replace(/[^a-zA-Z0-9._-]/g, "_");
 }
 
+const documentCategories = [
+  "XRAYS",
+  "PPE",
+  "VET_REPORTS",
+  "CONTRACTS",
+  "PASSPORT",
+  "COMPETITION_RECORDS",
+  "CARE",
+  "OTHER",
+] as const;
+
+type DocumentCategory = (typeof documentCategories)[number];
+
 export async function POST(req: Request, { params }: RouteProps) {
   try {
     const { id } = await params;
@@ -55,10 +68,15 @@ export async function POST(req: Request, { params }: RouteProps) {
 
     const formData = await req.formData();
     const title = String(formData.get("title") || "").trim();
+    const category = String(formData.get("category") || "OTHER").trim().toUpperCase();
     const file = formData.get("file");
 
     if (!title) {
       return NextResponse.json({ error: "Document title is required." }, { status: 400 });
+    }
+
+    if (!documentCategories.includes(category as DocumentCategory)) {
+      return NextResponse.json({ error: "Invalid document category." }, { status: 400 });
     }
 
     if (!(file instanceof File)) {
@@ -97,11 +115,31 @@ export async function POST(req: Request, { params }: RouteProps) {
         fileName: file.name,
         mimeType: file.type || null,
         isPrivate: true,
+        category: category as DocumentCategory,
+        fileSizeBytes: file.size,
+        uploadedByUserId: session.user.id,
       },
       select: {
         id: true,
         title: true,
         fileName: true,
+        category: true,
+        fileSizeBytes: true,
+      },
+    });
+
+    await prisma.vaultActivityLog.create({
+      data: {
+        horseId: horse.id,
+        horseDocumentId: document.id,
+        actorUserId: session.user.id,
+        activityType: "DOCUMENT_UPLOADED",
+        metadata: {
+          title,
+          category,
+          fileName: file.name,
+          fileSizeBytes: file.size,
+        },
       },
     });
 

@@ -1,9 +1,12 @@
 import prisma from "@/lib/db/prisma";
+import { getServerSession } from "next-auth";
 import { notFound } from "next/navigation";
 import Image from "next/image";
 import AppHeader from "@/components/layout/app-header";
 import RequestAccessButton from "@/components/horses/request-access-button";
 import HorseChatPanel from "@/components/horses/horse-chat-panel";
+import { authOptions } from "@/lib/auth/options";
+import { getBuyerHorseAccess } from "@/lib/vault/access";
 
 export default async function HorsePage({
   params,
@@ -11,15 +14,55 @@ export default async function HorsePage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
+  const session = await getServerSession(authOptions);
 
   const horse = await prisma.horse.findUnique({
     where: { id },
-    include: { sellerProfile: true },
+    include: {
+      sellerProfile: true,
+      documents: {
+        where: {
+          deletedAt: null,
+        },
+        select: {
+          id: true,
+          title: true,
+          category: true,
+        },
+        orderBy: {
+          createdAt: "desc",
+        },
+      },
+    },
   });
 
   if (!horse || !horse.isPublished) {
     notFound();
   }
+
+  const access = session?.user?.id
+    ? await getBuyerHorseAccess(session.user.id, horse.id)
+    : null;
+
+  const latestRequest = session?.user?.id
+    ? await prisma.accessRequest.findFirst({
+        where: {
+          horseId: horse.id,
+          buyerId: session.user.id,
+        },
+        orderBy: {
+          createdAt: "desc",
+        },
+        select: {
+          status: true,
+        },
+      })
+    : null;
+
+  const currentAccessStatus =
+    access?.status === "ACTIVE"
+      ? "ACTIVE"
+      : latestRequest?.status || access?.status || "NONE";
 
   return (
     <main className="min-h-screen bg-stone-50 text-stone-900">
@@ -92,7 +135,12 @@ export default async function HorsePage({
             </div>
 
             <div className="mt-6">
-              <RequestAccessButton horseId={horse.id} />
+              <RequestAccessButton
+                horseId={horse.id}
+                isLoggedIn={Boolean(session?.user?.id)}
+                currentStatus={currentAccessStatus}
+                availableDocuments={horse.documents}
+              />
             </div>
           </aside>
         </div>

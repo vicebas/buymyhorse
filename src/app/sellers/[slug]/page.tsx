@@ -51,7 +51,7 @@ export default async function PublicSellerPage({
 
             <div>
               <p className="text-sm font-medium uppercase tracking-[0.18em] text-stone-500">
-                Seller Profile
+                Barn Profile
               </p>
 
               <h1 className="mt-2 font-serif text-5xl">{seller.displayName}</h1>
@@ -78,7 +78,7 @@ export default async function PublicSellerPage({
                 {seller.bio ? (
                   <p>{seller.bio}</p>
                 ) : (
-                  <p className="text-stone-500">No seller bio available yet.</p>
+                  <p className="text-stone-500">No Barn bio available yet.</p>
                 )}
               </div>
             </div>

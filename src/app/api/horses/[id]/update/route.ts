@@ -1,6 +1,6 @@
 import { getServerSession } from "next-auth";
 import { NextResponse } from "next/server";
-import { writeFile, mkdir } from "node:fs/promises";
+import { mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
 
 import prisma from "@/lib/db/prisma";
@@ -10,7 +10,12 @@ function safeFileName(name: string) {
   return name.replace(/[^a-zA-Z0-9._-]/g, "_");
 }
 
-export async function POST(req: Request) {
+export async function POST(
+  req: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const { id } = await params;
+
   const session = await getServerSession(authOptions);
 
   if (!session?.user?.id) {
@@ -23,6 +28,17 @@ export async function POST(req: Request) {
 
   if (!seller) {
     return NextResponse.json({ error: "Seller not found" }, { status: 400 });
+  }
+
+  const existingHorse = await prisma.horse.findFirst({
+    where: {
+      id,
+      sellerProfileId: seller.id,
+    },
+  });
+
+  if (!existingHorse) {
+    return NextResponse.json({ error: "Horse not found" }, { status: 404 });
   }
 
   const formData = await req.formData();
@@ -45,7 +61,7 @@ export async function POST(req: Request) {
   }
 
   const file = formData.get("image") as File | null;
-  let imagePath: string | null = null;
+  let imagePath = existingHorse.image;
 
   if (file && file.size > 0) {
     const bytes = await file.arrayBuffer();
@@ -60,10 +76,12 @@ export async function POST(req: Request) {
     await writeFile(filepath, buffer);
     imagePath = `/uploads/horses/${filename}`;
   }
-
-  const horse = await prisma.horse.create({
+  console.log(existingHorse)
+  const horse = await prisma.horse.update({
+    where: {
+      id: existingHorse.id,
+    },
     data: {
-      sellerProfileId: seller.id,
       name,
       breed: breed || null,
       age: age ? Number(age) : null,
@@ -76,15 +94,14 @@ export async function POST(req: Request) {
       location: location || null,
       saleStatus: saleStatus as
         | "FOR_SALE"
-        | "SOLD"
         | "CONSIDERING_OFFERS"
         | "LEASE"
+        | "SOLD"
         | "NOT_AVAILABLE",
-        
       image: imagePath,
       isPublished: publishToMarketplace,
     },
   });
 
   return NextResponse.json(horse);
-}
+} 

@@ -1,88 +1,24 @@
-"use client"
-
-import { useRouter } from "next/navigation"
-import { useState } from "react"
-
-import AppHeader from "@/components/layout/app-header"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
+import AppHeader from "@/components/layout/app-header";
+import HorseForm from "@/components/horses/horse-form";
 
 export default function NewHorsePage() {
-
-  const router = useRouter()
-
-  const [loading,setLoading] = useState(false)
-
-  async function handleSubmit(e:any){
-    e.preventDefault()
-
-    const form = new FormData(e.target)
-
-    setLoading(true)
-
-    const res = await fetch("/api/horses/create",{
-      method:"POST",
-      body:form
-    })
-
-    setLoading(false)
-
-    if(res.ok){
-      router.push("/seller/horses")
-    }
-  }
-
   return (
-    <main className="min-h-screen bg-stone-50">
-      <AppHeader variant="seller"/>
+    <main className="min-h-screen bg-stone-50 text-stone-900">
+      <AppHeader variant="seller" />
 
-      <section className="mx-auto max-w-3xl px-6 py-10">
+      <section className="mx-auto max-w-5xl px-6 py-10">
+        <div className="mb-8">
+          <p className="text-sm font-medium uppercase tracking-[0.18em] text-stone-500">
+            MyBarn
+          </p>
+          <h1 className="mt-2 font-serif text-4xl">Add New Horse</h1>
+          <p className="mt-3 max-w-2xl text-stone-600">
+            Fill in the details below to add a horse to your barn.
+          </p>
+        </div>
 
-        <h1 className="font-serif text-3xl mb-8">
-          Add Horse
-        </h1>
-
-        <form onSubmit={handleSubmit} className="space-y-6">
-
-          <div>
-            <Label>Name</Label>
-            <Input name="name" required />
-          </div>
-
-          <div>
-            <Label>Breed</Label>
-            <Input name="breed" />
-          </div>
-
-          <div>
-            <Label>Age</Label>
-            <Input name="age" />
-          </div>
-
-          <div>
-            <Label>Price</Label>
-            <Input name="price" />
-          </div>
-
-          <div>
-            <Label>Description</Label>
-            <Textarea name="description" />
-          </div>
-
-          <div>
-            <Label>Horse Image</Label>
-            <Input type="file" name="image"/>
-          </div>
-
-          <Button type="submit">
-            {loading ? "Creating..." : "Create Horse"}
-          </Button>
-
-        </form>
-
+        <HorseForm mode="create" />
       </section>
     </main>
-  )
+  );
 }

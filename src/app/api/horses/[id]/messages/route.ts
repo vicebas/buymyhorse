@@ -3,8 +3,9 @@ import { authOptions } from "@/lib/auth/options"
 
 export async function POST(
   req: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const resolvedParams = await params;
 
   const session = await getServerSession(authOptions)
 
@@ -16,7 +17,7 @@ export async function POST(
 
   const horse = await prisma.horse.findUnique({
     where: {
-      id: params.id
+      id: resolvedParams.id
     }
   })
 
@@ -27,7 +28,7 @@ export async function POST(
   let conversation = await prisma.horseConversation.findUnique({
     where: {
       horseId_buyerId: {
-        horseId: params.id,
+        horseId: resolvedParams.id,
         buyerId: session.user.id
       }
     }
@@ -37,7 +38,7 @@ export async function POST(
 
     conversation = await prisma.horseConversation.create({
       data: {
-        horseId: params.id,
+        horseId: resolvedParams.id,
         buyerId: session.user.id,
         sellerId: horse.sellerProfileId
       }
