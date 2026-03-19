@@ -1,84 +1,111 @@
-"use client"
+"use client";
 
-import { useEffect, useState } from "react"
+import { useEffect, useState } from "react";
 
-export default function HorseChat({ horseId }: { horseId: string }) {
+import HorseMessageItem from "@/components/horses/horse-message-item";
 
-  const [messages, setMessages] = useState<any[]>([])
-  const [text, setText] = useState("")
-  const [loading, setLoading] = useState(false)
+type Message = {
+  id: string;
+  body: string | null;
+  messageType: "TEXT" | "GRANT";
+  metadata?: {
+    note?: string | null;
+    expiresAt?: string | null;
+    files?: Array<{
+      id: string;
+      title: string;
+      fileName: string;
+      category: string;
+    }>;
+  } | null;
+  createdAt: string | Date;
+  sender: {
+    id: string;
+    name: string | null;
+    email: string | null;
+  };
+};
 
-  async function loadMessages() {
-
-    const res = await fetch(`/api/horses/${horseId}/messages`)
-    const data = await res.json()
-
-    setMessages(data)
-  }
+export default function HorseChat({
+  horseId,
+  currentUserId,
+}: {
+  horseId: string;
+  currentUserId: string;
+}) {
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [text, setText] = useState("");
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    loadMessages()
-  }, [])
+    async function loadMessages() {
+      const res = await fetch(`/api/horses/${horseId}/messages`);
+
+      if (!res.ok) {
+        return;
+      }
+
+      const data = (await res.json()) as Message[];
+      setMessages(data);
+    }
+
+    void loadMessages();
+  }, [horseId]);
 
   async function sendMessage() {
+    if (!text.trim()) return;
 
-    if (!text.trim()) return
+    setLoading(true);
 
-    setLoading(true)
-
-    await fetch(`/api/horses/${horseId}/messages`, {
+    const res = await fetch(`/api/horses/${horseId}/messages`, {
       method: "POST",
       headers: {
-        "Content-Type": "application/json"
+        "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        body: text
-      })
-    })
+        body: text,
+      }),
+    });
 
-    setText("")
-    setLoading(false)
+    setLoading(false);
 
-    loadMessages()
+    if (!res.ok) {
+      return;
+    }
+
+    const message = (await res.json()) as Message;
+    setMessages((prev) => [...prev, message]);
+    setText("");
   }
 
   return (
-
-    <div className="mt-12 border rounded-xl p-6 bg-white">
-
-      <h3 className="font-semibold mb-4">
-        Contact Seller
-      </h3>
-
-      <div className="space-y-3 mb-4 max-h-60 overflow-y-auto">
-
-        {messages.map((m) => (
-          <div key={m.id} className="text-sm bg-stone-100 p-3 rounded">
-            {m.body}
-          </div>
+    <div className="rounded-xl border bg-white p-6">
+      <div className="mb-4 max-h-60 space-y-3 overflow-y-auto">
+        {messages.map((message) => (
+          <HorseMessageItem
+            key={message.id}
+            message={message}
+            mine={currentUserId === message.sender.id}
+          />
         ))}
-
       </div>
 
       <div className="flex gap-2">
-
         <input
           value={text}
           onChange={(e) => setText(e.target.value)}
-          className="flex-1 border rounded px-3 py-2"
+          className="flex-1 rounded border px-3 py-2"
           placeholder="Write a message..."
         />
 
         <button
           onClick={sendMessage}
           disabled={loading}
-          className="bg-black text-white px-4 rounded"
+          className="rounded bg-black px-4 text-white"
         >
           Send
         </button>
-
       </div>
-
     </div>
-  )
+  );
 }

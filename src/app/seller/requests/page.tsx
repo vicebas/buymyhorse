@@ -63,16 +63,6 @@ export default async function SellerRequestsPage() {
           email: true,
         },
       },
-      requestedCategories: {
-        select: {
-          category: true,
-        },
-      },
-      requestedFiles: {
-        select: {
-          horseDocumentId: true,
-        },
-      },
     },
     orderBy: {
       createdAt: "desc",
@@ -185,63 +175,6 @@ export default async function SellerRequestsPage() {
                     </div>
                   </div>
 
-                  <div className="grid gap-4 md:grid-cols-2">
-                    <div>
-                      <p className="text-xs uppercase tracking-[0.16em] text-stone-500">
-                        Requested Categories
-                      </p>
-                      <div className="mt-2 flex flex-wrap gap-2">
-                        {request.requestedCategories.length === 0 ? (
-                          <span className="text-sm text-stone-500">None selected</span>
-                        ) : (
-                          request.requestedCategories.map((entry) => (
-                            <span
-                              key={entry.category}
-                              className="rounded-full bg-stone-100 px-3 py-1 text-xs font-medium text-stone-700"
-                            >
-                              {entry.category.replaceAll("_", " ")}
-                            </span>
-                          ))
-                        )}
-                      </div>
-                    </div>
-
-                    <div>
-                      <p className="text-xs uppercase tracking-[0.16em] text-stone-500">
-                        Intended Use
-                      </p>
-                      <p className="mt-2 text-sm text-stone-900">
-                        {request.intendedUse || "Not provided"}
-                      </p>
-                    </div>
-                  </div>
-
-                  <div>
-                    <p className="text-xs uppercase tracking-[0.16em] text-stone-500">
-                      Requested Files
-                    </p>
-                    <div className="mt-2 flex flex-wrap gap-2">
-                      {request.requestedFiles.length === 0 ? (
-                        <span className="text-sm text-stone-500">No specific files requested</span>
-                      ) : (
-                        request.horse.documents
-                          .filter((document) =>
-                            request.requestedFiles.some(
-                              (entry) => entry.horseDocumentId === document.id
-                            )
-                          )
-                          .map((document) => (
-                            <span
-                              key={document.id}
-                              className="rounded-full bg-amber-50 px-3 py-1 text-xs font-medium text-amber-800"
-                            >
-                              {document.title}
-                            </span>
-                          ))
-                      )}
-                    </div>
-                  </div>
-
                   {grant ? (
                     <div className="rounded-2xl border border-stone-200 bg-white p-4">
                       <p className="text-xs uppercase tracking-[0.16em] text-stone-500">
@@ -284,12 +217,6 @@ export default async function SellerRequestsPage() {
                   {request.status === "PENDING" ? (
                     <RequestActionButtons
                       requestId={request.id}
-                      requestedCategories={request.requestedCategories.map(
-                        (entry) => entry.category
-                      )}
-                      requestedFileIds={request.requestedFiles.map(
-                        (entry) => entry.horseDocumentId
-                      )}
                       availableDocuments={request.horse.documents}
                     />
                   ) : null}

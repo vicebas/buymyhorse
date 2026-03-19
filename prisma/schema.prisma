@@ -193,7 +193,6 @@ model HorseDocument {
 
   horse           Horse                 @relation(fields: [horseId], references: [id], onDelete: Cascade)
   uploadedBy      User                  @relation("UploadedHorseDocuments", fields: [uploadedByUserId], references: [id], onDelete: Restrict)
-  requestedIn     AccessRequestFile[]
   grantedIn       AccessGrantFile[]
   vaultActivities VaultActivityLog[]
 
@@ -207,7 +206,6 @@ model AccessRequest {
   buyerId      String
   message      String?
   status       AccessRequestStatus @default(PENDING)
-  intendedUse  String?
   decisionNote String?
   createdAt    DateTime            @default(now())
   updatedAt    DateTime            @updatedAt
@@ -215,8 +213,6 @@ model AccessRequest {
   horse Horse @relation(fields: [horseId], references: [id], onDelete: Cascade)
   buyer User  @relation("BuyerAccessRequests", fields: [buyerId], references: [id], onDelete: Cascade)
 
-  requestedCategories AccessRequestCategory[]
-  requestedFiles      AccessRequestFile[]
   vaultActivities     VaultActivityLog[]
 
   @@index([horseId, buyerId])
@@ -237,49 +233,13 @@ model AccessGrant {
   horse           Horse         @relation(fields: [horseId], references: [id], onDelete: Cascade)
   buyer           User          @relation("BuyerAccessGrants", fields: [buyerId], references: [id], onDelete: Cascade)
   grantedBySeller SellerProfile @relation(fields: [grantedBySellerId], references: [id], onDelete: Cascade)
-  grantedCategories AccessGrantCategory[]
   grantedFiles      AccessGrantFile[]
   vaultActivities   VaultActivityLog[]
+  messages          HorseMessage[]
 
   @@unique([horseId, buyerId])
   @@index([expiresAt])
   @@index([revokedAt])
-}
-
-model AccessRequestCategory {
-  id              String           @id @default(cuid())
-  accessRequestId String
-  category        DocumentCategory
-  createdAt       DateTime @default(now())
-
-  accessRequest AccessRequest @relation(fields: [accessRequestId], references: [id], onDelete: Cascade)
-
-  @@unique([accessRequestId, category])
-  @@index([category])
-}
-
-model AccessRequestFile {
-  id              String   @id @default(cuid())
-  accessRequestId String
-  horseDocumentId String
-  createdAt       DateTime @default(now())
-
-  accessRequest AccessRequest @relation(fields: [accessRequestId], references: [id], onDelete: Cascade)
-  horseDocument  HorseDocument @relation(fields: [horseDocumentId], references: [id], onDelete: Cascade)
-
-  @@unique([accessRequestId, horseDocumentId])
-}
-
-model AccessGrantCategory {
-  id            String           @id @default(cuid())
-  accessGrantId String
-  category      DocumentCategory
-  createdAt     DateTime @default(now())
-
-  accessGrant AccessGrant @relation(fields: [accessGrantId], references: [id], onDelete: Cascade)
-
-  @@unique([accessGrantId, category])
-  @@index([category])
 }
 
 model AccessGrantFile {
@@ -292,6 +252,11 @@ model AccessGrantFile {
   horseDocument HorseDocument @relation(fields: [horseDocumentId], references: [id], onDelete: Cascade)
 
   @@unique([accessGrantId, horseDocumentId])
+}
+
+enum HorseMessageType {
+  TEXT
+  GRANT
 }
 
 model VaultActivityLog {
@@ -332,12 +297,16 @@ model HorseConversation {
 }
 
 model HorseMessage {
-  id             String   @id @default(cuid())
+  id             String           @id @default(cuid())
   conversationId String
   senderUserId   String
-  body           String
-  createdAt      DateTime @default(now())
+  body           String?
+  messageType    HorseMessageType @default(TEXT)
+  accessGrantId  String?
+  metadata       Json?
+  createdAt      DateTime         @default(now())
 
   conversation HorseConversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
   sender       User              @relation(fields: [senderUserId], references: [id])
+  accessGrant  AccessGrant?      @relation(fields: [accessGrantId], references: [id], onDelete: SetNull)
 }

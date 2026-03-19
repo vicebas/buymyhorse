@@ -214,7 +214,7 @@ export default async function SellerPage() {
                 </div>
 
                 <div className="mt-8 flex flex-wrap items-center justify-between gap-4">
-                    <div className="inline-flex rounded-xl bg-stone-100 p-1">
+                    <div className="inline-flex rounded-xl bg-stone-300 p-1">
                         <button className="inline-flex items-center gap-2 rounded-lg bg-white px-5 py-2 text-sm font-medium text-stone-900 shadow-sm">
                             <FolderOpen className="h-4 w-4" />
                             My Horses
@@ -247,7 +247,7 @@ export default async function SellerPage() {
 
                 {seller.horses.length === 0 ? (
                     <div className="mt-16 rounded-3xl border border-dashed border-stone-300 bg-white p-16 text-center">
-                        <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-stone-100">
+                        <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-stone-300">
                             <FolderOpen className="h-8 w-8 text-stone-500" />
                         </div>
 
@@ -287,7 +287,7 @@ export default async function SellerPage() {
                                         <div>
                                             <div className="flex flex-wrap items-center gap-3">
                                                 <h3 className="font-serif text-3xl text-stone-900">{horse.name}</h3>
-                                                <span className="rounded-full bg-stone-100 px-3 py-1 text-xs font-medium text-stone-700">
+                                                <span className="rounded-full bg-stone-300 px-3 py-1 text-xs font-medium text-stone-700">
                                                     {horse.isPublished ? "For Sale" : "Draft"}
                                                 </span>
                                             </div>
@@ -297,7 +297,7 @@ export default async function SellerPage() {
                                             </p>
 
                                             {horse.isPublished ? (
-                                                <div className="mt-3 inline-flex rounded-full bg-stone-100 px-3 py-1 text-sm font-medium text-stone-800">
+                                                <div className="mt-3 inline-flex rounded-full bg-stone-300 px-3 py-1 text-sm font-medium text-stone-800">
                                                     Active in Marketplace
                                                 </div>
                                             ) : null}

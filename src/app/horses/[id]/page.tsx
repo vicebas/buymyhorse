@@ -20,19 +20,6 @@ export default async function HorsePage({
     where: { id },
     include: {
       sellerProfile: true,
-      documents: {
-        where: {
-          deletedAt: null,
-        },
-        select: {
-          id: true,
-          title: true,
-          category: true,
-        },
-        orderBy: {
-          createdAt: "desc",
-        },
-      },
     },
   });
 
@@ -139,7 +126,6 @@ export default async function HorsePage({
                 horseId={horse.id}
                 isLoggedIn={Boolean(session?.user?.id)}
                 currentStatus={currentAccessStatus}
-                availableDocuments={horse.documents}
               />
             </div>
           </aside>
@@ -159,7 +145,7 @@ export default async function HorsePage({
           </div>
 
           <div>
-            <HorseChatPanel horseId={horse.id} />
+            <HorseChatPanel horseId={horse.id} currentUserId={session?.user?.id || ""} />
           </div>
         </div>
       </section>

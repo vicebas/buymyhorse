@@ -4,7 +4,6 @@ import {
   Home,
   LayoutGrid,
   Tag,
-  DollarSign,
   Inbox,
   MessageSquare,
   Warehouse,
@@ -55,14 +54,6 @@ export default function AppHeader({ variant }: AppHeaderProps) {
               >
                 <Tag size={16} />
                 EquiTag
-              </Link>
-
-              <Link
-                href="/pricing"
-                className="flex items-center gap-2 text-sm text-stone-600 hover:text-black"
-              >
-                <DollarSign size={16} />
-                Pricing
               </Link>
             </>
           )}
@@ -123,9 +114,17 @@ export default function AppHeader({ variant }: AppHeaderProps) {
 
         <div className="flex items-center gap-3">
           {isBuyer && (
-            <Link href="/seller">
-              <Button variant="outline">Become a Seller</Button>
-            </Link>
+            <>
+              <Link href="/messages">
+                <Button variant="outline" size="icon" aria-label="Messages">
+                  <MessageSquare size={16} />
+                </Button>
+              </Link>
+
+              <Link href="/seller">
+                <Button variant="outline">Become a Seller</Button>
+              </Link>
+            </>
           )}
 
           {isSeller && (

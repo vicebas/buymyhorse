@@ -57,6 +57,7 @@ export async function POST(
       conversationId: conversation.id,
       senderUserId: session.user.id,
       body: String(body.body).trim(),
+      messageType: "TEXT",
     },
     include: {
       sender: {

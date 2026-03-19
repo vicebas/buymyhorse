@@ -106,7 +106,7 @@ export default function HorseMarketplaceCard({ horse }: { horse: Horse }) {
 
         <Link
           href={`/horses/${horse.id}`}
-          className="block w-full border rounded-md text-center py-2 text-sm hover:bg-stone-100"
+          className="block w-full border rounded-md text-center py-2 text-sm hover:bg-stone-300"
         >
           Message
         </Link>

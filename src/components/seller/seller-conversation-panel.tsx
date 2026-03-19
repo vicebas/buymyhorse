@@ -4,10 +4,22 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
+import HorseMessageItem from "@/components/horses/horse-message-item";
 
 interface Message {
   id: string;
-  body: string;
+  body: string | null;
+  messageType: "TEXT" | "GRANT";
+  metadata?: {
+    note?: string | null;
+    expiresAt?: string | null;
+    files?: Array<{
+      id: string;
+      title: string;
+      fileName: string;
+      category: string;
+    }>;
+  } | null;
   createdAt: string | Date;
   sender: {
     id: string;
@@ -63,20 +75,7 @@ export default function SellerConversationPanel({
             const mine = message.sender.id === currentUserId;
 
             return (
-              <div
-                key={message.id}
-                className={`flex ${mine ? "justify-end" : "justify-start"}`}
-              >
-                <div
-                  className={`max-w-[75%] rounded-2xl px-4 py-3 text-sm ${
-                    mine
-                      ? "bg-stone-900 text-white"
-                      : "bg-stone-100 text-stone-900"
-                  }`}
-                >
-                  <p>{message.body}</p>
-                </div>
-              </div>
+              <HorseMessageItem key={message.id} message={message} mine={mine} />
             );
           })
         )}

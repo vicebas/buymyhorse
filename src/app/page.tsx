@@ -56,7 +56,7 @@ export default async function HomePage() {
 
             <Link
               href="/login"
-              className="rounded-xl border border-stone-300 bg-white px-5 py-3 text-sm font-medium text-stone-900 transition hover:bg-stone-100"
+              className="rounded-xl border border-stone-300 bg-white px-5 py-3 text-sm font-medium texbg-stone-300t-stone-900 transition hover:"
             >
               Sign in
             </Link>

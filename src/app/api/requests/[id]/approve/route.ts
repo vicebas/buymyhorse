@@ -3,19 +3,7 @@ import { NextResponse } from "next/server";
 
 import prisma from "@/lib/db/prisma";
 import { authOptions } from "@/lib/auth/options";
-
-const documentCategories = [
-  "XRAYS",
-  "PPE",
-  "VET_REPORTS",
-  "CONTRACTS",
-  "PASSPORT",
-  "COMPETITION_RECORDS",
-  "CARE",
-  "OTHER",
-] as const;
-
-type DocumentCategory = (typeof documentCategories)[number];
+import { ensureHorseConversation } from "@/lib/conversations/horse-conversation";
 
 interface RouteContext {
   params: Promise<{
@@ -24,7 +12,6 @@ interface RouteContext {
 }
 
 type ApproveBody = {
-  categories?: string[];
   fileIds?: string[];
   note?: string;
   expiresAt?: string | null;
@@ -57,25 +44,13 @@ export async function POST(req: Request, { params }: RouteContext) {
     }
 
     const body = (await req.json()) as ApproveBody;
-    const approvedCategories = uniqueStrings(body.categories ?? []);
     const approvedFileIds = uniqueStrings(body.fileIds ?? []);
     const note = body.note?.trim() || null;
     const expiresAt = body.expiresAt ? new Date(body.expiresAt) : null;
 
-    if (approvedCategories.length === 0 && approvedFileIds.length === 0) {
+    if (approvedFileIds.length === 0) {
       return NextResponse.json(
-        { error: "Select at least one category or file to approve." },
-        { status: 400 }
-      );
-    }
-
-    const invalidCategory = approvedCategories.find(
-      (category) => !documentCategories.includes(category as DocumentCategory)
-    );
-
-    if (invalidCategory) {
-      return NextResponse.json(
-        { error: `Invalid category: ${invalidCategory}` },
+        { error: "Select at least one file to approve." },
         { status: 400 }
       );
     }
@@ -113,21 +88,21 @@ export async function POST(req: Request, { params }: RouteContext) {
       );
     }
 
-    const files =
-      approvedFileIds.length > 0
-        ? await prisma.horseDocument.findMany({
-            where: {
-              id: {
-                in: approvedFileIds,
-              },
-              horseId: accessRequest.horseId,
-              deletedAt: null,
-            },
-            select: {
-              id: true,
-            },
-          })
-        : [];
+    const files = await prisma.horseDocument.findMany({
+      where: {
+        id: {
+          in: approvedFileIds,
+        },
+        horseId: accessRequest.horseId,
+        deletedAt: null,
+      },
+      select: {
+        id: true,
+        title: true,
+        fileName: true,
+        category: true,
+      },
+    });
 
     if (files.length !== approvedFileIds.length) {
       return NextResponse.json(
@@ -135,6 +110,12 @@ export async function POST(req: Request, { params }: RouteContext) {
         { status: 400 }
       );
     }
+
+    const conversation = await ensureHorseConversation(
+      accessRequest.horseId,
+      accessRequest.buyerId,
+      seller.id
+    );
 
     const result = await prisma.$transaction(async (tx) => {
       const updatedRequest = await tx.accessRequest.update({
@@ -177,35 +158,32 @@ export async function POST(req: Request, { params }: RouteContext) {
         },
       });
 
-      await tx.accessGrantCategory.deleteMany({
-        where: {
-          accessGrantId: grant.id,
-        },
-      });
-
       await tx.accessGrantFile.deleteMany({
         where: {
           accessGrantId: grant.id,
         },
       });
 
-      if (approvedCategories.length > 0) {
-        await tx.accessGrantCategory.createMany({
-          data: approvedCategories.map((category) => ({
-            accessGrantId: grant.id,
-            category: category as DocumentCategory,
-          })),
-        });
-      }
+      await tx.accessGrantFile.createMany({
+        data: files.map((file) => ({
+          accessGrantId: grant.id,
+          horseDocumentId: file.id,
+        })),
+      });
 
-      if (files.length > 0) {
-        await tx.accessGrantFile.createMany({
-          data: files.map((file) => ({
-            accessGrantId: grant.id,
-            horseDocumentId: file.id,
-          })),
-        });
-      }
+      await tx.horseMessage.create({
+        data: {
+          conversationId: conversation.id,
+          senderUserId: session.user.id,
+          messageType: "GRANT",
+          accessGrantId: grant.id,
+          metadata: {
+            note,
+            expiresAt: expiresAt?.toISOString() ?? null,
+            files,
+          },
+        },
+      });
 
       await tx.vaultActivityLog.create({
         data: {
@@ -215,7 +193,6 @@ export async function POST(req: Request, { params }: RouteContext) {
           actorUserId: session.user.id,
           activityType: "ACCESS_REQUEST_APPROVED",
           metadata: {
-            categories: approvedCategories,
             fileIds: files.map((file) => file.id),
             expiresAt: expiresAt?.toISOString() ?? null,
             note,

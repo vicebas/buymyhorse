@@ -17,11 +17,6 @@ export async function getBuyerHorseAccess(buyerId: string, horseId: string) {
           name: true,
         },
       },
-      grantedCategories: {
-        select: {
-          category: true,
-        },
-      },
       grantedFiles: {
         select: {
           horseDocumentId: true,
@@ -57,10 +52,9 @@ export async function getBuyerHorseAccess(buyerId: string, horseId: string) {
     };
   }
 
-  const categoryScope = grant.grantedCategories.map((entry) => entry.category);
   const fileScope = grant.grantedFiles.map((entry) => entry.horseDocumentId);
 
-  if (categoryScope.length === 0 && fileScope.length === 0) {
+  if (fileScope.length === 0) {
     return {
       status: "ACTIVE" as BuyerHorseAccessStatus,
       horse: grant.horse,
@@ -73,26 +67,9 @@ export async function getBuyerHorseAccess(buyerId: string, horseId: string) {
     where: {
       horseId,
       deletedAt: null,
-      OR: [
-        ...(categoryScope.length > 0
-          ? [
-              {
-                category: {
-                  in: categoryScope,
-                },
-              },
-            ]
-          : []),
-        ...(fileScope.length > 0
-          ? [
-              {
-                id: {
-                  in: fileScope,
-                },
-              },
-            ]
-          : []),
-      ],
+      id: {
+        in: fileScope,
+      },
     },
     orderBy: {
       createdAt: "desc",

@@ -4,19 +4,6 @@ import { NextResponse } from "next/server";
 import prisma from "@/lib/db/prisma";
 import { authOptions } from "@/lib/auth/options";
 
-const documentCategories = [
-  "XRAYS",
-  "PPE",
-  "VET_REPORTS",
-  "CONTRACTS",
-  "PASSPORT",
-  "COMPETITION_RECORDS",
-  "CARE",
-  "OTHER",
-] as const;
-
-type DocumentCategory = (typeof documentCategories)[number];
-
 interface RouteContext {
   params: Promise<{
     id: string;
@@ -24,15 +11,8 @@ interface RouteContext {
 }
 
 type RequestBody = {
-  message?: string;
-  intendedUse?: string;
-  categories?: string[];
-  fileIds?: string[];
+  description?: string;
 };
-
-function uniqueStrings(values: string[]) {
-  return [...new Set(values.map((value) => value.trim()).filter(Boolean))];
-}
 
 export async function POST(req: Request, { params }: RouteContext) {
   try {
@@ -44,25 +24,11 @@ export async function POST(req: Request, { params }: RouteContext) {
     }
 
     const body = (await req.json()) as RequestBody;
-    const message = body.message?.trim() || null;
-    const intendedUse = body.intendedUse?.trim() || null;
-    const requestedCategories = uniqueStrings(body.categories ?? []);
-    const requestedFileIds = uniqueStrings(body.fileIds ?? []);
+    const description = body.description?.trim() || "";
 
-    if (requestedCategories.length === 0 && requestedFileIds.length === 0) {
+    if (!description) {
       return NextResponse.json(
-        { error: "Select at least one category or file to request." },
-        { status: 400 }
-      );
-    }
-
-    const invalidCategory = requestedCategories.find(
-      (category) => !documentCategories.includes(category as DocumentCategory)
-    );
-
-    if (invalidCategory) {
-      return NextResponse.json(
-        { error: `Invalid category: ${invalidCategory}` },
+        { error: "Please describe the records you want to review." },
         { status: 400 }
       );
     }
@@ -108,62 +74,17 @@ export async function POST(req: Request, { params }: RouteContext) {
       );
     }
 
-    const files =
-      requestedFileIds.length > 0
-        ? await prisma.horseDocument.findMany({
-            where: {
-              id: {
-                in: requestedFileIds,
-              },
-              horseId: horse.id,
-              deletedAt: null,
-            },
-            select: {
-              id: true,
-            },
-          })
-        : [];
-
-    if (files.length !== requestedFileIds.length) {
-      return NextResponse.json(
-        { error: "One or more requested files are invalid." },
-        { status: 400 }
-      );
-    }
-
     const accessRequest = await prisma.accessRequest.create({
       data: {
         horseId: horse.id,
         buyerId: session.user.id,
-        message,
-        intendedUse,
-        requestedCategories: {
-          create: requestedCategories.map((category) => ({
-            category: category as DocumentCategory,
-          })),
-        },
-        requestedFiles: {
-          create: files.map((file) => ({
-            horseDocumentId: file.id,
-          })),
-        },
+        message: description,
       },
       select: {
         id: true,
         status: true,
         message: true,
-        intendedUse: true,
         createdAt: true,
-        requestedCategories: {
-          select: {
-            category: true,
-          },
-        },
-        requestedFiles: {
-          select: {
-            horseDocumentId: true,
-          },
-        },
       },
     });
 
@@ -174,9 +95,7 @@ export async function POST(req: Request, { params }: RouteContext) {
         actorUserId: session.user.id,
         activityType: "ACCESS_REQUEST_CREATED",
         metadata: {
-          categories: requestedCategories,
-          fileIds: files.map((file) => file.id),
-          intendedUse,
+          description,
         },
       },
     });

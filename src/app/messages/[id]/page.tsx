@@ -6,7 +6,7 @@ import { authOptions } from "@/lib/auth/options";
 import AppHeader from "@/components/layout/app-header";
 import SellerConversationPanel from "@/components/seller/seller-conversation-panel";
 
-export default async function SellerConversationPage({
+export default async function BuyerConversationPage({
   params,
 }: {
   params: Promise<{ id: string }>;
@@ -17,19 +17,6 @@ export default async function SellerConversationPage({
 
   if (!session?.user?.id) {
     redirect("/login");
-  }
-
-  const seller = await prisma.sellerProfile.findUnique({
-    where: {
-      userId: session.user.id,
-    },
-    select: {
-      id: true,
-    },
-  });
-
-  if (!seller) {
-    redirect("/seller/onboard");
   }
 
   const conversation = await prisma.horseConversation.findUnique({
@@ -43,11 +30,9 @@ export default async function SellerConversationPage({
           name: true,
         },
       },
-      buyer: {
+      sellerProfile: {
         select: {
-          id: true,
-          name: true,
-          email: true,
+          displayName: true,
         },
       },
       messages: {
@@ -59,7 +44,7 @@ export default async function SellerConversationPage({
             select: {
               id: true,
               name: true,
-            email: true,
+              email: true,
             },
           },
         },
@@ -67,13 +52,13 @@ export default async function SellerConversationPage({
     },
   });
 
-  if (!conversation || conversation.sellerId !== seller.id) {
+  if (!conversation || conversation.buyerId !== session.user.id) {
     notFound();
   }
 
   return (
     <main className="min-h-screen bg-stone-50 text-stone-900">
-      <AppHeader variant="seller" />
+      <AppHeader variant="buyer" />
 
       <section className="mx-auto max-w-5xl px-6 py-10">
         <div className="mb-8">
@@ -82,7 +67,7 @@ export default async function SellerConversationPage({
           </p>
           <h1 className="mt-2 font-serif text-4xl">{conversation.horse.name}</h1>
           <p className="mt-3 text-stone-600">
-            Buyer: {conversation.buyer.name || conversation.buyer.email}
+            Seller: {conversation.sellerProfile.displayName}
           </p>
         </div>
 

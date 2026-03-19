@@ -14,19 +14,11 @@ type DocumentOption = {
 
 interface RequestActionButtonsProps {
   requestId: string;
-  requestedCategories: string[];
-  requestedFileIds: string[];
   availableDocuments: DocumentOption[];
-}
-
-function uniqueStrings(values: string[]) {
-  return [...new Set(values)];
 }
 
 export default function RequestActionButtons({
   requestId,
-  requestedCategories,
-  requestedFileIds,
   availableDocuments,
 }: RequestActionButtonsProps) {
   const router = useRouter();
@@ -34,10 +26,7 @@ export default function RequestActionButtons({
   const [error, setError] = useState("");
   const [note, setNote] = useState("");
   const [expiresAt, setExpiresAt] = useState("");
-  const [selectedCategories, setSelectedCategories] = useState<string[]>(
-    uniqueStrings(requestedCategories)
-  );
-  const [selectedFiles, setSelectedFiles] = useState<string[]>(uniqueStrings(requestedFileIds));
+  const [selectedFiles, setSelectedFiles] = useState<string[]>([]);
 
   function toggleSelection(
     value: string,
@@ -53,8 +42,8 @@ export default function RequestActionButtons({
   }
 
   async function handleApprove() {
-    if (selectedCategories.length === 0 && selectedFiles.length === 0) {
-      setError("Select at least one category or file to share.");
+    if (selectedFiles.length === 0) {
+      setError("Select at least one file to share.");
       return;
     }
 
@@ -67,7 +56,6 @@ export default function RequestActionButtons({
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        categories: selectedCategories,
         fileIds: selectedFiles,
         note,
         expiresAt: expiresAt || null,
@@ -115,36 +103,12 @@ export default function RequestActionButtons({
   return (
     <div className="space-y-5 rounded-2xl border border-stone-200 bg-stone-50 p-4">
       <div>
-        <p className="text-sm font-medium text-stone-900">Share categories</p>
-        <div className="mt-3 space-y-2">
-          {requestedCategories.length === 0 ? (
-            <p className="text-sm text-stone-500">No categories were requested.</p>
-          ) : (
-            requestedCategories.map((category) => (
-              <label key={category} className="flex items-center gap-3 text-sm text-stone-700">
-                <input
-                  type="checkbox"
-                  checked={selectedCategories.includes(category)}
-                  onChange={() =>
-                    toggleSelection(category, selectedCategories, setSelectedCategories)
-                  }
-                />
-                <span>{category.replaceAll("_", " ")}</span>
-              </label>
-            ))
-          )}
-        </div>
-      </div>
-
-      <div>
         <p className="text-sm font-medium text-stone-900">Share files</p>
         <div className="mt-3 space-y-2">
           {availableDocuments.length === 0 ? (
             <p className="text-sm text-stone-500">This horse has no vault files yet.</p>
           ) : (
             availableDocuments.map((document) => {
-              const wasRequested = requestedFileIds.includes(document.id);
-
               return (
                 <label key={document.id} className="flex items-start gap-3 text-sm text-stone-700">
                   <input
@@ -158,11 +122,6 @@ export default function RequestActionButtons({
                     <span className="ml-2 text-stone-400">
                       {document.category.replaceAll("_", " ")}
                     </span>
-                    {wasRequested ? (
-                      <span className="ml-2 rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-medium uppercase tracking-[0.12em] text-amber-800">
-                        Requested
-                      </span>
-                    ) : null}
                   </span>
                 </label>
               );

@@ -22,7 +22,6 @@ export const authOptions: NextAuthOptions = {
       },
 
       async authorize(credentials) {
-        console.log("Authorize called with credentials:", credentials)
         if (!credentials?.email || !credentials?.password) {
           return null
         }
@@ -51,7 +50,6 @@ export const authOptions: NextAuthOptions = {
 
   callbacks: {
     async jwt({ token, user }) {
-        console.log("JWT callback called with token:", token, "and user:", user, 'from options file')
       if (user) {
         token.id = user.id
       }
@@ -59,7 +57,6 @@ export const authOptions: NextAuthOptions = {
     },
 
     async session({ session,user, token }) {
-      console.log("Session callback called with session:", session, "and token:", token, 'from options file')
       if (session.user) {
         session.user.id = token.id as string
       }

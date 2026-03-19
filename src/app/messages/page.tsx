@@ -8,30 +8,16 @@ import AppHeader from "@/components/layout/app-header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 
-export default async function SellerMessagesPage() {
+export default async function BuyerMessagesPage() {
   const session = await getServerSession(authOptions);
 
   if (!session?.user?.id) {
     redirect("/login");
   }
 
-  const seller = await prisma.sellerProfile.findUnique({
-    where: {
-      userId: session.user.id,
-    },
-    select: {
-      id: true,
-      displayName: true,
-    },
-  });
-
-  if (!seller) {
-    redirect("/seller/onboard");
-  }
-
   const conversations = await prisma.horseConversation.findMany({
     where: {
-      sellerId: seller.id,
+      buyerId: session.user.id,
     },
     include: {
       horse: {
@@ -41,11 +27,9 @@ export default async function SellerMessagesPage() {
           image: true,
         },
       },
-      buyer: {
+      sellerProfile: {
         select: {
-          id: true,
-          name: true,
-          email: true,
+          displayName: true,
         },
       },
       messages: {
@@ -62,16 +46,16 @@ export default async function SellerMessagesPage() {
 
   return (
     <main className="min-h-screen bg-stone-50 text-stone-900">
-      <AppHeader variant="seller" />
+      <AppHeader variant="buyer" />
 
       <section className="mx-auto max-w-6xl px-6 py-10">
         <div className="mb-8">
           <p className="text-sm font-medium uppercase tracking-[0.18em] text-stone-500">
-            Seller Messages
+            Buyer Messages
           </p>
-          <h1 className="mt-2 font-serif text-4xl">Buyer Conversations</h1>
+          <h1 className="mt-2 font-serif text-4xl">Your Conversations</h1>
           <p className="mt-3 max-w-2xl text-stone-600">
-            Keep track of buyers interested in your horses and continue conversations.
+            Keep track of sellers you have contacted about specific horses.
           </p>
         </div>
 
@@ -80,7 +64,7 @@ export default async function SellerMessagesPage() {
             <CardContent className="p-10 text-center">
               <p className="text-lg text-stone-700">No conversations yet</p>
               <p className="mt-2 text-sm text-stone-500">
-                Buyer messages will appear here after they contact you from a horse page.
+                Messages will appear here after you contact a seller from a horse page.
               </p>
             </CardContent>
           </Card>
@@ -101,7 +85,7 @@ export default async function SellerMessagesPage() {
                       </div>
 
                       <div className="text-sm font-normal text-stone-500">
-                        Buyer: {conversation.buyer.name || conversation.buyer.email}
+                        Seller: {conversation.sellerProfile.displayName}
                       </div>
                     </CardTitle>
                   </CardHeader>
@@ -109,7 +93,7 @@ export default async function SellerMessagesPage() {
                   <CardContent className="flex flex-col gap-5 md:flex-row md:items-center md:justify-between">
                     <div className="space-y-1">
                       <p className="text-sm font-medium text-stone-900">
-                        {conversation.buyer.email}
+                        {conversation.sellerProfile.displayName}
                       </p>
                       <p className="text-sm text-stone-500">
                         {lastMessage
@@ -125,7 +109,7 @@ export default async function SellerMessagesPage() {
                       ) : null}
                     </div>
 
-                    <Link href={`/seller/messages/${conversation.id}`}>
+                    <Link href={`/messages/${conversation.id}`}>
                       <Button>Open Conversation</Button>
                     </Link>
                   </CardContent>
