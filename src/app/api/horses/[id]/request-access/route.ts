@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 
 import prisma from "@/lib/db/prisma";
 import { authOptions } from "@/lib/auth/options";
+import { isHorsePubliclyVisible } from "@/lib/billing/entitlements";
 
 interface RouteContext {
   params: Promise<{
@@ -33,20 +34,35 @@ export async function POST(req: Request, { params }: RouteContext) {
       );
     }
 
-    const horse = await prisma.horse.findFirst({
+    const horse = await prisma.horse.findUnique({
       where: {
         id,
-        isPublished: true,
-        deletedAt: null,
-        isActive: true,
       },
       select: {
         id: true,
+        isPublished: true,
+        deletedAt: true,
+        adminDisabledAt: true,
         sellerProfileId: true,
+        sellerProfile: {
+          select: {
+            adminDisabledAt: true,
+            plan: true,
+            billingCadence: true,
+            billingStatus: true,
+            adminPlanOverride: true,
+            adminBillingCadenceOverride: true,
+            adminBillingStatusOverride: true,
+            adminBillingOverrideReason: true,
+            adminBillingOverrideExpiresAt: true,
+            trialEndsAt: true,
+            currentPeriodEndsAt: true,
+          },
+        },
       },
     });
 
-    if (!horse) {
+    if (!horse || !isHorsePubliclyVisible(horse)) {
       return NextResponse.json({ error: "Horse not found." }, { status: 404 });
     }
 

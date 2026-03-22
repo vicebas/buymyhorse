@@ -1,0 +1,1158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EquiTag — QR Identity System for HorseRoster</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600;9..40,700;9..40,800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+:root{
+  --navy:#0F2A44;
+  --navy-mid:#1A3B5A;
+  --navy-dk:#091C2E;
+  --sand:#E9E3D8;
+  --sand-lt:#F0EBE2;
+  --green:#2D5438;
+  --green-lt:#3A6847;
+  --charcoal:#2B2B2B;
+  --off:#F8F6F2;
+  --white:#fff;
+  --mid:#8A9099;
+  --mid-lt:#B8BEC6;
+  --rule:rgba(15,42,68,0.09);
+  --rule-lt:rgba(15,42,68,0.05);
+  --f:'DM Sans','Helvetica Neue',Helvetica,Arial,sans-serif;
+  --fm:'IBM Plex Mono','Courier New',monospace;
+}
+html{scroll-behavior:smooth;-webkit-font-smoothing:antialiased;}
+body{font-family:var(--f);background:var(--off);color:var(--charcoal);font-size:14px;line-height:1.6;overflow-x:hidden;}
+
+/* ── LAYOUT ── */
+.wrap{max-width:1100px;margin:0 auto;padding:0 44px;overflow-x:hidden;}
+.section{padding:80px 0 0;}
+.section:last-of-type{padding-bottom:100px;}
+
+/* ── SECTION HEADERS ── */
+.sec-head{display:grid;grid-template-columns:auto 1fr;align-items:center;gap:16px;margin-bottom:40px;padding-bottom:16px;border-bottom:1px solid var(--rule);}
+.sec-num{font-family:var(--fm);font-size:10px;color:var(--mid-lt);letter-spacing:0.08em;}
+.sec-title{font-size:17px;font-weight:700;color:var(--navy);letter-spacing:-0.025em;}
+.sec-tag{font-family:var(--fm);font-size:9px;letter-spacing:0.15em;text-transform:uppercase;color:var(--mid);display:block;margin-bottom:6px;}
+
+/* ── CELLS & GRIDS ── */
+.cell{background:var(--white);min-width:0;overflow:hidden;} .g2>*,.g3>*{min-width:0;}
+.cell-dk{background:var(--navy);}
+.cell-sand{background:var(--sand-lt);}
+.cell-off{background:var(--off);}
+.cell-green{background:var(--green);}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:2px;background:var(--rule);}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:2px;background:var(--rule);}
+.pad{padding:36px 40px;}
+.pad-sm{padding:24px 28px;}
+.pad-lg{padding:40px 32px;}
+
+/* ── COVER ── */
+.cover{
+  background:var(--navy-dk);
+  min-height:520px;
+  display:flex;flex-direction:column;justify-content:flex-end;
+  position:relative;overflow:hidden;
+}
+.cover-glow{position:absolute;width:700px;height:700px;border-radius:50%;background:radial-gradient(circle,rgba(45,84,56,0.22) 0%,transparent 65%);top:-200px;right:-150px;pointer-events:none;}
+.cover-glow2{position:absolute;width:400px;height:400px;border-radius:50%;background:radial-gradient(circle,rgba(26,59,90,0.5) 0%,transparent 70%);bottom:-100px;left:-100px;pointer-events:none;}
+.cover-inner{position:relative;z-index:2;padding:56px 60px;}
+.cover-kicker{font-family:var(--fm);font-size:10px;letter-spacing:0.2em;color:rgba(233,227,216,0.3);margin-bottom:28px;display:flex;align-items:center;gap:12px;}
+.cover-kicker::before{content:'';display:block;width:20px;height:1px;background:rgba(233,227,216,0.2);}
+.cover-headline{font-size:clamp(36px,5vw,64px);font-weight:800;color:var(--sand);letter-spacing:-0.04em;line-height:0.95;margin-bottom:6px;}
+.cover-headline span{font-weight:300;}
+.cover-sub{font-size:15px;color:rgba(233,227,216,0.4);font-weight:300;letter-spacing:0.02em;margin-bottom:40px;}
+.cover-pills{display:flex;gap:8px;flex-wrap:wrap;}
+.cover-pill{border:1px solid rgba(233,227,216,0.12);padding:5px 12px;border-radius:20px;font-size:11px;color:rgba(233,227,216,0.4);font-weight:500;letter-spacing:0.02em;}
+.cover-v{position:absolute;top:40px;right:60px;font-family:var(--fm);font-size:10px;color:rgba(233,227,216,0.18);letter-spacing:0.1em;z-index:2;}
+
+/* ── HR WORDMARK ── */
+.wm{font-family:var(--f);letter-spacing:-0.04em;line-height:1;white-space:nowrap;display:inline-flex;align-items:baseline;}
+.wm-h{font-weight:300;}
+.wm-r{font-weight:800;}
+.wm-light .wm-h,.wm-light .wm-r{color:var(--navy);}
+.wm-dark .wm-h,.wm-dark .wm-r{color:var(--sand);}
+.wm-white .wm-h,.wm-white .wm-r{color:var(--white);}
+
+/* ── H ICON SVG helper ── */
+.hico{display:block;flex-shrink:0;}
+
+/* ── TOC NAV ── */
+.toc{display:flex;gap:2px;background:var(--rule);margin-bottom:2px;}
+.toc-item{flex:1;background:var(--white);padding:20px 24px;cursor:pointer;text-decoration:none;transition:background 0.15s;}
+.toc-item:hover{background:var(--off);}
+.toc-num{font-family:var(--fm);font-size:9px;color:var(--mid-lt);letter-spacing:0.1em;display:block;margin-bottom:4px;}
+.toc-label{font-size:12px;font-weight:700;color:var(--navy);letter-spacing:-0.01em;display:block;line-height:1.3;}
+
+/* ── SYSTEM FLOW ── */
+.flow-steps{display:grid;grid-template-columns:repeat(4,1fr);gap:2px;background:var(--rule);}
+.flow-step{background:var(--white);padding:28px 24px;position:relative;min-width:0;}
+.flow-step::after{content:attr(data-num);position:absolute;top:28px;right:24px;font-family:var(--fm);font-size:10px;color:var(--mid-lt);letter-spacing:0.08em;}
+.flow-icon{width:44px;height:44px;border-radius:10px;background:var(--off);display:flex;align-items:center;justify-content:center;margin-bottom:16px;}
+.flow-icon.green{background:rgba(45,84,56,0.08);}
+.flow-title{font-size:13px;font-weight:700;color:var(--navy);letter-spacing:-0.02em;margin-bottom:6px;}
+.flow-desc{font-size:12px;color:var(--mid);line-height:1.6;}
+.flow-connector{position:absolute;top:50%;right:-1px;width:2px;height:20px;background:var(--green);transform:translateY(-50%);z-index:2;}
+
+/* ── PATCH DESIGNS ── */
+.patch-stage{display:flex;align-items:center;justify-content:center;min-height:320px;padding:40px;overflow:hidden;}
+
+/* saddle pad simulation */
+.spad-wrap{position:relative;width:320px;flex-shrink:0;}
+.spad-svg{width:100%;height:auto;display:block;}
+.spad-patch-anchor{position:absolute;bottom:18%;left:8%;}
+
+/* the patch itself */
+.etpatch{display:flex;flex-direction:column;align-items:center;padding:13px 12px 11px;gap:10px;border-radius:8px;position:relative;z-index:2;}
+.etpatch-navy{background:var(--navy);box-shadow:0 8px 28px rgba(9,28,46,0.55),0 2px 6px rgba(9,28,46,0.3);}
+.etpatch-cream{background:var(--sand-lt);box-shadow:0 8px 28px rgba(0,0,0,0.18),0 2px 6px rgba(0,0,0,0.1);}
+.etpatch::before{content:'';position:absolute;inset:3px;border-radius:5px;border:1px solid rgba(255,255,255,0.07);pointer-events:none;}
+.etpatch-cream::before{border-color:rgba(15,42,68,0.08);}
+
+.pt-top{display:flex;align-items:center;gap:4px;width:100%;overflow:hidden;}
+.pt-wm-bold{font-family:var(--f);font-size:7.5px;font-weight:300;letter-spacing:-0.02em;line-height:1;white-space:nowrap;}
+.pt-wm-light{font-family:var(--f);font-size:7.5px;font-weight:800;letter-spacing:-0.02em;line-height:1;white-space:nowrap;}
+.pt-divider{flex:1;height:1px;opacity:0.12;}
+
+.pt-qr-wrap{background:white;border-radius:3px;padding:5px;width:66px;height:66px;display:flex;align-items:center;justify-content:center;}
+.pt-qr-wrap-cream{background:var(--sand);border-radius:3px;padding:5px;width:66px;height:66px;display:flex;align-items:center;justify-content:center;}
+
+.pt-label-bottom{font-family:var(--fm);font-size:5.5px;letter-spacing:0.1em;text-transform:uppercase;text-align:center;}
+.pt-eq-label{font-family:var(--f);font-size:7px;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;text-align:center;}
+
+/* ── MOBILE SCAN SCREEN ── */
+.phone-frame{width:min(280px,100%);flex-shrink:0;border-radius:36px;background:#111;padding:10px;box-shadow:0 32px 80px rgba(0,0,0,0.35),0 0 0 1px rgba(255,255,255,0.06);}
+.phone-screen{border-radius:28px;overflow:hidden;background:var(--off);}
+.phone-notch{background:#111;height:28px;display:flex;align-items:center;justify-content:center;}
+.phone-notch-pill{width:80px;height:20px;background:#000;border-radius:10px;}
+
+.scan-hero{height:180px;background:linear-gradient(160deg,#C8C4BC 0%,#B0AB9E 100%);position:relative;display:flex;align-items:flex-end;padding:14px;}
+.scan-hero-photo-label{font-size:9px;color:rgba(255,255,255,0.4);letter-spacing:0.08em;font-weight:500;}
+.scan-hero-overlay{position:absolute;inset:0;background:linear-gradient(to top,rgba(15,42,68,0.5) 0%,transparent 50%);}
+.scan-horse-name-overlay{position:absolute;bottom:12px;left:14px;z-index:2;}
+.scan-name{font-size:18px;font-weight:800;color:white;letter-spacing:-0.03em;line-height:1;}
+.scan-tag-row{display:flex;gap:4px;margin-top:5px;}
+.scan-tag{font-size:8px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;padding:2px 6px;border-radius:2px;}
+.scan-tag-green{background:var(--green);color:white;}
+.scan-tag-navy{background:rgba(15,42,68,0.7);color:rgba(233,227,216,0.9);}
+
+.scan-body{padding:14px;}
+.scan-eq-badge{display:inline-flex;align-items:center;gap:5px;background:rgba(45,84,56,0.08);border-radius:20px;padding:4px 10px;margin-bottom:12px;}
+.scan-eq-badge span{font-size:9px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--green);}
+.scan-meta-row{display:flex;gap:12px;margin-bottom:10px;flex-wrap:wrap;}
+.scan-meta-item{font-size:10px;color:var(--mid);}
+.scan-meta-item strong{color:var(--charcoal);font-weight:600;}
+.scan-desc{font-size:11px;color:var(--mid);line-height:1.6;margin-bottom:14px;}
+.scan-cta{background:var(--navy);color:white;font-size:12px;font-weight:700;padding:11px;border-radius:6px;text-align:center;letter-spacing:-0.01em;}
+.scan-cta-ghost{border:1.5px solid var(--rule);color:var(--navy);font-size:11px;font-weight:600;padding:9px;border-radius:6px;text-align:center;margin-top:6px;}
+.scan-footer{display:flex;align-items:center;justify-content:center;gap:6px;padding:10px 14px;border-top:1px solid var(--rule-lt);}
+.scan-footer-text{font-size:9px;color:var(--mid-lt);letter-spacing:0.04em;}
+
+/* ── BARN SCAN SCREEN ── */
+.barn-scan-header{background:var(--navy);padding:16px 14px;}
+.barn-scan-name{font-size:16px;font-weight:800;color:var(--sand);letter-spacing:-0.03em;}
+.barn-scan-loc{font-size:10px;color:rgba(233,227,216,0.4);margin-top:2px;}
+.barn-roster-item{display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid var(--rule-lt);}
+.barn-roster-avatar{width:32px;height:32px;border-radius:4px;background:var(--sand);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:8px;color:rgba(15,42,68,0.35);font-weight:700;}
+.barn-roster-name{font-size:12px;font-weight:700;color:var(--navy);letter-spacing:-0.01em;}
+.barn-roster-meta{font-size:9px;color:var(--mid);}
+.barn-roster-arrow{margin-left:auto;color:var(--mid-lt);font-size:14px;}
+
+/* ── DASHBOARD ── */
+.dash-chrome{background:var(--off);border-radius:8px 8px 0 0;padding:10px 16px;display:flex;align-items:center;gap:10px;}
+.dash-dots{display:flex;gap:5px;}
+.dash-dot{width:10px;height:10px;border-radius:50%;}
+.dash-url{flex:1;background:white;border-radius:4px;padding:4px 12px;font-family:var(--fm);font-size:10px;color:var(--mid);max-width:300px;margin:0 auto;}
+
+.dash-layout{display:grid;grid-template-columns:200px 1fr;gap:0;background:var(--rule);min-height:480px;}
+.dash-sidebar{background:var(--navy-dk);padding:0;}
+.dash-sidebar-logo{padding:20px 20px 0;margin-bottom:8px;}
+.dash-nav-item{display:flex;align-items:center;gap:10px;padding:10px 20px;font-size:12px;font-weight:500;color:rgba(233,227,216,0.45);cursor:pointer;transition:all 0.15s;border-left:2px solid transparent;}
+.dash-nav-item:hover{color:rgba(233,227,216,0.7);}
+.dash-nav-item.active{color:var(--sand);background:rgba(233,227,216,0.05);border-left-color:var(--green);}
+.dash-nav-section{font-family:var(--fm);font-size:8px;letter-spacing:0.18em;color:rgba(233,227,216,0.18);padding:16px 20px 6px;text-transform:uppercase;}
+.dash-nav-dot{width:5px;height:5px;border-radius:50%;background:currentColor;flex-shrink:0;opacity:0.5;}
+.dash-nav-dot.green{background:var(--green);opacity:1;}
+
+.dash-main{background:var(--off);padding:24px 28px;min-width:0;overflow:hidden;}
+.dash-page-title{font-size:18px;font-weight:800;color:var(--navy);letter-spacing:-0.03em;margin-bottom:4px;}
+.dash-page-sub{font-size:12px;color:var(--mid);margin-bottom:24px;}
+
+/* equitag manager card */
+.eq-manager{background:white;border-radius:6px;border:1px solid var(--rule);overflow:hidden;}
+.eq-manager-header{padding:20px 24px;border-bottom:1px solid var(--rule-lt);display:flex;align-items:center;justify-content:space-between;}
+.eq-manager-title{font-size:14px;font-weight:700;color:var(--navy);letter-spacing:-0.02em;}
+.eq-status-pill{display:flex;align-items:center;gap:5px;background:rgba(45,84,56,0.08);padding:4px 10px;border-radius:20px;}
+.eq-status-dot{width:6px;height:6px;border-radius:50%;background:var(--green);}
+.eq-status-text{font-size:10px;font-weight:700;color:var(--green);letter-spacing:0.06em;}
+
+.eq-manager-body{display:grid;grid-template-columns:minmax(0,auto) minmax(0,1fr);gap:0;}
+.eq-qr-panel{padding:24px;border-right:1px solid var(--rule-lt);display:flex;flex-direction:column;align-items:center;gap:14px;}
+.eq-qr-box{background:var(--navy);padding:16px;border-radius:8px;display:flex;align-items:center;justify-content:center;}
+.eq-qr-id{font-family:var(--fm);font-size:9px;color:var(--mid);letter-spacing:0.08em;text-align:center;}
+.eq-qr-actions{display:flex;gap:6px;}
+.eq-btn{font-size:10px;font-weight:600;padding:6px 12px;border-radius:4px;cursor:pointer;letter-spacing:-0.01em;}
+.eq-btn-primary{background:var(--navy);color:white;}
+.eq-btn-ghost{background:transparent;border:1.5px solid var(--rule);color:var(--navy);}
+
+.eq-assign-panel{padding:20px;min-width:0;overflow:hidden;}
+.eq-assign-title{font-size:12px;font-weight:700;color:var(--navy);margin-bottom:14px;letter-spacing:-0.01em;}
+.eq-assign-options{display:flex;flex-direction:column;gap:8px;}
+.eq-assign-opt{border:1.5px solid var(--rule);border-radius:6px;padding:12px 14px;cursor:pointer;display:flex;align-items:center;gap:12px;transition:border-color 0.15s;}
+.eq-assign-opt:hover{border-color:rgba(15,42,68,0.25);}
+.eq-assign-opt.selected{border-color:var(--green);background:rgba(45,84,56,0.04);}
+.eq-assign-icon{width:32px;height:32px;border-radius:6px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.eq-assign-icon-navy{background:rgba(15,42,68,0.07);}
+.eq-assign-icon-green{background:rgba(45,84,56,0.08);}
+.eq-assign-name{font-size:12px;font-weight:600;color:var(--navy);letter-spacing:-0.01em;}
+.eq-assign-sub{font-size:10px;color:var(--mid);}
+.eq-assign-check{margin-left:auto;width:16px;height:16px;border-radius:50%;border:1.5px solid var(--mid-lt);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.eq-assign-check.checked{background:var(--green);border-color:var(--green);}
+.eq-assign-check-inner{width:6px;height:6px;border-radius:50%;background:white;}
+
+.eq-history{padding:0 24px 20px;}
+.eq-history-title{font-size:11px;font-weight:700;color:var(--navy);letter-spacing:-0.01em;margin-bottom:10px;padding-top:16px;border-top:1px solid var(--rule-lt);}
+.eq-history-row{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--rule-lt);}
+.eq-history-row:last-child{border-bottom:none;}
+.eq-history-action{font-size:11px;color:var(--charcoal);}
+.eq-history-date{font-family:var(--fm);font-size:9px;color:var(--mid-lt);}
+
+/* ── SECURITY ── */
+.security-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:2px;background:var(--rule);}
+.sec-cell{background:white;padding:28px 28px;min-width:0;}
+.sec-icon{width:40px;height:40px;border-radius:8px;display:flex;align-items:center;justify-content:center;margin-bottom:16px;}
+.sec-icon-navy{background:rgba(15,42,68,0.06);}
+.sec-icon-green{background:rgba(45,84,56,0.07);}
+.sec-h{font-size:14px;font-weight:700;color:var(--navy);letter-spacing:-0.02em;margin-bottom:8px;}
+.sec-p{font-size:12px;color:var(--mid);line-height:1.7;}
+.sec-code{font-family:var(--fm);font-size:10px;color:var(--green);margin-top:10px;padding:7px 10px;background:rgba(45,84,56,0.06);border-radius:4px;display:block;word-break:break-all;}
+
+/* ── NETWORK EFFECT ── */
+.network-flow{display:grid;grid-template-columns:repeat(5,1fr);gap:2px;background:var(--rule);}
+.nf-step{background:white;padding:24px 16px;text-align:center;position:relative;min-width:0;}
+.nf-step::after{display:none;}
+
+.nf-num{font-family:var(--fm);font-size:9px;color:var(--green);letter-spacing:0.1em;margin-bottom:10px;}
+.nf-icon-wrap{width:48px;height:48px;border-radius:50%;margin:0 auto 12px;display:flex;align-items:center;justify-content:center;}
+.nf-title{font-size:12px;font-weight:700;color:var(--navy);letter-spacing:-0.01em;margin-bottom:4px;}
+.nf-desc{font-size:11px;color:var(--mid);line-height:1.5;}
+
+/* ── STATS ROW ── */
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:2px;background:var(--rule);margin-top:2px;} .stat-cell{min-width:0;}
+.stat-cell{background:var(--navy);padding:28px 32px;}
+.stat-num{font-size:32px;font-weight:800;color:var(--sand);letter-spacing:-0.04em;line-height:1;}
+.stat-label{font-size:11px;color:rgba(233,227,216,0.4);margin-top:4px;}
+
+/* ── IDENTITY COMPARISON ── */
+.identity-row{display:grid;grid-template-columns:repeat(3,1fr);gap:2px;background:var(--rule);} .id-cell{min-width:0;}
+.id-cell{padding:36px 40px;}
+.id-platform{font-size:13px;font-weight:700;color:var(--navy);margin-bottom:4px;}
+.id-for{font-size:12px;color:var(--mid);margin-bottom:12px;}
+.id-arrow{font-size:11px;color:var(--mid-lt);margin:8px 0;}
+.id-claim{font-size:13px;font-weight:700;color:var(--green);}
+
+/* ── IMPLEMENTATION SPEC ── */
+.spec-table{width:100%;border-collapse:collapse;table-layout:fixed;word-break:break-word;}
+.spec-table th{font-family:var(--fm);font-size:9px;letter-spacing:0.14em;text-transform:uppercase;color:var(--mid);font-weight:500;padding:10px 16px;text-align:left;border-bottom:1px solid var(--rule);}
+.spec-table td{font-size:12px;padding:12px 16px;border-bottom:1px solid var(--rule-lt);color:var(--charcoal);vertical-align:top;}
+.spec-table td:first-child{font-weight:600;color:var(--navy);word-break:break-word;}
+.spec-table td code{font-family:var(--fm);font-size:11px;color:var(--green);background:rgba(45,84,56,0.06);padding:2px 5px;border-radius:3px;}
+.spec-table tr:last-child td{border-bottom:none;}
+
+/* ── TAGLINE CALLOUT ── */
+.callout{background:var(--navy);padding:48px 56px;display:flex;align-items:center;justify-content:space-between;gap:40px;flex-wrap:wrap;}
+.callout-text{font-size:clamp(20px,3vw,32px);font-weight:800;color:var(--sand);letter-spacing:-0.03em;line-height:1.15;max-width:500px;}
+.callout-text span{font-weight:300;}
+.callout-sub{font-size:13px;color:rgba(233,227,216,0.4);margin-top:8px;line-height:1.6;max-width:320px;}
+
+/* ── FOOTER ── */
+.doc-footer{padding:40px 0 72px;border-top:1px solid var(--rule);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-top:80px;}
+.doc-footer p{font-size:11px;color:var(--mid-lt);}
+
+/* ── QR SVG (reusable) ── */
+/* responsive */
+@media(max-width:1050px){
+  .network-flow{grid-template-columns:1fr 1fr 1fr;}
+  .stats-row{grid-template-columns:1fr 1fr;}
+}
+@media(max-width:900px){
+  .wrap{padding:0 24px;}
+  .g2,.g3,.flow-steps,.security-grid,.network-flow,.identity-row,.stats-row{grid-template-columns:1fr;}
+  .dash-layout{grid-template-columns:1fr;}
+  .dash-sidebar{display:none;}
+  .eq-manager-body{grid-template-columns:1fr;}
+  .toc{flex-wrap:wrap;}
+  .toc-item{min-width:140px;}
+  .nf-step::after{display:none;}
+}
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════
+     COVER
+═══════════════════════════════════════ -->
+<div class="cover">
+  <div class="cover-glow"></div>
+  <div class="cover-glow2"></div>
+  <span class="cover-v">EQUITAG — SYSTEM DESIGN v1.0</span>
+  <div class="cover-inner">
+    <div class="cover-kicker">HorseRoster Platform · EquiTag QR Identity System</div>
+    <div class="cover-headline">Equi<span>Tag</span></div>
+    <div class="cover-sub">The digital identity layer for horses, barns, and trainers.</div>
+    <div class="cover-pills">
+      <span class="cover-pill">QR Identity</span>
+      <span class="cover-pill">Scan Experience</span>
+      <span class="cover-pill">Patch Design</span>
+      <span class="cover-pill">Dashboard Manager</span>
+      <span class="cover-pill">Security Model</span>
+      <span class="cover-pill">Network Effect</span>
+    </div>
+  </div>
+</div>
+
+<div class="wrap">
+
+<!-- TOC -->
+<div class="toc" style="margin-top:2px;">
+  <a class="toc-item" href="#s1"><span class="toc-num">01</span><span class="toc-label">System Concept</span></a>
+  <a class="toc-item" href="#s2"><span class="toc-num">02</span><span class="toc-label">Patch Design</span></a>
+  <a class="toc-item" href="#s3"><span class="toc-num">03</span><span class="toc-label">Scan Experience</span></a>
+  <a class="toc-item" href="#s4"><span class="toc-num">04</span><span class="toc-label">Dashboard Manager</span></a>
+  <a class="toc-item" href="#s5"><span class="toc-num">05</span><span class="toc-label">Security</span></a>
+  <a class="toc-item" href="#s6"><span class="toc-num">06</span><span class="toc-label">Network Effect</span></a>
+</div>
+
+<!-- ═══════════════════════════════════════
+     §1 — SYSTEM CONCEPT
+═══════════════════════════════════════ -->
+<div class="section" id="s1">
+  <div class="sec-head">
+    <span class="sec-num">01</span>
+    <h2 class="sec-title">EquiTag System Concept</h2>
+  </div>
+
+  <!-- How it works: 4-step flow -->
+  <div class="flow-steps" style="margin-bottom:2px;">
+
+    <div class="flow-step" data-num="01">
+      <div class="flow-icon green">
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+          <rect x="2" y="2" width="7" height="7" rx="1" fill="none" stroke="#2D5438" stroke-width="1.5"/>
+          <rect x="3.5" y="3.5" width="4" height="4" rx="0.5" fill="#2D5438"/>
+          <rect x="11" y="2" width="7" height="7" rx="1" fill="none" stroke="#2D5438" stroke-width="1.5"/>
+          <rect x="12.5" y="3.5" width="4" height="4" rx="0.5" fill="#2D5438"/>
+          <rect x="2" y="11" width="7" height="7" rx="1" fill="none" stroke="#2D5438" stroke-width="1.5"/>
+          <rect x="3.5" y="12.5" width="4" height="4" rx="0.5" fill="#2D5438"/>
+          <rect x="11" y="11" width="2.5" height="2.5" rx="0.3" fill="#2D5438"/>
+          <rect x="14.5" y="11" width="2.5" height="2.5" rx="0.3" fill="#2D5438"/>
+          <rect x="11" y="14.5" width="2.5" height="2.5" rx="0.3" fill="#2D5438"/>
+          <rect x="14.5" y="14.5" width="2.5" height="2.5" rx="0.3" fill="#2D5438"/>
+        </svg>
+      </div>
+      <div class="flow-title">Account Creation</div>
+      <div class="flow-desc">When a user creates a HorseRoster account, one permanent EquiTag QR code is generated and assigned. This code never changes, regardless of what it points to.</div>
+      <div style="margin-top:12px; font-family:var(--fm); font-size:10px; color:var(--green); background:rgba(45,84,56,0.06); padding:7px 10px; border-radius:4px;">horseroster.com/eq/<strong>A7F2C</strong></div>
+    </div>
+
+    <div class="flow-step" data-num="02">
+      <div class="flow-icon">
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+          <circle cx="10" cy="10" r="7" fill="none" stroke="#0F2A44" stroke-width="1.5"/>
+          <path d="M10 6v4l3 2" stroke="#0F2A44" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <div class="flow-title">Permanent Redirect</div>
+      <div class="flow-desc">The QR code URL is a permanent redirect layer. The destination changes — the code never does. Users can reassign it anytime from their dashboard without reprinting.</div>
+      <div style="margin-top:12px; display:flex; flex-direction:column; gap:4px;">
+        <div style="font-size:11px; color:var(--mid); display:flex; align-items:center; gap:6px;"><span style="color:var(--green); font-weight:700;">→</span> Horse profile</div>
+        <div style="font-size:11px; color:var(--mid); display:flex; align-items:center; gap:6px;"><span style="color:var(--green); font-weight:700;">→</span> Barn roster</div>
+        <div style="font-size:11px; color:var(--mid); display:flex; align-items:center; gap:6px;"><span style="color:var(--green); font-weight:700;">→</span> Trainer profile</div>
+      </div>
+    </div>
+
+    <div class="flow-step" data-num="03">
+      <div class="flow-icon green">
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+          <rect x="3" y="3" width="14" height="14" rx="2" fill="none" stroke="#2D5438" stroke-width="1.5"/>
+          <path d="M7 10h6M10 7v6" stroke="#2D5438" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <div class="flow-title">Assignment</div>
+      <div class="flow-desc">From the EquiTag Manager in MyBarn, users assign their QR to any entity they own — a horse, their barn page, or their personal trainer profile. One QR, one destination at a time.</div>
+    </div>
+
+    <div class="flow-step" data-num="04">
+      <div class="flow-icon">
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+          <path d="M4 10c0-3.3 2.7-6 6-6s6 2.7 6 6-2.7 6-6 6-6-2.7-6-6z" fill="none" stroke="#0F2A44" stroke-width="1.5"/>
+          <path d="M10 7v3l2 2" stroke="#0F2A44" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <div class="flow-title">Scan & Discover</div>
+      <div class="flow-desc">Anyone with a phone camera scans the tag. No app needed. They land on a mobile-optimised profile page. If they don't have HorseRoster, they see a smart prompt to join.</div>
+    </div>
+
+  </div>
+
+  <!-- URL structure + deduplication explanation -->
+  <div class="g2" style="margin-bottom:2px;">
+    <div class="cell pad">
+      <span class="sec-tag">URL Architecture</span>
+      <h3 style="font-size:14px;font-weight:700;color:var(--navy);letter-spacing:-0.02em;margin-bottom:12px;">One permanent code. Infinite destinations.</h3>
+      <p style="font-size:13px;color:var(--mid);line-height:1.7;margin-bottom:16px;">Each EquiTag URL is a two-layer system. The short code (<code style="font-family:var(--fm);font-size:11px;color:var(--green);">/eq/A7F2C</code>) is permanent and printed. It resolves via server-side redirect to the current assignment. Changing the assignment takes &lt;1 second. The printed tag never needs replacing.</p>
+      <div style="background:var(--off);border-radius:6px;padding:16px;font-family:var(--fm);font-size:11px;line-height:2;">
+        <div style="color:var(--mid-lt);">// QR code contains:</div>
+        <div style="color:var(--navy);">horseroster.com<span style="color:var(--green);">/eq/A7F2C</span></div>
+        <div style="color:var(--mid-lt);margin-top:6px;">// Redirects to current assignment:</div>
+        <div style="color:var(--navy);">horseroster.com<span style="color:var(--green);">/h/bolt-action-z</span></div>
+        <div style="color:var(--mid-lt);margin-top:6px;">// Or reassigned to barn:</div>
+        <div style="color:var(--navy);">horseroster.com<span style="color:var(--green);">/barn/oaklane</span></div>
+      </div>
+    </div>
+    <div class="cell pad" style="background:var(--off);">
+      <span class="sec-tag">Deduplication & Uniqueness</span>
+      <h3 style="font-size:14px;font-weight:700;color:var(--navy);letter-spacing:-0.02em;margin-bottom:12px;">Every code is cryptographically unique.</h3>
+      <div style="display:flex;flex-direction:column;gap:10px;">
+        <div style="display:flex;gap:12px;padding:12px;background:white;border-radius:5px;border:1px solid var(--rule-lt);">
+          <div style="width:32px;height:32px;border-radius:6px;background:rgba(45,84,56,0.08);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 1l1.5 4h4l-3.3 2.4 1.3 4L7 9 3.5 11.4l1.3-4L1.5 5h4L7 1z" fill="#2D5438"/></svg>
+          </div>
+          <div><div style="font-size:12px;font-weight:700;color:var(--navy);">UUID v4 generation</div><div style="font-size:11px;color:var(--mid);margin-top:2px;">Codes are generated using UUID v4 at account creation — statistically impossible to duplicate (2¹²² combinations).</div></div>
+        </div>
+        <div style="display:flex;gap:12px;padding:12px;background:white;border-radius:5px;border:1px solid var(--rule-lt);">
+          <div style="width:32px;height:32px;border-radius:6px;background:rgba(15,42,68,0.06);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><rect x="2" y="2" width="10" height="10" rx="2" fill="none" stroke="#0F2A44" stroke-width="1.5"/><path d="M5 7l2 2 4-4" stroke="#0F2A44" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <div><div style="font-size:12px;font-weight:700;color:var(--navy);">Database-level constraint</div><div style="font-size:11px;color:var(--mid);margin-top:2px;">Unique index enforced at database layer. No two accounts can share a code, even in edge-case race conditions.</div></div>
+        </div>
+        <div style="display:flex;gap:12px;padding:12px;background:white;border-radius:5px;border:1px solid var(--rule-lt);">
+          <div style="width:32px;height:32px;border-radius:6px;background:rgba(45,84,56,0.08);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="5" fill="none" stroke="#2D5438" stroke-width="1.5"/><path d="M7 5v3" stroke="#2D5438" stroke-width="1.5" stroke-linecap="round"/><circle cx="7" cy="10" r="0.7" fill="#2D5438"/></svg>
+          </div>
+          <div><div style="font-size:12px;font-weight:700;color:var(--navy);">One-to-one ownership</div><div style="font-size:11px;color:var(--mid);margin-top:2px;">A code is permanently bound to one account. It cannot be transferred, sold, or re-issued. Tied to the account UUID in the users table.</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tech spec table -->
+  <div class="cell" style="margin-bottom:2px;">
+    <div style="padding:20px 28px 0;"><span class="sec-tag">Technical Specification</span></div>
+    <table class="spec-table">
+      <thead><tr><th>Property</th><th>Value</th><th>Notes</th></tr></thead>
+      <tbody>
+        <tr><td>Code format</td><td><code>5-char alphanumeric</code></td><td>Base-32 encoded, uppercase, no ambiguous chars (0, O, I, 1)</td></tr>
+        <tr><td>QR version</td><td><code>QR v3, error correction H</code></td><td>40% damage tolerance — critical for embroidered/worn patches</td></tr>
+        <tr><td>URL base</td><td><code>horseroster.com/eq/</code></td><td>Short domain alias eq.hr.com optionally for print brevity</td></tr>
+        <tr><td>Redirect type</td><td><code>302 (temporary)</code></td><td>Allows destination changes without caching issues</td></tr>
+        <tr><td>Scan analytics</td><td><code>timestamp + geo + device</code></td><td>Each scan logged anonymously for account scan history</td></tr>
+        <tr><td>Assignment latency</td><td><code>&lt; 500ms</code></td><td>Redirect table update propagates globally via CDN edge</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+</div>
+
+<!-- ═══════════════════════════════════════
+     §2 — PATCH DESIGN
+═══════════════════════════════════════ -->
+<div class="section" id="s2">
+  <div class="sec-head">
+    <span class="sec-num">02</span>
+    <h2 class="sec-title">EquiTag Patch Design</h2>
+  </div>
+
+  <div class="g2" style="margin-bottom:2px;">
+
+    <!-- Light pad -->
+    <div class="cell">
+      <div class="patch-stage" style="background:#E8E6E2;padding:32px 40px;">
+        <div style="display:flex;flex-direction:column;align-items:center;gap:16px;">
+          <!-- Realistic flat AP saddle pad SVG — white -->
+          <div class="spad-wrap">
+            <svg class="spad-svg" viewBox="0 0 480 340" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <!-- Main pad body — AP square shape -->
+              <path d="M60 40 C60 40 120 28 240 28 C340 28 400 36 430 52 C452 64 460 82 458 110 C456 145 440 200 420 240 C400 278 370 308 330 318 C295 327 255 326 215 322 C170 317 130 305 100 285 C72 267 52 240 44 205 C34 165 34 120 40 85 C44 65 54 48 60 40 Z" fill="white" stroke="#E0DDDA" stroke-width="2"/>
+              <!-- Quilted diamond texture lines — horizontal -->
+              <path d="M80 80 Q240 70 420 85" stroke="#E8E6E2" stroke-width="1" fill="none"/>
+              <path d="M72 105 Q240 95 435 110" stroke="#E8E6E2" stroke-width="1" fill="none"/>
+              <path d="M66 130 Q240 120 438 135" stroke="#E8E6E2" stroke-width="1" fill="none"/>
+              <path d="M62 155 Q240 145 440 160" stroke="#E8E6E2" stroke-width="1" fill="none"/>
+              <path d="M60 180 Q240 170 440 185" stroke="#E8E6E2" stroke-width="1" fill="none"/>
+              <path d="M62 205 Q240 197 438 210" stroke="#E8E6E2" stroke-width="1" fill="none"/>
+              <path d="M68 230 Q240 222 432 235" stroke="#E8E6E2" stroke-width="1" fill="none"/>
+              <path d="M80 255 Q240 248 420 258" stroke="#E8E6E2" stroke-width="1" fill="none"/>
+              <path d="M98 278 Q240 272 400 280" stroke="#E8E6E2" stroke-width="1" fill="none"/>
+              <!-- Quilted vertical lines -->
+              <path d="M120 35 Q115 180 108 310" stroke="#E8E6E2" stroke-width="1" fill="none"/>
+              <path d="M160 30 Q157 180 152 318" stroke="#E8E6E2" stroke-width="1" fill="none"/>
+              <path d="M200 29 Q200 180 198 322" stroke="#E8E6E2" stroke-width="1" fill="none"/>
+              <path d="M240 28 Q242 180 242 324" stroke="#E8E6E2" stroke-width="1" fill="none"/>
+              <path d="M280 29 Q283 180 286 322" stroke="#E8E6E2" stroke-width="1" fill="none"/>
+              <path d="M320 30 Q324 175 326 316" stroke="#E8E6E2" stroke-width="1" fill="none"/>
+              <path d="M360 32 Q366 165 365 305" stroke="#E8E6E2" stroke-width="1" fill="none"/>
+              <path d="M400 40 Q406 155 398 285" stroke="#E8E6E2" stroke-width="1" fill="none"/>
+              <!-- Spine channel (center seam) -->
+              <path d="M240 28 Q238 180 242 324" stroke="#D4D0CC" stroke-width="2.5" fill="none" stroke-dasharray="6,4"/>
+              <!-- Outer binding edge -->
+              <path d="M60 40 C60 40 120 28 240 28 C340 28 400 36 430 52 C452 64 460 82 458 110 C456 145 440 200 420 240 C400 278 370 308 330 318 C295 327 255 326 215 322 C170 317 130 305 100 285 C72 267 52 240 44 205 C34 165 34 120 40 85 C44 65 54 48 60 40 Z" fill="none" stroke="#C8C4BF" stroke-width="3.5"/>
+              <!-- Saddle cutout at top -->
+              <ellipse cx="240" cy="28" rx="45" ry="16" fill="#E8E6E2"/>
+              <path d="M195 28 Q240 14 285 28" stroke="#C8C4BF" stroke-width="2" fill="none"/>
+            </svg>
+            <!-- Patch anchored bottom-left of pad -->
+            <div class="spad-patch-anchor">
+              <div class="equitag-patch etp-navy">
+                <div class="pt-top">
+                  <svg width="12" height="12" viewBox="0 0 72 72" fill="none" style="flex-shrink:0;">
+                    <rect width="72" height="72" rx="14" fill="#1A3B5A"/>
+                    <rect x="15" y="13" width="10" height="46" rx="2.5" fill="#E9E3D8"/>
+                    <rect x="47" y="13" width="10" height="46" rx="2.5" fill="#E9E3D8"/>
+                    <rect x="25" y="30" width="22" height="12" rx="2.5" fill="#2D5438"/>
+                  </svg>
+                  <span style="font-family:var(--f);font-size:7px;font-weight:300;color:#E9E3D8;letter-spacing:-0.02em;white-space:nowrap;">Horse</span><span style="font-family:var(--f);font-size:7px;font-weight:800;color:#E9E3D8;letter-spacing:-0.02em;white-space:nowrap;">Roster</span>
+                  <div style="flex:1;height:1px;background:#E9E3D8;opacity:0.12;min-width:2px;"></div>
+                  <span style="font-family:var(--f);font-size:5.5px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:rgba(233,227,216,0.4);white-space:nowrap;">EquiTag</span>
+                </div>
+                <div class="pt-qr-wrap">
+                <svg viewBox="0 0 80 80" width="60" height="60" fill="none">
+                  <rect x="2" y="2" width="22" height="22" rx="2" fill="#0F2A44"/><rect x="5" y="5" width="16" height="16" rx="1" fill="white"/><rect x="8" y="8" width="10" height="10" rx="1" fill="#0F2A44"/>
+                  <rect x="56" y="2" width="22" height="22" rx="2" fill="#0F2A44"/><rect x="59" y="5" width="16" height="16" rx="1" fill="white"/><rect x="62" y="8" width="10" height="10" rx="1" fill="#0F2A44"/>
+                  <rect x="2" y="56" width="22" height="22" rx="2" fill="#0F2A44"/><rect x="5" y="59" width="16" height="16" rx="1" fill="white"/><rect x="8" y="62" width="10" height="10" rx="1" fill="#0F2A44"/>
+                  <rect x="28" y="2" width="4" height="4" fill="#0F2A44"/><rect x="34" y="2" width="4" height="4" fill="#0F2A44"/><rect x="44" y="2" width="4" height="4" fill="#0F2A44"/>
+                  <rect x="28" y="8" width="4" height="4" fill="#0F2A44"/><rect x="40" y="8" width="4" height="4" fill="#0F2A44"/><rect x="50" y="8" width="4" height="4" fill="#0F2A44"/>
+                  <rect x="34" y="14" width="4" height="4" fill="#0F2A44"/><rect x="44" y="14" width="4" height="4" fill="#0F2A44"/>
+                  <rect x="28" y="20" width="4" height="4" fill="#0F2A44"/><rect x="38" y="20" width="4" height="4" fill="#0F2A44"/>
+                  <rect x="28" y="28" width="4" height="4" fill="#0F2A44"/><rect x="36" y="28" width="4" height="4" fill="#0F2A44"/><rect x="48" y="28" width="4" height="4" fill="#0F2A44"/><rect x="56" y="28" width="4" height="4" fill="#0F2A44"/><rect x="68" y="28" width="4" height="4" fill="#0F2A44"/>
+                  <rect x="2" y="28" width="4" height="4" fill="#0F2A44"/><rect x="14" y="28" width="4" height="4" fill="#0F2A44"/>
+                  <rect x="2" y="36" width="4" height="4" fill="#0F2A44"/><rect x="18" y="36" width="4" height="4" fill="#0F2A44"/><rect x="34" y="36" width="4" height="4" fill="#0F2A44"/><rect x="48" y="36" width="4" height="4" fill="#0F2A44"/><rect x="62" y="36" width="4" height="4" fill="#0F2A44"/>
+                  <rect x="8" y="44" width="4" height="4" fill="#0F2A44"/><rect x="28" y="44" width="4" height="4" fill="#0F2A44"/><rect x="40" y="44" width="4" height="4" fill="#0F2A44"/><rect x="54" y="44" width="4" height="4" fill="#0F2A44"/>
+                  <rect x="2" y="44" width="4" height="4" fill="#0F2A44"/><rect x="68" y="44" width="4" height="4" fill="#0F2A44"/>
+                  <rect x="28" y="56" width="4" height="4" fill="#0F2A44"/><rect x="40" y="56" width="4" height="4" fill="#0F2A44"/><rect x="56" y="56" width="4" height="4" fill="#0F2A44"/><rect x="68" y="56" width="4" height="4" fill="#0F2A44"/>
+                  <rect x="28" y="64" width="4" height="4" fill="#0F2A44"/><rect x="44" y="64" width="4" height="4" fill="#0F2A44"/><rect x="60" y="64" width="4" height="4" fill="#0F2A44"/>
+                  <rect x="34" y="72" width="4" height="4" fill="#0F2A44"/><rect x="48" y="72" width="4" height="4" fill="#0F2A44"/><rect x="64" y="72" width="4" height="4" fill="#0F2A44"/>
+                </svg>
+                </div>
+                <p class="pt-label-bottom" style="color:rgba(233,227,216,0.35);text-align:center;">SCAN FOR HORSE PROFILE</p>
+              </div>
+            </div>
+          </div>
+          <span style="font-size:10px;color:rgba(15,42,68,0.35);letter-spacing:0.06em;font-weight:500;">White saddle pad</span>
+        </div>
+      </div>
+      <div style="padding:20px 28px;border-top:1px solid var(--rule-lt);">
+        <span class="sec-tag">Version A — Navy patch</span>
+        <p style="font-size:12px;color:var(--mid);margin-top:4px;line-height:1.6;">Navy #0F2A44 base · Cream wordmark · White QR field. Works on grey, white, tan, and light pads.</p>
+      </div>
+    </div>
+
+    <!-- Dark pad -->
+    <div class="cell">
+      <div class="patch-stage" style="background:#1A1A1A;padding:32px 40px;">
+        <div style="display:flex;flex-direction:column;align-items:center;gap:16px;">
+          <!-- Realistic flat AP saddle pad SVG — navy -->
+          <div class="spad-wrap">
+            <svg class="spad-svg" viewBox="0 0 480 340" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M60 40 C60 40 120 28 240 28 C340 28 400 36 430 52 C452 64 460 82 458 110 C456 145 440 200 420 240 C400 278 370 308 330 318 C295 327 255 326 215 322 C170 317 130 305 100 285 C72 267 52 240 44 205 C34 165 34 120 40 85 C44 65 54 48 60 40 Z" fill="#0F2A44" stroke="#1A3B5A" stroke-width="2"/>
+              <path d="M80 80 Q240 70 420 85" stroke="#1A3B5A" stroke-width="1" fill="none"/>
+              <path d="M72 105 Q240 95 435 110" stroke="#1A3B5A" stroke-width="1" fill="none"/>
+              <path d="M66 130 Q240 120 438 135" stroke="#1A3B5A" stroke-width="1" fill="none"/>
+              <path d="M62 155 Q240 145 440 160" stroke="#1A3B5A" stroke-width="1" fill="none"/>
+              <path d="M60 180 Q240 170 440 185" stroke="#1A3B5A" stroke-width="1" fill="none"/>
+              <path d="M62 205 Q240 197 438 210" stroke="#1A3B5A" stroke-width="1" fill="none"/>
+              <path d="M68 230 Q240 222 432 235" stroke="#1A3B5A" stroke-width="1" fill="none"/>
+              <path d="M80 255 Q240 248 420 258" stroke="#1A3B5A" stroke-width="1" fill="none"/>
+              <path d="M98 278 Q240 272 400 280" stroke="#1A3B5A" stroke-width="1" fill="none"/>
+              <path d="M120 35 Q115 180 108 310" stroke="#1A3B5A" stroke-width="1" fill="none"/>
+              <path d="M160 30 Q157 180 152 318" stroke="#1A3B5A" stroke-width="1" fill="none"/>
+              <path d="M200 29 Q200 180 198 322" stroke="#1A3B5A" stroke-width="1" fill="none"/>
+              <path d="M240 28 Q242 180 242 324" stroke="#1A3B5A" stroke-width="1" fill="none"/>
+              <path d="M280 29 Q283 180 286 322" stroke="#1A3B5A" stroke-width="1" fill="none"/>
+              <path d="M320 30 Q324 175 326 316" stroke="#1A3B5A" stroke-width="1" fill="none"/>
+              <path d="M360 32 Q366 165 365 305" stroke="#1A3B5A" stroke-width="1" fill="none"/>
+              <path d="M400 40 Q406 155 398 285" stroke="#1A3B5A" stroke-width="1" fill="none"/>
+              <path d="M240 28 Q238 180 242 324" stroke="#091C2E" stroke-width="2.5" fill="none" stroke-dasharray="6,4"/>
+              <path d="M60 40 C60 40 120 28 240 28 C340 28 400 36 430 52 C452 64 460 82 458 110 C456 145 440 200 420 240 C400 278 370 308 330 318 C295 327 255 326 215 322 C170 317 130 305 100 285 C72 267 52 240 44 205 C34 165 34 120 40 85 C44 65 54 48 60 40 Z" fill="none" stroke="#091C2E" stroke-width="3.5"/>
+              <ellipse cx="240" cy="28" rx="45" ry="16" fill="#1A1A1A"/>
+              <path d="M195 28 Q240 14 285 28" stroke="#091C2E" stroke-width="2" fill="none"/>
+            </svg>
+            <div class="spad-patch-anchor">
+              <div class="equitag-patch etp-cream">
+                <div class="pt-top">
+                  <svg width="12" height="12" viewBox="0 0 72 72" fill="none" style="flex-shrink:0;">
+                    <rect width="72" height="72" rx="14" fill="#0F2A44"/>
+                    <rect x="15" y="13" width="10" height="46" rx="2.5" fill="#E9E3D8"/>
+                    <rect x="47" y="13" width="10" height="46" rx="2.5" fill="#E9E3D8"/>
+                    <rect x="25" y="30" width="22" height="12" rx="2.5" fill="#2D5438"/>
+                  </svg>
+                  <span style="font-family:var(--f);font-size:7px;font-weight:300;color:#0F2A44;letter-spacing:-0.02em;white-space:nowrap;">Horse</span><span style="font-family:var(--f);font-size:7px;font-weight:800;color:#0F2A44;letter-spacing:-0.02em;white-space:nowrap;">Roster</span>
+                  <div style="flex:1;height:1px;background:#0F2A44;opacity:0.12;min-width:2px;"></div>
+                  <span style="font-family:var(--f);font-size:5.5px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:rgba(15,42,68,0.38);white-space:nowrap;">EquiTag</span>
+                </div>
+                <div class="pt-qr-wrap-cream">
+                <svg viewBox="0 0 80 80" width="60" height="60" fill="none">
+                  <rect x="2" y="2" width="22" height="22" rx="2" fill="#0F2A44"/><rect x="5" y="5" width="16" height="16" rx="1" fill="#F0EBE2"/><rect x="8" y="8" width="10" height="10" rx="1" fill="#0F2A44"/>
+                  <rect x="56" y="2" width="22" height="22" rx="2" fill="#0F2A44"/><rect x="59" y="5" width="16" height="16" rx="1" fill="#F0EBE2"/><rect x="62" y="8" width="10" height="10" rx="1" fill="#0F2A44"/>
+                  <rect x="2" y="56" width="22" height="22" rx="2" fill="#0F2A44"/><rect x="5" y="59" width="16" height="16" rx="1" fill="#F0EBE2"/><rect x="8" y="62" width="10" height="10" rx="1" fill="#0F2A44"/>
+                  <rect x="28" y="2" width="4" height="4" fill="#0F2A44"/><rect x="34" y="2" width="4" height="4" fill="#0F2A44"/><rect x="44" y="2" width="4" height="4" fill="#0F2A44"/>
+                  <rect x="28" y="8" width="4" height="4" fill="#0F2A44"/><rect x="40" y="8" width="4" height="4" fill="#0F2A44"/><rect x="50" y="8" width="4" height="4" fill="#0F2A44"/>
+                  <rect x="34" y="14" width="4" height="4" fill="#0F2A44"/><rect x="44" y="14" width="4" height="4" fill="#0F2A44"/>
+                  <rect x="28" y="20" width="4" height="4" fill="#0F2A44"/><rect x="38" y="20" width="4" height="4" fill="#0F2A44"/>
+                  <rect x="28" y="28" width="4" height="4" fill="#0F2A44"/><rect x="36" y="28" width="4" height="4" fill="#0F2A44"/><rect x="48" y="28" width="4" height="4" fill="#0F2A44"/><rect x="56" y="28" width="4" height="4" fill="#0F2A44"/><rect x="68" y="28" width="4" height="4" fill="#0F2A44"/>
+                  <rect x="2" y="28" width="4" height="4" fill="#0F2A44"/><rect x="14" y="28" width="4" height="4" fill="#0F2A44"/>
+                  <rect x="2" y="36" width="4" height="4" fill="#0F2A44"/><rect x="18" y="36" width="4" height="4" fill="#0F2A44"/><rect x="34" y="36" width="4" height="4" fill="#0F2A44"/><rect x="48" y="36" width="4" height="4" fill="#0F2A44"/><rect x="62" y="36" width="4" height="4" fill="#0F2A44"/>
+                  <rect x="8" y="44" width="4" height="4" fill="#0F2A44"/><rect x="28" y="44" width="4" height="4" fill="#0F2A44"/><rect x="40" y="44" width="4" height="4" fill="#0F2A44"/><rect x="54" y="44" width="4" height="4" fill="#0F2A44"/>
+                  <rect x="2" y="44" width="4" height="4" fill="#0F2A44"/><rect x="68" y="44" width="4" height="4" fill="#0F2A44"/>
+                  <rect x="28" y="56" width="4" height="4" fill="#0F2A44"/><rect x="40" y="56" width="4" height="4" fill="#0F2A44"/><rect x="56" y="56" width="4" height="4" fill="#0F2A44"/>
+                  <rect x="34" y="62" width="4" height="4" fill="#0F2A44"/><rect x="48" y="62" width="4" height="4" fill="#0F2A44"/>
+                </svg>
+                </div>
+                <p class="pt-label-bottom" style="color:rgba(15,42,68,0.3);text-align:center;">SCAN FOR HORSE PROFILE</p>
+              </div>
+            </div>
+          </div>
+          <span style="font-size:10px;color:rgba(233,227,216,0.25);letter-spacing:0.06em;font-weight:500;">Navy saddle pad</span>
+        </div>
+      </div>
+      <div style="padding:20px 28px;border-top:1px solid var(--rule-lt);">
+        <span class="sec-tag">Version B — Cream patch</span>
+        <p style="font-size:12px;color:var(--mid);margin-top:4px;line-height:1.6;">Sand #F0EBE2 base · Navy wordmark · Sand-tinted QR field. Works on black, navy, and dark pads.</p>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Patch specs -->
+  <div class="cell" style="border-top:2px solid var(--green);">
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:0;background:var(--rule);min-width:0;">
+      <div style="background:white;padding:20px 24px;border-right:1px solid var(--rule-lt);">
+        <span class="sec-tag">Standard sizes</span>
+        <p style="font-size:13px;color:var(--charcoal);margin-top:4px;font-weight:500;">7.5 × 7.5 cm</p>
+        <p style="font-size:11px;color:var(--mid);">Compact: 5 × 5 cm</p>
+      </div>
+      <div style="background:white;padding:20px 24px;border-right:1px solid var(--rule-lt);">
+        <span class="sec-tag">Material</span>
+        <p style="font-size:13px;color:var(--charcoal);margin-top:4px;font-weight:500;">Woven twill base</p>
+        <p style="font-size:11px;color:var(--mid);">UV-stable sublimated QR · Velcro or sewn</p>
+      </div>
+      <div style="background:white;padding:20px 24px;border-right:1px solid var(--rule-lt);">
+        <span class="sec-tag">QR spec</span>
+        <p style="font-size:13px;color:var(--charcoal);margin-top:4px;font-weight:500;">Version 3, Level H</p>
+        <p style="font-size:11px;color:var(--mid);">40% error correction for wear/damage</p>
+      </div>
+      <div style="background:white;padding:20px 24px;">
+        <span class="sec-tag">SKUs</span>
+        <p style="font-size:13px;color:var(--charcoal);margin-top:4px;font-weight:500;">2 SKUs only</p>
+        <p style="font-size:11px;color:var(--mid);">Navy + Cream — covers all pad colours</p>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ═══════════════════════════════════════
+     §3 — SCAN EXPERIENCE
+═══════════════════════════════════════ -->
+<div class="section" id="s3">
+  <div class="sec-head">
+    <span class="sec-num">03</span>
+    <h2 class="sec-title">Scan Experience — Mobile Landing Pages</h2>
+  </div>
+
+  <div class="g2" style="margin-bottom:2px;">
+
+    <!-- Horse profile scan -->
+    <div class="cell pad-lg">
+      <span class="sec-tag" style="margin-bottom:20px;">Horse Profile Scan</span>
+      <div style="display:flex;justify-content:center;">
+        <div class="phone-frame">
+          <div class="phone-notch"><div class="phone-notch-pill"></div></div>
+          <div class="phone-screen">
+            <!-- Hero photo -->
+            <div class="scan-hero">
+              <div class="scan-hero-overlay"></div>
+              <div class="scan-horse-name-overlay">
+                <div class="scan-name">Bolt Action Z</div>
+                <div class="scan-tag-row">
+                  <span class="scan-tag scan-tag-green">Verified</span>
+                  <span class="scan-tag scan-tag-navy">1.50m</span>
+                  <span class="scan-tag scan-tag-navy">KWPN</span>
+                </div>
+              </div>
+            </div>
+            <!-- Body -->
+            <div class="scan-body">
+              <div class="scan-eq-badge">
+                <svg width="10" height="10" viewBox="0 0 72 72" fill="none"><rect x="15" y="13" width="10" height="46" rx="2" fill="#2D5438"/><rect x="47" y="13" width="10" height="46" rx="2" fill="#2D5438"/><rect x="25" y="30" width="22" height="12" rx="2" fill="#2D5438" opacity="0.5"/></svg>
+                <span>EquiTag Profile</span>
+              </div>
+              <div class="scan-meta-row">
+                <div class="scan-meta-item"><strong>2018</strong> · 7 yrs</div>
+                <div class="scan-meta-item"><strong>Show Jumping</strong></div>
+                <div class="scan-meta-item"><strong>16.3hh</strong></div>
+              </div>
+              <p class="scan-desc">Approved KWPN stallion with 1.50m international results. Scopey, careful, and rideable. Based at Oaklane Sport Horses, Wellington FL.</p>
+              <div class="scan-cta">View Full Profile</div>
+              <div class="scan-cta-ghost">Contact Barn</div>
+            </div>
+            <!-- Footer -->
+            <div class="scan-footer">
+              <svg width="14" height="14" viewBox="0 0 72 72" fill="none"><rect x="15" y="13" width="10" height="46" rx="2" fill="#B8BEC6"/><rect x="47" y="13" width="10" height="46" rx="2" fill="#B8BEC6"/><rect x="25" y="30" width="22" height="12" rx="2" fill="#B8BEC6" opacity="0.5"/></svg>
+              <span class="scan-footer-text">Powered by HorseRoster</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Barn scan -->
+    <div class="cell pad-lg" style="background:var(--off);">
+      <span class="sec-tag" style="margin-bottom:20px;">Barn Roster Scan</span>
+      <div style="display:flex;justify-content:center;">
+        <div class="phone-frame">
+          <div class="phone-notch"><div class="phone-notch-pill"></div></div>
+          <div class="phone-screen">
+            <div class="barn-scan-header">
+              <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+                <svg width="24" height="24" viewBox="0 0 72 72" fill="none"><rect width="72" height="72" rx="10" fill="#1A3B5A"/><rect x="15" y="13" width="10" height="46" rx="2" fill="#E9E3D8"/><rect x="47" y="13" width="10" height="46" rx="2" fill="#E9E3D8"/><rect x="25" y="30" width="22" height="12" rx="2" fill="#2D5438"/></svg>
+                <div>
+                  <div class="scan-eq-badge" style="margin-bottom:0;">
+                    <svg width="8" height="8" viewBox="0 0 72 72" fill="none"><rect x="15" y="13" width="10" height="46" rx="2" fill="#2D5438"/><rect x="47" y="13" width="10" height="46" rx="2" fill="#2D5438"/><rect x="25" y="30" width="22" height="12" rx="2" fill="#2D5438" opacity="0.5"/></svg>
+                    <span style="font-size:8px;">EquiTag · Barn</span>
+                  </div>
+                </div>
+              </div>
+              <div class="barn-scan-name">Oaklane Sport Horses</div>
+              <div class="barn-scan-loc">Wellington, FL · Est. 2009 · 14 horses</div>
+            </div>
+            <!-- Roster items -->
+            <div class="barn-roster-item">
+              <div class="barn-roster-avatar">BZ</div>
+              <div><div class="barn-roster-name">Bolt Action Z</div><div class="barn-roster-meta">KWPN · 2018 · 1.50m · €185k</div></div>
+              <span class="barn-roster-arrow">›</span>
+            </div>
+            <div class="barn-roster-item">
+              <div class="barn-roster-avatar" style="background:#DDE8E0;">CF</div>
+              <div><div class="barn-roster-name">Cento Fiori</div><div class="barn-roster-meta">Oldenburg · 2016 · 1.35m · €95k</div></div>
+              <span class="barn-roster-arrow">›</span>
+            </div>
+            <div class="barn-roster-item">
+              <div class="barn-roster-avatar" style="background:#E0DDD8;">DK</div>
+              <div><div class="barn-roster-name">Dark Kingdom</div><div class="barn-roster-meta">Hanoverian · 2019 · On request</div></div>
+              <span class="barn-roster-arrow">›</span>
+            </div>
+            <div style="padding:10px 14px;text-align:center;">
+              <div class="scan-cta">View All 14 Horses</div>
+            </div>
+            <div class="scan-footer">
+              <svg width="14" height="14" viewBox="0 0 72 72" fill="none"><rect x="15" y="13" width="10" height="46" rx="2" fill="#B8BEC6"/><rect x="47" y="13" width="10" height="46" rx="2" fill="#B8BEC6"/><rect x="25" y="30" width="22" height="12" rx="2" fill="#B8BEC6" opacity="0.5"/></svg>
+              <span class="scan-footer-text">Powered by HorseRoster</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- New visitor conversion -->
+  <div class="cell" style="border-top:2px solid var(--green);">
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:0;background:var(--rule);min-width:0;">
+      <div style="background:white;padding:24px 28px;">
+        <span class="sec-tag">Returning user</span>
+        <p style="font-size:13px;font-weight:700;color:var(--navy);margin:8px 0 6px;">Already has account</p>
+        <p style="font-size:12px;color:var(--mid);line-height:1.6;">Profile loads instantly. Option to follow or save the horse. Logged-in state remembered.</p>
+      </div>
+      <div style="background:var(--off);padding:24px 28px;">
+        <span class="sec-tag">New visitor</span>
+        <p style="font-size:13px;font-weight:700;color:var(--navy);margin:8px 0 6px;">No account yet</p>
+        <p style="font-size:12px;color:var(--mid);line-height:1.6;">Sees full profile read-only. Soft prompt: <em>"Save this horse — join HorseRoster free."</em> No gate before viewing.</p>
+      </div>
+      <div style="background:white;padding:24px 28px;">
+        <span class="sec-tag">Conversion moment</span>
+        <p style="font-size:13px;font-weight:700;color:var(--navy);margin:8px 0 6px;">Save or contact action</p>
+        <p style="font-size:12px;color:var(--mid);line-height:1.6;">Tapping "Contact Barn" or "Save Horse" triggers a lightweight sign-up. One tap via Apple/Google auth.</p>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ═══════════════════════════════════════
+     §4 — DASHBOARD MANAGER
+═══════════════════════════════════════ -->
+<div class="section" id="s4">
+  <div class="sec-head">
+    <span class="sec-num">04</span>
+    <h2 class="sec-title">EquiTag Manager — MyBarn Dashboard</h2>
+  </div>
+
+  <div style="background:var(--rule); overflow:hidden; border-radius:2px;">
+    <!-- Browser chrome -->
+    <div class="dash-chrome">
+      <div class="dash-dots">
+        <div class="dash-dot" style="background:#FF5F56;"></div>
+        <div class="dash-dot" style="background:#FFBD2E;"></div>
+        <div class="dash-dot" style="background:#27C93F;"></div>
+      </div>
+      <div class="dash-url">app.horseroster.com/mybarn/equitag</div>
+    </div>
+
+    <!-- Dashboard layout -->
+    <div class="dash-layout">
+      <!-- Sidebar -->
+      <div class="dash-sidebar">
+        <div class="dash-sidebar-logo">
+          <div style="display:flex;align-items:center;gap:8px;">
+            <svg width="24" height="24" viewBox="0 0 72 72" fill="none"><rect width="72" height="72" rx="8" fill="#1A3B5A"/><rect x="15" y="13" width="10" height="46" rx="2" fill="#E9E3D8"/><rect x="47" y="13" width="10" height="46" rx="2" fill="#E9E3D8"/><rect x="25" y="30" width="22" height="12" rx="2" fill="#2D5438"/></svg>
+            <div style="display:flex;align-items:baseline;"><span style="font-family:var(--f);font-size:13px;font-weight:300;color:var(--sand);letter-spacing:-0.03em;">Horse</span><span style="font-family:var(--f);font-size:13px;font-weight:800;color:var(--sand);letter-spacing:-0.03em;">Roster</span></div>
+          </div>
+        </div>
+        <div class="dash-nav-section">Management</div>
+        <div class="dash-nav-item"><span class="dash-nav-dot"></span>MyBarn</div>
+        <div class="dash-nav-item"><span class="dash-nav-dot"></span>My Horses</div>
+        <div class="dash-nav-item"><span class="dash-nav-dot"></span>Roster</div>
+        <div class="dash-nav-section">Identity</div>
+        <div class="dash-nav-item active"><span class="dash-nav-dot green"></span>EquiTag</div>
+        <div class="dash-nav-item"><span class="dash-nav-dot"></span>EquiVault</div>
+        <div class="dash-nav-section">Account</div>
+        <div class="dash-nav-item"><span class="dash-nav-dot"></span>Settings</div>
+        <div class="dash-nav-item"><span class="dash-nav-dot"></span>Subscription</div>
+      </div>
+
+      <!-- Main area -->
+      <div class="dash-main">
+        <div class="dash-page-title">EquiTag Manager</div>
+        <div class="dash-page-sub">Your permanent QR identity code. Assign it to any horse, barn, or profile you own.</div>
+
+        <div class="eq-manager">
+          <!-- Header -->
+          <div class="eq-manager-header">
+            <span class="eq-manager-title">Your EquiTag Code</span>
+            <div class="eq-status-pill">
+              <div class="eq-status-dot"></div>
+              <span class="eq-status-text">ACTIVE</span>
+            </div>
+          </div>
+
+          <!-- Body: QR + assignment -->
+          <div class="eq-manager-body">
+
+            <!-- QR panel -->
+            <div class="eq-qr-panel">
+              <div class="eq-qr-box">
+                <svg viewBox="0 0 80 80" width="120" height="120" fill="none">
+                  <rect x="2" y="2" width="22" height="22" rx="2" fill="#E9E3D8"/><rect x="5" y="5" width="16" height="16" rx="1" fill="#0F2A44"/><rect x="8" y="8" width="10" height="10" rx="1" fill="#E9E3D8"/>
+                  <rect x="56" y="2" width="22" height="22" rx="2" fill="#E9E3D8"/><rect x="59" y="5" width="16" height="16" rx="1" fill="#0F2A44"/><rect x="62" y="8" width="10" height="10" rx="1" fill="#E9E3D8"/>
+                  <rect x="2" y="56" width="22" height="22" rx="2" fill="#E9E3D8"/><rect x="5" y="59" width="16" height="16" rx="1" fill="#0F2A44"/><rect x="8" y="62" width="10" height="10" rx="1" fill="#E9E3D8"/>
+                  <rect x="28" y="2" width="4" height="4" fill="#E9E3D8"/><rect x="34" y="2" width="4" height="4" fill="#E9E3D8"/>
+                  <rect x="28" y="8" width="4" height="4" fill="#E9E3D8"/><rect x="40" y="8" width="4" height="4" fill="#E9E3D8"/>
+                  <rect x="34" y="14" width="4" height="4" fill="#E9E3D8"/>
+                  <rect x="28" y="28" width="4" height="4" fill="#E9E3D8"/><rect x="40" y="28" width="4" height="4" fill="#E9E3D8"/><rect x="56" y="28" width="4" height="4" fill="#E9E3D8"/><rect x="68" y="28" width="4" height="4" fill="#E9E3D8"/>
+                  <rect x="2" y="28" width="4" height="4" fill="#E9E3D8"/><rect x="14" y="28" width="4" height="4" fill="#E9E3D8"/>
+                  <rect x="2" y="36" width="4" height="4" fill="#E9E3D8"/><rect x="20" y="36" width="4" height="4" fill="#E9E3D8"/><rect x="36" y="36" width="4" height="4" fill="#E9E3D8"/><rect x="50" y="36" width="4" height="4" fill="#E9E3D8"/>
+                  <rect x="10" y="44" width="4" height="4" fill="#E9E3D8"/><rect x="30" y="44" width="4" height="4" fill="#E9E3D8"/><rect x="44" y="44" width="4" height="4" fill="#E9E3D8"/>
+                  <rect x="4" y="44" width="4" height="4" fill="#E9E3D8"/><rect x="66" y="44" width="4" height="4" fill="#E9E3D8"/>
+                  <rect x="28" y="58" width="4" height="4" fill="#E9E3D8"/><rect x="42" y="58" width="4" height="4" fill="#E9E3D8"/>
+                  <rect x="34" y="64" width="4" height="4" fill="#E9E3D8"/><rect x="48" y="64" width="4" height="4" fill="#E9E3D8"/>
+                  <rect x="28" y="70" width="4" height="4" fill="#E9E3D8"/><rect x="58" y="70" width="4" height="4" fill="#E9E3D8"/>
+                  <!-- EquiTag label centered -->
+                  <rect x="26" y="46" width="28" height="14" rx="3" fill="#2D5438"/>
+                  <text x="40" y="56" font-size="6" fill="white" text-anchor="middle" font-family="sans-serif" font-weight="bold" letter-spacing="1">EQUITAG</text>
+                </svg>
+              </div>
+              <div class="eq-qr-id">
+                <div style="font-size:11px;color:var(--navy);font-weight:700;letter-spacing:0.05em;">A7F2C</div>
+                <div style="font-size:9px;color:var(--mid-lt);margin-top:2px;">horseroster.com/eq/A7F2C</div>
+              </div>
+              <div class="eq-qr-actions">
+                <button class="eq-btn eq-btn-primary">↓ Download</button>
+                <button class="eq-btn eq-btn-ghost">Copy URL</button>
+              </div>
+            </div>
+
+            <!-- Assignment panel -->
+            <div class="eq-assign-panel">
+              <div class="eq-assign-title">Assign QR destination</div>
+              <div class="eq-assign-options">
+
+                <div class="eq-assign-opt selected">
+                  <div class="eq-assign-icon eq-assign-icon-green">
+                    <svg width="16" height="16" viewBox="0 0 72 72" fill="none"><rect x="15" y="13" width="10" height="46" rx="2" fill="#2D5438"/><rect x="47" y="13" width="10" height="46" rx="2" fill="#2D5438"/><rect x="25" y="30" width="22" height="12" rx="2" fill="#2D5438" opacity="0.4"/></svg>
+                  </div>
+                  <div>
+                    <div class="eq-assign-name">Bolt Action Z</div>
+                    <div class="eq-assign-sub">Horse profile · Currently active</div>
+                  </div>
+                  <div class="eq-assign-check checked"><div class="eq-assign-check-inner"></div></div>
+                </div>
+
+                <div class="eq-assign-opt">
+                  <div class="eq-assign-icon eq-assign-icon-navy">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="2" y="6" width="12" height="8" rx="1" fill="none" stroke="#0F2A44" stroke-width="1.5"/><path d="M5 6V5a3 3 0 016 0v1" stroke="#0F2A44" stroke-width="1.5" stroke-linecap="round"/></svg>
+                  </div>
+                  <div>
+                    <div class="eq-assign-name">Oaklane Sport Horses</div>
+                    <div class="eq-assign-sub">Barn roster · 14 horses</div>
+                  </div>
+                  <div class="eq-assign-check"></div>
+                </div>
+
+                <div class="eq-assign-opt">
+                  <div class="eq-assign-icon eq-assign-icon-navy">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="5" r="3" fill="none" stroke="#0F2A44" stroke-width="1.5"/><path d="M2 14c0-3.3 2.7-6 6-6s6 2.7 6 6" stroke="#0F2A44" stroke-width="1.5" stroke-linecap="round"/></svg>
+                  </div>
+                  <div>
+                    <div class="eq-assign-name">Sarah van der Berg</div>
+                    <div class="eq-assign-sub">Trainer profile</div>
+                  </div>
+                  <div class="eq-assign-check"></div>
+                </div>
+
+              </div>
+
+              <div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--rule-lt);">
+                <button style="background:var(--green);color:white;font-size:12px;font-weight:700;padding:10px 20px;border-radius:5px;border:none;cursor:pointer;width:100%;letter-spacing:-0.01em;">Save Assignment</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- History log -->
+          <div class="eq-history">
+            <div class="eq-history-title">Assignment History</div>
+            <div class="eq-history-row"><span class="eq-history-action">Assigned to <strong>Bolt Action Z</strong></span><span class="eq-history-date">2024-11-03</span></div>
+            <div class="eq-history-row"><span class="eq-history-action">Assigned to <strong>Oaklane Sport Horses</strong> (barn)</span><span class="eq-history-date">2024-08-17</span></div>
+            <div class="eq-history-row"><span class="eq-history-action">EquiTag code generated at account creation</span><span class="eq-history-date">2024-06-01</span></div>
+          </div>
+
+        </div>
+
+        <!-- Download options -->
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:16px;">
+          <div style="border:1.5px solid var(--rule);border-radius:6px;padding:14px 16px;">
+            <div style="font-size:11px;font-weight:700;color:var(--navy);margin-bottom:4px;">Print-ready SVG</div>
+            <div style="font-size:11px;color:var(--mid);">For patch manufacturers and print shops</div>
+          </div>
+          <div style="border:1.5px solid var(--rule);border-radius:6px;padding:14px 16px;">
+            <div style="font-size:11px;font-weight:700;color:var(--navy);margin-bottom:4px;">High-res PNG</div>
+            <div style="font-size:11px;color:var(--mid);">For digital use, business cards, signage</div>
+          </div>
+          <div style="border:1.5px solid var(--rule);border-radius:6px;padding:14px 16px;">
+            <div style="font-size:11px;font-weight:700;color:var(--navy);margin-bottom:4px;">EquiTag Patch File</div>
+            <div style="font-size:11px;color:var(--mid);">Production-ready file for embroidery systems</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════
+     §5 — SECURITY
+═══════════════════════════════════════ -->
+<div class="section" id="s5">
+  <div class="sec-head">
+    <span class="sec-num">05</span>
+    <h2 class="sec-title">Security & Ownership Model</h2>
+  </div>
+
+  <div class="security-grid" style="margin-bottom:2px;">
+
+    <div class="sec-cell">
+      <div class="sec-icon sec-icon-green">
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><rect x="3" y="7" width="12" height="9" rx="2" fill="none" stroke="#2D5438" stroke-width="1.5"/><path d="M6 7V5a3 3 0 016 0v2" stroke="#2D5438" stroke-width="1.5" stroke-linecap="round"/><circle cx="9" cy="12" r="1.5" fill="#2D5438"/></svg>
+      </div>
+      <div class="sec-h">Code Permanence</div>
+      <p class="sec-p">Once issued, a code is immutable. It cannot be deleted, transferred, or regenerated. The short code is written once at account creation to an append-only log table.</p>
+      <div class="sec-code">INSERT ONCE · NO UPDATE · NO DELETE</div>
+    </div>
+
+    <div class="sec-cell">
+      <div class="sec-icon sec-icon-navy">
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><circle cx="9" cy="9" r="6" fill="none" stroke="#0F2A44" stroke-width="1.5"/><path d="M9 6v4" stroke="#0F2A44" stroke-width="1.5" stroke-linecap="round"/><circle cx="9" cy="13" r="0.75" fill="#0F2A44"/></svg>
+      </div>
+      <div class="sec-h">Account Binding</div>
+      <p class="sec-p">Each QR code is a foreign key to exactly one user account UUID. This relationship is enforced at the database constraint level. No API endpoint allows re-binding to another account.</p>
+      <div class="sec-code">FOREIGN KEY(account_id) UNIQUE</div>
+    </div>
+
+    <div class="sec-cell">
+      <div class="sec-icon sec-icon-green">
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M9 2l6 3v5c0 3.3-2.7 6-6 6S3 13.3 3 10V5l6-3z" fill="none" stroke="#2D5438" stroke-width="1.5"/><path d="M6 9l2 2 4-4" stroke="#2D5438" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+      <div class="sec-h">Abuse Prevention</div>
+      <p class="sec-p">Scan rate limiting prevents brute-force enumeration of QR codes. Codes use Base-32 with no sequential pattern. A valid scan must also pass a signed token check before redirect.</p>
+      <div class="sec-code">HMAC-signed · rate-limited · no sequence</div>
+    </div>
+
+    <div class="sec-cell">
+      <div class="sec-icon sec-icon-navy">
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><rect x="2" y="2" width="6" height="6" rx="1" fill="none" stroke="#0F2A44" stroke-width="1.5"/><rect x="10" y="2" width="6" height="6" rx="1" fill="none" stroke="#0F2A44" stroke-width="1.5"/><rect x="2" y="10" width="6" height="6" rx="1" fill="none" stroke="#0F2A44" stroke-width="1.5"/><rect x="10" y="10" width="6" height="6" rx="1" fill="none" stroke="#0F2A44" stroke-width="1.5"/></svg>
+      </div>
+      <div class="sec-h">Uniqueness Guarantee</div>
+      <p class="sec-p">UUID v4 generation produces 2¹²² possible codes. The system also checks existing codes at generation time. Collision probability across 1 billion users is ~0.000000006%.</p>
+      <div class="sec-code">P(collision) at 1B users: ~6×10⁻⁹</div>
+    </div>
+
+    <div class="sec-cell">
+      <div class="sec-icon sec-icon-green">
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M3 9l4 4 8-8" stroke="#2D5438" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+      <div class="sec-h">Verified Ownership</div>
+      <p class="sec-p">Only the account owner can reassign their QR destination. All assignment changes require an authenticated session and are 2FA-confirmed for accounts marked "Professional" or "Verified Barn."</p>
+      <div class="sec-code">auth.session + optional 2FA</div>
+    </div>
+
+    <div class="sec-cell">
+      <div class="sec-icon sec-icon-navy">
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><circle cx="9" cy="9" r="6" fill="none" stroke="#0F2A44" stroke-width="1.5"/><path d="M7 7h2v5M7 12h4" stroke="#0F2A44" stroke-width="1.5" stroke-linecap="round"/></svg>
+      </div>
+      <div class="sec-h">Full Audit Log</div>
+      <p class="sec-p">Every scan, every assignment change, and every download is logged with timestamp, IP, and device. Account owners can view their full scan history and flag suspicious activity.</p>
+      <div class="sec-code">immutable audit_log table · 90-day retention</div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════
+     §6 — NETWORK EFFECT
+═══════════════════════════════════════ -->
+<div class="section" id="s6">
+  <div class="sec-head">
+    <span class="sec-num">06</span>
+    <h2 class="sec-title">Network Effect — How EquiTag Grows HorseRoster</h2>
+  </div>
+
+  <!-- 5-step funnel -->
+  <div class="network-flow" style="margin-bottom:2px;">
+
+    <div class="nf-step">
+      <div class="nf-num">01</div>
+      <div class="nf-icon-wrap" style="background:rgba(15,42,68,0.07);">
+        <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><rect x="2" y="8" width="18" height="12" rx="3" fill="none" stroke="#0F2A44" stroke-width="1.5"/><path d="M7 8V6a4 4 0 018 0v2" stroke="#0F2A44" stroke-width="1.5" stroke-linecap="round"/></svg>
+      </div>
+      <div class="nf-title">Tag is worn</div>
+      <div class="nf-desc">A barn or rider attaches the EquiTag patch to their saddle pad, stall, or show signage.</div>
+    </div>
+
+    <div class="nf-step">
+      <div class="nf-num">02</div>
+      <div class="nf-icon-wrap" style="background:rgba(45,84,56,0.08);">
+        <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><rect x="3" y="3" width="7" height="7" rx="1" fill="none" stroke="#2D5438" stroke-width="1.5"/><rect x="4.5" y="4.5" width="4" height="4" rx="0.5" fill="#2D5438"/><rect x="12" y="3" width="7" height="7" rx="1" fill="none" stroke="#2D5438" stroke-width="1.5"/><rect x="13.5" y="4.5" width="4" height="4" rx="0.5" fill="#2D5438"/><rect x="3" y="12" width="7" height="7" rx="1" fill="none" stroke="#2D5438" stroke-width="1.5"/><rect x="4.5" y="13.5" width="4" height="4" rx="0.5" fill="#2D5438"/></svg>
+      </div>
+      <div class="nf-title">Someone scans</div>
+      <div class="nf-desc">A competitor, buyer, trainer, or parent scans the QR — no app required, just a phone camera.</div>
+    </div>
+
+    <div class="nf-step">
+      <div class="nf-num">03</div>
+      <div class="nf-icon-wrap" style="background:rgba(15,42,68,0.07);">
+        <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><rect x="6" y="2" width="10" height="18" rx="2" fill="none" stroke="#0F2A44" stroke-width="1.5"/><rect x="9" y="16" width="4" height="2" rx="1" fill="#0F2A44" opacity="0.4"/></svg>
+      </div>
+      <div class="nf-title">Lands on HorseRoster</div>
+      <div class="nf-desc">The mobile scan page is their first experience of the platform. Clean, fast, professional.</div>
+    </div>
+
+    <div class="nf-step">
+      <div class="nf-num">04</div>
+      <div class="nf-icon-wrap" style="background:rgba(45,84,56,0.08);">
+        <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><circle cx="11" cy="8" r="4" fill="none" stroke="#2D5438" stroke-width="1.5"/><path d="M3 20c0-4.4 3.6-8 8-8s8 3.6 8 8" stroke="#2D5438" stroke-width="1.5" stroke-linecap="round"/></svg>
+      </div>
+      <div class="nf-title">Discovers platform</div>
+      <div class="nf-desc">They browse the horse or barn. They see other listings. The prompt to join is gentle and contextual.</div>
+    </div>
+
+    <div class="nf-step">
+      <div class="nf-num">05</div>
+      <div class="nf-icon-wrap" style="background:rgba(15,42,68,0.07);">
+        <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M11 3l2.5 5.5 6 .8-4.3 4.2 1 6L11 17l-5.2 2.5 1-6L2.5 9.3l6-.8L11 3z" fill="none" stroke="#0F2A44" stroke-width="1.5" stroke-linejoin="round"/></svg>
+      </div>
+      <div class="nf-title">Signs up / saves</div>
+      <div class="nf-desc">They create a free account to save the horse, contact the barn, or list their own horses. Loop closes.</div>
+    </div>
+
+  </div>
+
+  <!-- Identity positioning -->
+  <div class="identity-row" style="margin-bottom:2px;">
+    <div class="id-cell" style="background:white;">
+      <span class="sec-tag">LinkedIn</span>
+      <div class="id-platform">Professional identity</div>
+      <div class="id-for">For people in business</div>
+      <div class="id-arrow">→ Your profile follows you everywhere</div>
+      <div class="id-claim">HorseRoster is this for horses & barns</div>
+    </div>
+    <div class="id-cell" style="background:var(--off);">
+      <span class="sec-tag">Strava</span>
+      <div class="id-platform">Athletic identity</div>
+      <div class="id-for">For athletes and their performance</div>
+      <div class="id-arrow">→ Activity logged. Progress public.</div>
+      <div class="id-claim">HorseRoster tracks the horse's career</div>
+    </div>
+    <div class="id-cell" style="background:white;">
+      <span class="sec-tag">EquiTag</span>
+      <div class="id-platform">Equine identity</div>
+      <div class="id-for">For horses, barns, trainers</div>
+      <div class="id-arrow">→ Physical tag. Digital identity. Always on.</div>
+      <div class="id-claim" style="color:var(--navy);font-size:14px;">The QR on the saddle pad is the entry point to the entire platform</div>
+    </div>
+  </div>
+
+  <!-- Growth stats projection -->
+  <div class="stats-row">
+    <div class="stat-cell">
+      <div class="stat-num">1</div>
+      <div class="stat-label">EquiTag per account — permanently assigned</div>
+    </div>
+    <div class="stat-cell">
+      <div class="stat-num">~12</div>
+      <div class="stat-label">Avg. scans per show season per active tag</div>
+    </div>
+    <div class="stat-cell">
+      <div class="stat-num">60%</div>
+      <div class="stat-label">Of scanners are new to HorseRoster</div>
+    </div>
+    <div class="stat-cell">
+      <div class="stat-num">1 tag</div>
+      <div class="stat-label">= organic growth engine at every competition</div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ═══════════════════════════════════════
+     CLOSING CALLOUT
+═══════════════════════════════════════ -->
+<div style="margin-top:2px;">
+  <div class="callout">
+    <div>
+      <div class="callout-text">Every saddle pad is a <span>billboard.</span><br>Every scan is a <span>new user.</span></div>
+      <div class="callout-sub">EquiTag turns every HorseRoster member into an organic growth channel. The physical tag is the distribution mechanism. The platform is the destination.</div>
+    </div>
+    <div style="display:flex;align-items:center;gap:12px;opacity:0.6;">
+      <svg width="40" height="40" viewBox="0 0 72 72" fill="none"><rect width="72" height="72" rx="14" fill="#1A3B5A"/><rect x="15" y="13" width="10" height="46" rx="2" fill="#E9E3D8"/><rect x="47" y="13" width="10" height="46" rx="2" fill="#E9E3D8"/><rect x="25" y="30" width="22" height="12" rx="2" fill="#2D5438"/></svg>
+      <div style="display:flex;align-items:baseline;"><span style="font-family:var(--f);font-size:22px;font-weight:300;color:var(--sand);letter-spacing:-0.04em;">Horse</span><span style="font-family:var(--f);font-size:22px;font-weight:800;color:var(--sand);letter-spacing:-0.04em;">Roster</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<div class="doc-footer">
+  <div style="display:flex;align-items:center;gap:8px;">
+    <svg width="20" height="20" viewBox="0 0 72 72" fill="none"><rect width="72" height="72" rx="8" fill="#0F2A44"/><rect x="15" y="13" width="10" height="46" rx="2" fill="#E9E3D8"/><rect x="47" y="13" width="10" height="46" rx="2" fill="#E9E3D8"/><rect x="25" y="30" width="22" height="12" rx="2" fill="#2D5438"/></svg>
+    <span style="font-family:var(--f);font-size:13px;font-weight:300;color:var(--navy);letter-spacing:-0.03em;">Horse</span><span style="font-family:var(--f);font-size:13px;font-weight:800;color:var(--navy);letter-spacing:-0.03em;">Roster</span>
+  </div>
+  <p>EquiTag QR Identity System · Design Specification v1.0</p>
+  <p>horseroster.com · EquiTag™ · EquiVault™</p>
+</div>
+
+</div><!-- /wrap -->
+</body>
+</html>

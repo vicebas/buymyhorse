@@ -1,7 +1,9 @@
 import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
 
+import AdminBlockedNotice from "@/components/admin/admin-blocked-notice";
 import prisma from "@/lib/db/prisma";
+import { getBarnModerationMessage } from "@/lib/admin/moderation";
 import { authOptions } from "@/lib/auth/options";
 import AppHeader from "@/components/layout/app-header";
 import SellerSettingsForm from "@/components/seller/seller-settings-form";
@@ -17,10 +19,34 @@ export default async function SellerSettingsPage() {
     where: {
       userId: session.user.id,
     },
+    include: {
+      horses: {
+        orderBy: [
+          { isBarnFeatured: "desc" },
+          { barnDisplayOrder: "asc" },
+          { createdAt: "desc" },
+        ],
+      },
+    },
   });
 
   if (!seller) {
-    redirect("/seller/onboard");
+    redirect("/mybarn/onboard");
+  }
+
+  if (seller.adminDisabledAt) {
+    return (
+      <main className="min-h-screen bg-stone-50 text-stone-900">
+        <AppHeader variant="seller" />
+
+        <section className="mx-auto max-w-5xl px-6 py-10">
+          <AdminBlockedNotice
+            title="Barn editing is disabled"
+            message={getBarnModerationMessage(seller.adminDisableReason)}
+          />
+        </section>
+      </main>
+    );
   }
 
   return (
@@ -34,7 +60,7 @@ export default async function SellerSettingsPage() {
           </p>
           <h1 className="mt-2 font-serif text-4xl">Edit Barn Profile</h1>
           <p className="mt-3 max-w-2xl text-stone-600">
-            Update your public barn identity, branding, and marketplace information.
+            Update your public barn identity, frontpage imagery, and featured roster.
           </p>
         </div>
 

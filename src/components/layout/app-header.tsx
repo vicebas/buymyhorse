@@ -1,13 +1,18 @@
+"use client";
+
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import {
+  CreditCard,
   Home,
   LayoutGrid,
-  Tag,
-  Inbox,
   MessageSquare,
   Warehouse,
 } from "lucide-react";
+import { LogoutButton } from "@/components/auth/logout-button";
+import { BrandLogo } from "@/components/layout/brand-logo";
+import { ThemeToggle } from "@/components/layout/theme-toggle";
 
 type AppHeaderVariant = "buyer" | "seller" | "admin";
 
@@ -16,53 +21,67 @@ interface AppHeaderProps {
 }
 
 export default function AppHeader({ variant }: AppHeaderProps) {
+  const pathname = usePathname();
   const isBuyer = variant === "buyer";
   const isSeller = variant === "seller";
+  const activeItem = getActiveItem(variant, pathname);
+  const linkClasses =
+    "flex items-center gap-2 rounded-full px-3.5 py-2 text-sm font-medium transition-colors";
+  const activeClasses = "bg-[color:var(--accent)] text-[color:var(--accent-foreground)]";
+  const inactiveClasses =
+    "text-[color:var(--foreground-soft)] hover:bg-[color:var(--muted)] hover:text-[color:var(--foreground-strong)]";
+  const headerClasses =
+    "w-full border-b border-[color:var(--border)] bg-[color:var(--background-elevated)] shadow-[0_1px_0_rgba(15,42,68,0.04)]";
+  const brandHref = variant === "admin" ? "/admin" : isSeller ? "/mybarn" : "/dashboard";
 
   return (
-    <header className="w-full border-b border-stone-200 bg-white/95 backdrop-blur">
-      <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-3">
-        <Link href={isSeller ? "/seller" : "/dashboard"} className="flex items-center gap-3">
-          <div className="flex h-9 w-9 items-center justify-center bg-black font-serif text-lg text-white">
-            B
-          </div>
-          <span className="text-lg font-medium text-stone-900">BuyMyHorse</span>
-        </Link>
+    <header className={headerClasses}>
+      <div className="mx-auto flex max-w-7xl items-center justify-between gap-6 px-6 py-3">
+        <BrandLogo href={brandHref} variant="adaptive" priority />
 
-        <nav className="hidden items-center gap-6 md:flex">
+        <nav className="hidden items-center gap-2 md:flex">
           {isBuyer && (
             <>
               <Link
                 href="/dashboard"
-                className="flex items-center gap-2 rounded-md bg-black px-3 py-1.5 text-sm text-white"
+                className={`${linkClasses} ${
+                  activeItem === "dashboard" ? activeClasses : inactiveClasses
+                }`}
               >
                 <Home size={16} />
-                Listings
+                Dashboard
               </Link>
 
               <Link
                 href="/marketplace"
-                className="flex items-center gap-2 text-sm text-stone-600 hover:text-black"
+                className={`${linkClasses} ${
+                  activeItem === "marketplace" ? activeClasses : inactiveClasses
+                }`}
               >
                 <LayoutGrid size={16} />
                 Marketplace
               </Link>
 
-              <Link
-                href="/equitag"
-                className="flex items-center gap-2 text-sm text-stone-600 hover:text-black"
-              >
-                <Tag size={16} />
-                EquiTag
-              </Link>
             </>
           )}
 
           {isSeller && (
             <>
               <Link
-                href="/seller"
-                className="flex items-center gap-2 rounded-md bg-black px-3 py-1.5 text-sm text-white"
+                href="/dashboard"
+                className={`${linkClasses} ${
+                  activeItem === "dashboard" ? activeClasses : inactiveClasses
+                }`}
+              >
+                <Home size={16} />
+                Dashboard
+              </Link>
+
+              <Link
+                href="/mybarn"
+                className={`${linkClasses} ${
+                  activeItem === "mybarn" ? activeClasses : inactiveClasses
+                }`}
               >
                 <Warehouse size={16} />
                 MyBarn
@@ -70,49 +89,43 @@ export default function AppHeader({ variant }: AppHeaderProps) {
 
               <Link
                 href="/marketplace"
-                className="flex items-center gap-2 text-sm text-stone-600 hover:text-black"
+                className={`${linkClasses} ${
+                  activeItem === "marketplace" ? activeClasses : inactiveClasses
+                }`}
               >
                 <LayoutGrid size={16} />
                 Marketplace
               </Link>
 
               <Link
-                href="/seller/messages"
-                className="flex items-center gap-2 text-sm text-stone-600 hover:text-black"
+                href="/mybarn/messages"
+                className={`${linkClasses} ${
+                  activeItem === "messages" ? activeClasses : inactiveClasses
+                }`}
               >
                 <MessageSquare size={16} />
                 Messages
               </Link>
 
               <Link
-                href="/seller/requests"
-                className="flex items-center gap-2 text-sm text-stone-600 hover:text-black"
+                href="/mybarn/billing"
+                className={`${linkClasses} ${
+                  activeItem === "billing" ? activeClasses : inactiveClasses
+                }`}
               >
-                <Inbox size={16} />
-                Doc Requests
+                <CreditCard size={16} />
+                Billing
               </Link>
 
-              <Link
-                href="/equitag"
-                className="flex items-center gap-2 text-sm text-stone-600 hover:text-black"
-              >
-                <Tag size={16} />
-                EquiTag
-              </Link>
+              
+
             </>
           )}
 
-          {variant === "admin" && (
-            <Link
-              href="/admin"
-              className="rounded-md bg-black px-3 py-1.5 text-sm text-white"
-            >
-              Admin
-            </Link>
-          )}
         </nav>
 
         <div className="flex items-center gap-3">
+          <ThemeToggle surface="light" />
           {isBuyer && (
             <>
               <Link href="/messages">
@@ -121,30 +134,58 @@ export default function AppHeader({ variant }: AppHeaderProps) {
                 </Button>
               </Link>
 
-              <Link href="/seller">
-                <Button variant="outline">Become a Seller</Button>
+              <Link href="/mybarn/onboard">
+                <Button className="btn-brand-green border-0">
+                  Create Your Barn
+                </Button>
               </Link>
             </>
           )}
 
           {isSeller && (
             <>
-              <Link href="/seller/horses/new">
-                <Button>List Horse</Button>
+              <Link href="/mybarn/horses/new">
+                <Button className="btn-brand-green border-0">
+                  List Horse
+                </Button>
               </Link>
-              <Link href="/seller">
-                <Button variant="outline">My Barn</Button>
+              <Link href="/mybarn">
+                <Button variant="outline">
+                  My Barn
+                </Button>
               </Link>
+              <LogoutButton />
             </>
           )}
 
-          {variant === "admin" && (
-            <Link href="/admin">
-              <Button>Admin Panel</Button>
-            </Link>
-          )}
+          {variant === "admin" && <LogoutButton />}
+
+          {isBuyer && <LogoutButton />}
         </div>
       </div>
     </header>
   );
+}
+
+function getActiveItem(variant: AppHeaderVariant, pathname: string) {
+  if (variant === "admin") {
+    if (pathname === "/admin") return "admin-overview";
+    if (pathname.startsWith("/admin/barns")) return "admin-barns";
+    if (pathname.startsWith("/admin/horses")) return "admin-horses";
+    if (pathname.startsWith("/admin/billing")) return "admin-billing";
+    if (pathname.startsWith("/admin/users")) return "admin-users";
+    return "admin-overview";
+  }
+
+  if (variant === "seller") {
+    if (pathname === "/dashboard") return "dashboard";
+    if (pathname.startsWith("/marketplace")) return "marketplace";
+    if (pathname.startsWith("/mybarn/messages") || pathname.startsWith("/seller/messages")) return "messages";
+    if (pathname.startsWith("/mybarn/requests") || pathname.startsWith("/seller/requests")) return "requests";
+    if (pathname.startsWith("/mybarn/billing") || pathname.startsWith("/seller/billing")) return "billing";
+    return "mybarn";
+  }
+
+  if (pathname.startsWith("/marketplace")) return "marketplace";
+  return "dashboard";
 }

@@ -1,0 +1,170 @@
+import { headers } from "next/headers";
+import { NextResponse } from "next/server";
+import Stripe from "stripe";
+
+import prisma from "@/lib/db/prisma";
+import { getBillingProductFromPriceId, type BillingCadenceKey } from "@/lib/billing/plans";
+import { getStripe } from "@/lib/stripe";
+
+export const runtime = "nodejs";
+
+export async function POST(req: Request) {
+  const body = await req.text();
+  const signature = (await headers()).get("stripe-signature");
+  const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
+
+  if (!signature || !webhookSecret) {
+    return NextResponse.json({ error: "Missing Stripe webhook configuration." }, { status: 400 });
+  }
+
+  const stripe = getStripe();
+  let event: Stripe.Event;
+
+  try {
+    event = stripe.webhooks.constructEvent(body, signature, webhookSecret);
+  } catch (error) {
+    return NextResponse.json(
+      { error: error instanceof Error ? error.message : "Invalid webhook signature." },
+      { status: 400 }
+    );
+  }
+
+  console.log(`Received Stripe webhook: ${event.type}`);
+
+  if (event.type === "checkout.session.completed") {
+    await handleCheckoutSessionCompleted(event.data.object as Stripe.Checkout.Session);
+  }
+
+  if (
+    event.type === "customer.subscription.created" ||
+    event.type === "customer.subscription.updated" ||
+    event.type === "customer.subscription.deleted"
+  ) {
+    await syncSubscription(event.data.object as Stripe.Subscription);
+  }
+
+  return NextResponse.json({ received: true });
+}
+
+async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session) {
+  if (session.mode === "payment") {
+    await syncExtraHorsePurchase(session);
+    return;
+  }
+
+  const subscription = await loadSubscriptionFromCheckoutSession(session);
+
+  if (subscription) {
+    await syncSubscription(subscription);
+  }
+}
+
+async function loadSubscriptionFromCheckoutSession(session: Stripe.Checkout.Session) {
+  if (!session.subscription) {
+    return null;
+  }
+
+  const stripe = getStripe();
+  return stripe.subscriptions.retrieve(String(session.subscription));
+}
+
+function getActivationProductFromSubscriptionMetadata(subscription: Stripe.Subscription) {
+  const billingKind = subscription.metadata?.billingKind;
+  const cadence = subscription.metadata?.cadence;
+
+  if (billingKind !== "ACTIVATION") {
+    return null;
+  }
+
+  if (cadence === "MONTHLY" || cadence === "YEARLY") {
+    return {
+      kind: "ACTIVATION" as const,
+      cadence: cadence as BillingCadenceKey,
+    };
+  }
+
+  return null;
+}
+
+async function syncSubscription(subscription: Stripe.Subscription) {
+  const priceId = subscription.items.data[0]?.price.id || null;
+  const metadataProduct = getActivationProductFromSubscriptionMetadata(subscription);
+  const product = metadataProduct || (await getBillingProductFromPriceId(priceId));
+
+  if (!product || product.kind !== "ACTIVATION") {
+    return;
+  }
+
+  const customerId = String(subscription.customer);
+
+  await prisma.sellerProfile.updateMany({
+    where: {
+      stripeCustomerId: customerId,
+    },
+    data: {
+      plan: "ACTIVATION",
+      billingCadence: product.cadence,
+      stripeSubscriptionId: subscription.id,
+      stripePriceId: priceId,
+      billingStatus: mapStripeStatus(subscription.status),
+      currentPeriodEndsAt: subscription.items.data[0]?.current_period_end
+        ? new Date(subscription.items.data[0].current_period_end * 1000)
+        : null,
+      trialEndsAt: subscription.trial_end ? new Date(subscription.trial_end * 1000) : null,
+      canceledAt: subscription.canceled_at ? new Date(subscription.canceled_at * 1000) : null,
+    },
+  });
+}
+
+async function syncExtraHorsePurchase(session: Stripe.Checkout.Session) {
+  if (session.payment_status !== "paid") {
+    return;
+  }
+
+  const sellerProfileId = session.metadata?.sellerProfileId;
+  const quantity = Number(session.metadata?.quantity || 0);
+
+  if (!sellerProfileId || !Number.isFinite(quantity) || quantity <= 0) {
+    return;
+  }
+
+  await prisma.barnHorseSlotLedger.upsert({
+    where: {
+      stripeCheckoutSessionId: session.id,
+    },
+    update: {
+      quantity,
+      stripePaymentIntentId:
+        typeof session.payment_intent === "string" ? session.payment_intent : null,
+      note: "Stripe extra horse purchase",
+    },
+    create: {
+      sellerProfileId,
+      quantity,
+      source: "STRIPE_PURCHASE",
+      stripeCheckoutSessionId: session.id,
+      stripePaymentIntentId:
+        typeof session.payment_intent === "string" ? session.payment_intent : null,
+      note: "Stripe extra horse purchase",
+    },
+  });
+}
+
+function mapStripeStatus(status: Stripe.Subscription.Status) {
+  switch (status) {
+    case "active":
+      return "ACTIVE";
+    case "trialing":
+      return "TRIALING";
+    case "incomplete_expired":
+      return "EXPIRED";
+    case "past_due":
+    case "unpaid":
+    case "paused":
+      return "PAST_DUE";
+    case "canceled":
+      return "CANCELED";
+    default:
+      return "INCOMPLETE";
+  }
+}

@@ -54,21 +54,21 @@ export default function MarketplaceFilters({
   }
 
   return (
-    <div className="rounded-3xl border border-stone-200 bg-white p-5 shadow-sm">
+    <div className="rounded-3xl border border-[color:var(--border)] bg-[color:var(--card)] p-5 shadow-[var(--shadow-card)]">
       <div className="grid gap-4 md:grid-cols-3">
         <div>
-          <label className="mb-2 block text-sm font-medium text-stone-700">
+          <label className="mb-2 block text-sm font-medium text-[color:var(--foreground-soft)]">
             Organization
           </label>
           <Input
-            placeholder="Seller name"
+            placeholder="Barn name"
             value={org}
             onChange={(e) => setOrg(e.target.value)}
           />
         </div>
 
         <div>
-          <label className="mb-2 block text-sm font-medium text-stone-700">
+          <label className="mb-2 block text-sm font-medium text-[color:var(--foreground-soft)]">
             Breed
           </label>
           <Input
@@ -79,7 +79,7 @@ export default function MarketplaceFilters({
         </div>
 
         <div>
-          <label className="mb-2 block text-sm font-medium text-stone-700">
+          <label className="mb-2 block text-sm font-medium text-[color:var(--foreground-soft)]">
             Max price
           </label>
           <Input

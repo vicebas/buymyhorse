@@ -141,7 +141,7 @@ export default function RequestActionButtons({
       </div>
 
       <div>
-        <p className="mb-2 text-sm font-medium text-stone-900">Seller note</p>
+        <p className="mb-2 text-sm font-medium text-stone-900">Barn note</p>
         <Textarea
           value={note}
           onChange={(e) => setNote(e.target.value)}

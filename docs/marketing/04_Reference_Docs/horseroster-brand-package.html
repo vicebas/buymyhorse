@@ -1,0 +1,1885 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HorseRoster — Production Brand Package</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,200;0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;0,9..40,800;1,9..40,300;1,9..40,400&family=DM+Serif+Display:ital@0;1&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════════════
+   RESET + TOKENS
+═══════════════════════════════════════════ */
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+
+:root {
+  --navy:      #0F2A44;
+  --navy-mid:  #1A3B5A;
+  --navy-dark: #091C2E;
+  --sand:      #E9E3D8;
+  --sand-lt:   #F0EBE2;
+  --green:     #2D5438;
+  --green-lt:  #3A6847;
+  --charcoal:  #2B2B2B;
+  --offwhite:  #F8F6F2;
+  --white:     #FFFFFF;
+  --mid:       #8A9099;
+  --mid-lt:    #B8BEC6;
+  --rule:      rgba(15,42,68,0.1);
+  --rule-lt:   rgba(15,42,68,0.06);
+
+  --f-sans:  'DM Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  --f-serif: 'DM Serif Display', Georgia, serif;
+  --f-mono:  'IBM Plex Mono', 'Courier New', monospace;
+}
+
+html { scroll-behavior:smooth; }
+body {
+  font-family: var(--f-sans);
+  background: var(--offwhite);
+  color: var(--charcoal);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ═══════════════════════════════════════════
+   SHARED COMPONENTS
+═══════════════════════════════════════════ */
+.pg { max-width: 1160px; margin: 0 auto; padding: 0 48px; }
+
+.chapter {
+  padding: 72px 0 0;
+}
+.chapter-header {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 40px;
+  padding-bottom: 18px;
+  border-bottom: 1px solid var(--rule);
+}
+.chapter-num {
+  font-family: var(--f-mono);
+  font-size: 11px;
+  color: var(--mid-lt);
+  letter-spacing: 0.06em;
+  flex-shrink: 0;
+}
+.chapter-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--navy);
+  letter-spacing: -0.03em;
+}
+.chapter-desc {
+  font-size: 12px;
+  color: var(--mid);
+  max-width: 300px;
+  text-align: right;
+  line-height: 1.5;
+}
+
+.label-xs {
+  font-family: var(--f-mono);
+  font-size: 9px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--mid);
+  display: block;
+}
+.label-xs.light { color: rgba(233,227,216,0.35); }
+.label-xs.green { color: var(--green); }
+
+/* card-style cells */
+.cell {
+  background: var(--white);
+  position: relative;
+  min-width: 0; /* prevent grid blowout */
+}
+.cell.dark   { background: var(--navy); }
+.cell.darker { background: var(--navy-dark); }
+.cell.sand   { background: var(--sand-lt); }
+.cell.offwhite { background: var(--offwhite); }
+.cell.green-bg { background: var(--green); }
+
+/* grids */
+.g2 { display:grid; grid-template-columns:1fr 1fr; gap:2px; background:var(--rule); }
+.g3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:2px; background:var(--rule); }
+.g4 { display:grid; grid-template-columns:repeat(4,1fr); gap:2px; background:var(--rule); }
+.g2>*,.g3>*,.g4>* { min-width:0; overflow:hidden; }
+
+/* ═══════════════════════════════════════════
+   THE WORDMARK (Direction A)
+   Bold "Horse" + Light "Roster"
+═══════════════════════════════════════════ */
+.wm {
+  font-family: var(--f-sans);
+  letter-spacing: -0.04em;
+  line-height: 1;
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0;
+  max-width: 100%;
+}
+.wm-bold  { font-weight: 300; }
+.wm-light { font-weight: 800; }
+
+/* color variants */
+.wm-navy   { color: var(--navy); }
+.wm-cream   { color: var(--sand); }
+.wm-white  { color: var(--white); }
+.wm-black   { color: #000; }
+
+/* sizes */
+.wm-72 { font-size: 72px; }
+.wm-56 { font-size: 56px; }
+.wm-48 { font-size: 48px; }
+.wm-36 { font-size: 36px; }
+.wm-28 { font-size: 28px; }
+.wm-22 { font-size: 22px; }
+.wm-18 { font-size: 18px; }
+.wm-14 { font-size: 14px; }
+.wm-12 { font-size: 12px; }
+
+/* ═══════════════════════════════════════════
+   THE H ICON (Direction B)
+   Geometric H with green crossbar
+═══════════════════════════════════════════ */
+.icon-wrap svg { display: block; }
+
+/* ═══════════════════════════════════════════
+   COVER
+═══════════════════════════════════════════ */
+.cover {
+  background: var(--navy-dark);
+  min-height: 480px;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+}
+.cover-noise {
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+  opacity: 0.4;
+}
+.cover-glow {
+  position: absolute;
+  width: 600px; height: 600px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(45,84,56,0.2) 0%, transparent 70%);
+  top: -100px; right: -100px;
+  pointer-events: none;
+}
+.cover-glow2 {
+  position: absolute;
+  width: 400px; height: 400px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(15,42,68,0.8) 0%, transparent 70%);
+  bottom: -50px; left: -50px;
+  pointer-events: none;
+}
+.cover-inner {
+  position: relative;
+  z-index: 2;
+  padding: 64px;
+}
+.cover-eyebrow {
+  font-family: var(--f-mono);
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  color: rgba(233,227,216,0.35);
+  margin-bottom: 32px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.cover-eyebrow::before {
+  content: '';
+  display: block;
+  width: 24px;
+  height: 1px;
+  background: rgba(233,227,216,0.25);
+}
+.cover-logo-area {
+  margin-bottom: 48px;
+}
+.cover-meta-row {
+  display: flex;
+  gap: 40px;
+  padding-top: 32px;
+  border-top: 1px solid rgba(233,227,216,0.08);
+}
+.cover-meta-item p:first-child {
+  font-family: var(--f-mono);
+  font-size: 9px;
+  letter-spacing: 0.15em;
+  color: rgba(233,227,216,0.25);
+  margin-bottom: 4px;
+}
+.cover-meta-item p:last-child {
+  font-size: 12px;
+  color: rgba(233,227,216,0.5);
+}
+.cover-version {
+  position: absolute;
+  top: 40px;
+  right: 64px;
+  font-family: var(--f-mono);
+  font-size: 10px;
+  color: rgba(233,227,216,0.2);
+  letter-spacing: 0.1em;
+  z-index: 2;
+}
+
+/* ═══════════════════════════════════════════
+   §1 LOGO SYSTEM
+═══════════════════════════════════════════ */
+.logo-showcase-cell {
+  padding: 48px 44px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 180px;
+  min-width: 0;
+  overflow: hidden;
+}
+.lsc-bottom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 24px;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+/* Stacked wordmark */
+.wm-stacked {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+.wm-stacked-horse {
+  font-family: var(--f-sans);
+  font-weight: 300;
+  letter-spacing: -0.04em;
+  line-height: 0.95;
+}
+.wm-stacked-roster {
+  font-family: var(--f-sans);
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  line-height: 0.95;
+}
+.wm-stacked-rule {
+  height: 1.5px;
+  margin: 8px 0 6px;
+  background: currentColor;
+  opacity: 0.15;
+}
+.wm-stacked-tag {
+  font-family: var(--f-sans);
+  font-size: 9px;
+  font-weight: 500;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  opacity: 0.38;
+}
+
+/* Monogram */
+.monogram-block {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+}
+.monogram-text {
+  font-family: var(--f-sans);
+  font-weight: 800;
+  letter-spacing: -0.06em;
+  line-height: 1;
+}
+
+/* ═══════════════════════════════════════════
+   §2 EQUITAG PATCH
+═══════════════════════════════════════════ */
+.patch-stage {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 80px 60px;
+  min-height: 480px;
+}
+
+/* Saddle pad simulation */
+.saddle-pad {
+  border-radius: 120px 120px 60px 60px;
+  position: relative;
+  width: min(340px, 100%);
+  height: 280px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: flex-start;
+  padding: 0 0 24px 24px;
+}
+.saddle-pad-inner {
+  position: absolute;
+  inset: 14px;
+  border-radius: 110px 110px 50px 50px;
+  border: 1.5px solid rgba(255,255,255,0.08);
+}
+.saddle-pad-light {
+  background: linear-gradient(160deg, #DCDAD5 0%, #C8C4BC 100%);
+  box-shadow: 0 24px 64px rgba(0,0,0,0.18), inset 0 1px 0 rgba(255,255,255,0.4);
+}
+.saddle-pad-dark {
+  background: linear-gradient(160deg, #1E1E1E 0%, #111111 100%);
+  box-shadow: 0 24px 64px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.05);
+}
+
+/* The actual patch */
+.equitag-patch {
+  position: relative;
+  z-index: 2;
+  width: 100px;
+  height: 100px;
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  padding: 9px 8px 8px;
+}
+.etp-navy {
+  background: var(--navy);
+  box-shadow: 0 6px 24px rgba(9,28,46,0.5), 0 1px 3px rgba(9,28,46,0.3);
+}
+.etp-cream {
+  background: var(--sand-lt);
+  box-shadow: 0 6px 24px rgba(0,0,0,0.15), 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.patch-top-row {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  width: 100%;
+}
+.patch-qr-area {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.patch-qr-bg {
+  background: white;
+  border-radius: 3px;
+  padding: 4px;
+  width: 66px;
+  height: 82px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.patch-bottom {
+  font-family: var(--f-mono);
+  font-size: 6px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  text-align: center;
+}
+
+/* ═══════════════════════════════════════════
+   §3 APP ICON
+═══════════════════════════════════════════ */
+.app-icon-grid {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  padding: 44px 48px;
+}
+.app-icon-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+.app-icon-wrap {
+  border-radius: calc(var(--sz) * 0.225);
+  width: var(--sz);
+  height: var(--sz);
+  background: var(--navy);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+}
+.app-icon-wrap::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(255,255,255,0.07) 0%, transparent 60%);
+  border-radius: inherit;
+}
+.app-icon-size-label {
+  font-family: var(--f-mono);
+  font-size: 9px;
+  color: var(--mid);
+  letter-spacing: 0.1em;
+  text-align: center;
+}
+
+/* ═══════════════════════════════════════════
+   §4 WEBSITE HEADER MOCKUP
+═══════════════════════════════════════════ */
+.browser-chrome {
+  background: #E8E8E8;
+  border-radius: 8px 8px 0 0;
+  padding: 10px 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.browser-dots { display: flex; gap: 5px; }
+.browser-dot {
+  width: 10px; height: 10px;
+  border-radius: 50%;
+}
+.browser-url {
+  flex: 1;
+  background: white;
+  border-radius: 4px;
+  padding: 4px 12px;
+  font-family: var(--f-mono);
+  font-size: 10px;
+  color: var(--mid);
+  max-width: 320px;
+  margin: 0 auto;
+}
+
+.site-header {
+  background: rgba(255,255,255,0.96);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--rule-lt);
+  padding: 0 40px;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.site-nav {
+  display: flex;
+  align-items: center;
+  gap: 28px;
+}
+.site-nav a {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--charcoal);
+  text-decoration: none;
+  opacity: 0.7;
+  transition: opacity 0.15s;
+}
+.site-nav-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.btn-ghost {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--navy);
+  padding: 7px 16px;
+  border: 1.5px solid var(--rule);
+  border-radius: 5px;
+  cursor: pointer;
+  background: transparent;
+}
+.btn-primary {
+  font-size: 13px;
+  font-weight: 600;
+  color: white;
+  padding: 8px 18px;
+  background: var(--navy);
+  border-radius: 5px;
+  cursor: pointer;
+  border: none;
+  letter-spacing: -0.01em;
+}
+.site-hero {
+  background: var(--offwhite);
+  padding: 64px 40px 56px;
+}
+.site-hero-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(45,84,56,0.08);
+  color: var(--green);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  padding: 4px 10px;
+  border-radius: 20px;
+  margin-bottom: 20px;
+}
+.site-hero-badge::before {
+  content: '';
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--green);
+}
+.site-hero h1 {
+  font-family: var(--f-sans);
+  font-size: 48px;
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  color: var(--navy);
+  line-height: 1.0;
+  margin-bottom: 16px;
+  max-width: 520px;
+}
+.site-hero h1 em {
+  font-style: normal;
+  color: var(--green);
+}
+.site-hero p {
+  font-size: 16px;
+  color: var(--mid);
+  line-height: 1.65;
+  max-width: 440px;
+  margin-bottom: 32px;
+}
+.site-hero-cta {
+  display: flex;
+  gap: 12px;
+}
+.cta-primary {
+  background: var(--navy);
+  color: white;
+  font-size: 14px;
+  font-weight: 600;
+  padding: 12px 24px;
+  border-radius: 6px;
+  cursor: pointer;
+  letter-spacing: -0.01em;
+}
+.cta-secondary {
+  background: transparent;
+  color: var(--navy);
+  font-size: 14px;
+  font-weight: 500;
+  padding: 12px 24px;
+  border-radius: 6px;
+  cursor: pointer;
+  border: 1.5px solid rgba(15,42,68,0.2);
+}
+.site-stats {
+  display: flex;
+  gap: 40px;
+  margin-top: 48px;
+  padding-top: 32px;
+  border-top: 1px solid var(--rule);
+}
+.site-stat strong {
+  display: block;
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  color: var(--navy);
+}
+.site-stat span {
+  font-size: 12px;
+  color: var(--mid);
+}
+
+/* ═══════════════════════════════════════════
+   §5 SOCIAL MEDIA
+═══════════════════════════════════════════ */
+
+/* Instagram profile */
+.ig-profile {
+  background: white;
+  padding: 32px;
+  font-family: -apple-system, 'San Francisco', 'Helvetica Neue', sans-serif;
+}
+.ig-header {
+  display: flex;
+  gap: 40px;
+  align-items: flex-start;
+  margin-bottom: 20px;
+}
+.ig-avatar-ring {
+  width: 86px; height: 86px;
+  border-radius: 50%;
+  padding: 2.5px;
+  background: linear-gradient(45deg,#f09433,#e6683c,#dc2743,#cc2366,#bc1888);
+  flex-shrink: 0;
+}
+.ig-avatar-inner {
+  width: 100%; height: 100%;
+  border-radius: 50%;
+  background: var(--navy);
+  border: 3px solid white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.ig-info { flex: 1; }
+.ig-username {
+  font-size: 18px;
+  font-weight: 400;
+  color: #262626;
+  margin-bottom: 12px;
+}
+.ig-stats-row {
+  display: flex;
+  gap: 28px;
+  margin-bottom: 12px;
+}
+.ig-stat { text-align: center; }
+.ig-stat strong { display: block; font-size: 14px; font-weight: 600; color: #262626; }
+.ig-stat span { font-size: 12px; color: #8e8e8e; }
+.ig-bio-name { font-size: 13px; font-weight: 600; color: #262626; }
+.ig-bio-text { font-size: 13px; color: #262626; line-height: 1.5; }
+.ig-link { font-size: 13px; color: #00376B; }
+
+/* Social post template */
+.social-post {
+  background: var(--navy);
+  aspect-ratio: 1;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+.post-bg-pattern {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 80% 60% at 110% 0%, rgba(45,84,56,0.25) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 80% at -10% 100%, rgba(233,227,216,0.04) 0%, transparent 50%);
+}
+.post-content {
+  position: relative;
+  z-index: 2;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 28px;
+}
+.post-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: auto;
+}
+.post-body { margin-bottom: 20px; }
+.post-tag {
+  background: var(--green);
+  color: white;
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  padding: 4px 8px;
+  border-radius: 3px;
+  display: inline-block;
+  margin-bottom: 12px;
+}
+.post-headline {
+  font-size: 26px;
+  font-weight: 800;
+  color: var(--sand);
+  letter-spacing: -0.03em;
+  line-height: 1.1;
+}
+.post-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 16px;
+  border-top: 1px solid rgba(233,227,216,0.12);
+}
+
+/* Listing card */
+.listing-card {
+  background: white;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(15,42,68,0.08), 0 1px 2px rgba(15,42,68,0.05);
+}
+.listing-photo {
+  height: 180px;
+  background: linear-gradient(160deg, #D8D4CC 0%, #C4BFB5 100%);
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+.listing-photo-label {
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  color: rgba(15,42,68,0.3);
+  font-weight: 500;
+}
+.listing-badge {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  background: var(--green);
+  color: white;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  padding: 3px 8px;
+  border-radius: 3px;
+}
+.listing-equitag {
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+  background: rgba(9,28,46,0.7);
+  backdrop-filter: blur(4px);
+  padding: 5px 7px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.listing-info { padding: 16px; }
+.listing-name {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--navy);
+  letter-spacing: -0.025em;
+  margin-bottom: 3px;
+}
+.listing-meta {
+  font-size: 11px;
+  color: var(--mid);
+  margin-bottom: 10px;
+}
+.listing-tags {
+  display: flex;
+  gap: 5px;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+}
+.listing-tag {
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 3px 7px;
+  border-radius: 3px;
+}
+.lt-sand   { background: var(--sand-lt); color: var(--navy); }
+.lt-green  { background: rgba(45,84,56,0.1); color: var(--green); }
+.lt-navy   { background: rgba(15,42,68,0.08); color: var(--navy); }
+.listing-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 10px;
+  border-top: 1px solid var(--rule-lt);
+}
+.listing-price {
+  font-size: 17px;
+  font-weight: 800;
+  color: var(--navy);
+  letter-spacing: -0.03em;
+}
+.listing-price-sub {
+  font-size: 10px;
+  color: var(--mid);
+  font-weight: 400;
+}
+.listing-cta {
+  background: var(--navy);
+  color: white;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 6px 14px;
+  border-radius: 4px;
+  cursor: pointer;
+  letter-spacing: -0.01em;
+}
+
+/* ═══════════════════════════════════════════
+   §6 BRAND RULES
+═══════════════════════════════════════════ */
+.rules-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2px;
+  background: var(--rule);
+}
+.rule-cell {
+  background: white;
+  padding: 28px 32px;
+  min-width: 0;
+  overflow: hidden;
+}
+.rule-cell h3 {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--navy);
+  letter-spacing: -0.02em;
+  margin-bottom: 6px;
+  margin-top: 16px;
+}
+.rule-cell h3:first-of-type { margin-top: 0; }
+.rule-cell p {
+  font-size: 12px;
+  color: var(--mid);
+  line-height: 1.65;
+}
+
+/* Clearspace demo */
+.clearspace-demo {
+  border: 1.5px dashed rgba(45,84,56,0.3);
+  padding: 24px;
+  display: inline-flex;
+  position: relative;
+  margin: 20px 0;
+}
+.cs-arrow {
+  position: absolute;
+  font-family: var(--f-mono);
+  font-size: 8px;
+  color: var(--green);
+  letter-spacing: 0.1em;
+}
+.cs-top    { top: 4px; left: 50%; transform: translateX(-50%); }
+.cs-bottom { bottom: 4px; left: 50%; transform: translateX(-50%); }
+.cs-left   { left: 4px; top: 50%; transform: translateY(-50%) rotate(-90deg); }
+.cs-right  { right: 4px; top: 50%; transform: translateY(-50%) rotate(90deg); }
+
+/* Color combos */
+.combo-row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
+.combo-chip {
+  width: 40px; height: 40px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  position: relative;
+}
+.combo-chip::after {
+  content: attr(data-check);
+  position: absolute;
+  bottom: -14px;
+  font-size: 9px;
+}
+
+/* Do/don't */
+.do-dont { display: flex; flex-direction: column; gap: 6px; margin-top: 12px; }
+.do-item, .dont-item {
+  font-size: 12px;
+  padding-left: 16px;
+  position: relative;
+  line-height: 1.5;
+}
+.do-item::before { content: '✓'; position: absolute; left: 0; color: var(--green); font-weight: 700; }
+.dont-item::before { content: '×'; position: absolute; left: 0; color: #C0392B; font-weight: 700; }
+.dont-item { color: #C0392B; text-decoration: line-through; opacity: 0.7; }
+
+/* ═══════════════════════════════════════════
+   COLOR PALETTE SECTION
+═══════════════════════════════════════════ */
+.palette-row {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 2px;
+  background: var(--rule);
+}
+.palette-swatch {
+  padding: 20px 16px 16px;
+  background: var(--white);
+  min-width: 0;
+  overflow: hidden;
+}
+.ps-color { height: 52px; border-radius: 3px; margin-bottom: 12px; }
+.ps-name  { font-size: 13px; font-weight: 700; color: var(--navy); }
+.ps-hex   { font-family: var(--f-mono); font-size: 11px; color: var(--mid); margin-top: 2px; }
+.ps-role  { font-size: 11px; color: var(--mid); margin-top: 4px; line-height: 1.4; }
+
+/* ═══════════════════════════════════════════
+   FOOTER
+═══════════════════════════════════════════ */
+.doc-footer {
+  padding: 40px 0 72px;
+  margin-top: 80px;
+  border-top: 1px solid var(--rule);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.doc-footer p { font-size: 11px; color: var(--mid-lt); }
+
+/* ═══════════════════════════════════════════
+   SVG HELPERS (inlined H icon)
+═══════════════════════════════════════════ */
+.h-icon-svg { display: block; }
+
+/* ═══════════════════════════════════════════
+   RESPONSIVE
+═══════════════════════════════════════════ */
+@media (max-width: 1100px) {
+  .g3 { grid-template-columns: 1fr 1fr; }
+  .logo-grid { grid-template-columns: 1fr 1fr; }
+}
+@media (max-width: 1000px) {
+  .pg { padding: 0 32px; }
+  .g3 { grid-template-columns: 1fr 1fr; }
+  .chapter-desc { display: none; }
+  .palette-row { grid-template-columns: repeat(3, 1fr); }
+}
+@media (max-width: 720px) {
+  .pg { padding: 0 20px; }
+  .g2, .g3, .g4 { grid-template-columns: 1fr; }
+  .palette-row { grid-template-columns: 1fr 1fr; }
+  .rules-grid { grid-template-columns: 1fr; }
+  .cover-inner { padding: 32px; }
+  .chapter { padding: 56px 0 0; }
+  .site-hero h1 { font-size: 36px; }
+  .site-nav { display: none; }
+}
+</style>
+</head>
+<body>
+
+<!-- ════════════════════════════════════════════════
+     COVER PAGE
+════════════════════════════════════════════════ -->
+<div class="cover">
+  <div class="cover-noise"></div>
+  <div class="cover-glow"></div>
+  <div class="cover-glow2"></div>
+  <span class="cover-version">BRAND PACKAGE — v1.0</span>
+  <div class="cover-inner pg">
+    <div class="cover-eyebrow">Production Brand Asset Package</div>
+    <div class="cover-logo-area">
+      <!-- Full lockup: H icon + wordmark -->
+      <div style="display:flex; align-items:center; gap:14px; overflow:hidden; min-width:0;">
+        <svg width="52" height="52" viewBox="0 0 72 72" fill="none" style="flex-shrink:0;">
+          <rect width="72" height="72" rx="14" fill="#0F2A44"/>
+          <rect x="0" y="0" width="72" height="72" rx="14" fill="url(#icongrad)"/>
+          <defs>
+            <linearGradient id="icongrad" x1="0" y1="0" x2="72" y2="72">
+              <stop offset="0%" stop-color="#1A3B5A"/>
+              <stop offset="100%" stop-color="#0A1E30"/>
+            </linearGradient>
+          </defs>
+          <!-- Left bar -->
+          <rect x="15" y="13" width="10" height="46" rx="2.5" fill="#E9E3D8"/>
+          <!-- Right bar -->
+          <rect x="47" y="13" width="10" height="46" rx="2.5" fill="#E9E3D8"/>
+          <!-- Crossbar — green -->
+          <rect x="25" y="30" width="22" height="12" rx="2.5" fill="#2D5438"/>
+        </svg>
+        <div style="display:flex; align-items:baseline; min-width:0; overflow:hidden;">
+          <span style="font-family:'DM Sans',sans-serif; font-size:clamp(28px,4.5vw,52px); font-weight:300; color:#E9E3D8; letter-spacing:-0.04em; line-height:1; white-space:nowrap;">Horse</span>
+          <span style="font-family:'DM Sans',sans-serif; font-size:clamp(28px,4.5vw,52px); font-weight:800; color:#E9E3D8; letter-spacing:-0.04em; line-height:1; white-space:nowrap;">Roster</span>
+        </div>
+      </div>
+      <p style="font-size:16px; color:rgba(233,227,216,0.35); margin-top:16px; font-weight:300; letter-spacing:0.04em;">Find your next horse.</p>
+    </div>
+    <div class="cover-meta-row" style="flex-wrap:wrap; gap:16px 32px;">
+      <div class="cover-meta-item"><p>Direction</p><p>A (Wordmark) + B (Icon) — Finalised</p></div>
+      <div class="cover-meta-item"><p>Products</p><p>HorseRoster · EquiTag · EquiVault</p></div>
+      <div class="cover-meta-item"><p>Markets</p><p>Wellington · Europe · Global Sport Horse</p></div>
+      <div class="cover-meta-item"><p>Formats</p><p>SVG · PNG · App Icon · Favicon · Social</p></div>
+    </div>
+  </div>
+</div>
+
+<div class="pg">
+
+<!-- ════════════════════════════════════════════════
+     §1 — LOGO SYSTEM
+════════════════════════════════════════════════ -->
+<div class="chapter">
+  <div class="chapter-header">
+    <span class="chapter-num">01</span>
+    <h2 class="chapter-title">Logo System</h2>
+    <p class="chapter-desc">Direction A wordmark + Direction B icon. The complete mark family across all use contexts.</p>
+  </div>
+
+  <!-- 1A: Primary horizontal -->
+  <div style="background:var(--rule); display:grid; grid-template-columns:1fr 1fr; gap:2px; margin-bottom:2px;">
+
+    <div class="cell logo-showcase-cell" style="background:#fff; min-height:220px;">
+      <div style="display:flex; align-items:center; gap:12px; overflow:hidden; min-width:0;">
+        <svg width="44" height="44" viewBox="0 0 72 72" fill="none">
+          <rect width="72" height="72" rx="12" fill="#0F2A44"/>
+          <rect x="15" y="13" width="10" height="46" rx="2.5" fill="#E9E3D8"/>
+          <rect x="47" y="13" width="10" height="46" rx="2.5" fill="#E9E3D8"/>
+          <rect x="25" y="30" width="22" height="12" rx="2.5" fill="#2D5438"/>
+        </svg>
+        <div style="display:flex; align-items:baseline;">
+          <span class="wm wm-bold wm-navy" style="font-size:clamp(22px,3.2vw,42px); letter-spacing:-0.04em;">Horse</span>
+          <span class="wm wm-light wm-navy" style="font-size:clamp(22px,3.2vw,42px); letter-spacing:-0.04em;">Roster</span>
+        </div>
+      </div>
+      <div class="lsc-bottom">
+        <span class="label-xs">Primary — Icon + Wordmark Lockup</span>
+        <span class="label-xs">Light backgrounds</span>
+      </div>
+    </div>
+
+    <div class="cell logo-showcase-cell dark" style="min-height:220px;">
+      <div style="display:flex; align-items:center; gap:12px; overflow:hidden; min-width:0;">
+        <svg width="44" height="44" viewBox="0 0 72 72" fill="none">
+          <rect width="72" height="72" rx="12" fill="#1A3B5A"/>
+          <rect x="15" y="13" width="10" height="46" rx="2.5" fill="#E9E3D8"/>
+          <rect x="47" y="13" width="10" height="46" rx="2.5" fill="#E9E3D8"/>
+          <rect x="25" y="30" width="22" height="12" rx="2.5" fill="#2D5438"/>
+        </svg>
+        <div style="display:flex; align-items:baseline;">
+          <span class="wm wm-bold wm-cream" style="font-size:clamp(22px,3.2vw,42px); letter-spacing:-0.04em;">Horse</span>
+          <span class="wm wm-light wm-cream" style="font-size:clamp(22px,3.2vw,42px); letter-spacing:-0.04em;">Roster</span>
+        </div>
+      </div>
+      <div class="lsc-bottom">
+        <span class="label-xs light">Primary — Reversed</span>
+        <span class="label-xs light">Dark backgrounds</span>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- 1B: Wordmark only variants -->
+  <div class="g3" style="margin-bottom:2px;">
+    <div class="cell logo-showcase-cell" style="background:#fff; padding:40px;">
+      <div style="display:flex; align-items:baseline;">
+        <span class="wm wm-bold wm-navy" style="font-size:clamp(18px,2.6vw,32px); letter-spacing:-0.04em;">Horse</span>
+        <span class="wm wm-light wm-navy" style="font-size:clamp(18px,2.6vw,32px); letter-spacing:-0.04em;">Roster</span>
+      </div>
+      <div class="lsc-bottom" style="margin-top:20px;">
+        <span class="label-xs">Wordmark Only — Navy</span>
+      </div>
+    </div>
+    <div class="cell logo-showcase-cell dark" style="padding:40px;">
+      <div style="display:flex; align-items:baseline;">
+        <span class="wm wm-bold wm-cream" style="font-size:clamp(18px,2.6vw,32px); letter-spacing:-0.04em;">Horse</span>
+        <span class="wm wm-light wm-cream" style="font-size:clamp(18px,2.6vw,32px); letter-spacing:-0.04em;">Roster</span>
+      </div>
+      <div class="lsc-bottom" style="margin-top:20px;">
+        <span class="label-xs light">Wordmark Only — Cream</span>
+      </div>
+    </div>
+    <div class="cell logo-showcase-cell" style="background:#0A1E30; padding:40px;">
+      <div style="display:flex; align-items:baseline;">
+        <span class="wm wm-bold wm-white" style="font-size:clamp(18px,2.6vw,32px); letter-spacing:-0.04em;">Horse</span>
+        <span class="wm wm-light wm-white" style="font-size:clamp(18px,2.6vw,32px); letter-spacing:-0.04em;">Roster</span>
+      </div>
+      <div class="lsc-bottom" style="margin-top:20px;">
+        <span class="label-xs light">Wordmark Only — White</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 1C: Stacked + Monogram side by side -->
+  <div class="g3" style="margin-bottom:2px;">
+
+    <!-- Stacked light -->
+    <div class="cell" style="padding:48px 44px;">
+      <div class="wm-stacked" style="color:var(--navy);">
+        <span class="wm-stacked-horse" style="font-size:clamp(28px,4vw,48px);">Horse</span>
+        <span class="wm-stacked-roster" style="font-size:clamp(28px,4vw,48px);">Roster</span>
+        <div class="wm-stacked-rule"></div>
+        <span class="wm-stacked-tag">Find your next horse</span>
+      </div>
+      <div style="margin-top:28px;"><span class="label-xs">Stacked — Light</span></div>
+    </div>
+
+    <!-- Stacked dark -->
+    <div class="cell dark" style="padding:48px 44px;">
+      <div class="wm-stacked" style="color:var(--sand);">
+        <span class="wm-stacked-horse" style="font-size:clamp(28px,4vw,48px);">Horse</span>
+        <span class="wm-stacked-roster" style="font-size:clamp(28px,4vw,48px);">Roster</span>
+        <div class="wm-stacked-rule" style="background:var(--sand);"></div>
+        <span class="wm-stacked-tag">Find your next horse</span>
+      </div>
+      <div style="margin-top:28px;"><span class="label-xs light">Stacked — Dark</span></div>
+    </div>
+
+    <!-- Monogram -->
+    <div class="cell" style="padding:48px 44px; background:var(--offwhite);">
+      <div style="display:flex; gap:16px; align-items:flex-end; margin-bottom:28px;">
+        <!-- Navy monogram -->
+        <div>
+          <div class="monogram-block" style="background:var(--navy); width:72px; height:72px;">
+            <span class="monogram-text" style="font-size:30px; color:var(--sand);">HR</span>
+          </div>
+        </div>
+        <!-- Green monogram -->
+        <div>
+          <div class="monogram-block" style="background:var(--green); width:56px; height:56px;">
+            <span class="monogram-text" style="font-size:23px; color:var(--sand);">HR</span>
+          </div>
+        </div>
+        <!-- Circle monogram -->
+        <div>
+          <div style="width:48px; height:48px; border-radius:50%; background:var(--navy); display:flex; align-items:center; justify-content:center;">
+            <span class="monogram-text" style="font-size:19px; color:var(--sand);">HR</span>
+          </div>
+        </div>
+      </div>
+      <span class="label-xs">HR Monogram — Three containers</span>
+    </div>
+
+  </div>
+
+  <!-- 1D: Single color + Green bg -->
+  <div class="g3">
+    <div class="cell" style="padding:40px; background:#F0F0EE;">
+      <div style="display:flex; align-items:baseline;">
+        <span style="font-family:var(--f-sans); font-size:clamp(16px,2.4vw,30px); font-weight:300; color:#000; letter-spacing:-0.04em; line-height:1;">Horse</span>
+        <span style="font-family:var(--f-sans); font-size:clamp(16px,2.4vw,30px); font-weight:800; color:#000; letter-spacing:-0.04em; line-height:1;">Roster</span>
+      </div>
+      <div style="margin-top:16px;"><span class="label-xs">Single colour — Black</span></div>
+    </div>
+    <div class="cell green-bg" style="padding:40px;">
+      <div style="display:flex; align-items:baseline;">
+        <span class="wm wm-bold wm-cream" style="font-size:clamp(16px,2.4vw,30px); letter-spacing:-0.04em;">Horse</span>
+        <span class="wm wm-light wm-cream" style="font-size:clamp(16px,2.4vw,30px); letter-spacing:-0.04em;">Roster</span>
+      </div>
+      <div style="margin-top:16px;"><span class="label-xs light">Hunter Green background</span></div>
+    </div>
+    <div class="cell sand" style="padding:40px;">
+      <div style="display:flex; align-items:center; gap:10px;">
+        <svg width="28" height="28" viewBox="0 0 72 72" fill="none">
+          <rect x="15" y="13" width="10" height="46" rx="2.5" fill="#0F2A44"/>
+          <rect x="47" y="13" width="10" height="46" rx="2.5" fill="#0F2A44"/>
+          <rect x="25" y="30" width="22" height="12" rx="2.5" fill="#2D5438"/>
+        </svg>
+        <div style="display:flex; align-items:baseline;">
+          <span class="wm wm-bold wm-navy" style="font-size:24px; letter-spacing:-1px;">Horse</span>
+          <span class="wm wm-light wm-navy" style="font-size:24px; letter-spacing:-1px;">Roster</span>
+        </div>
+      </div>
+      <div style="margin-top:16px;"><span class="label-xs">Mark only lockup — Sand bg</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════
+     §2 — EQUITAG PATCH
+════════════════════════════════════════════════ -->
+<div class="chapter">
+  <div class="chapter-header">
+    <span class="chapter-num">02</span>
+    <h2 class="chapter-title">EquiTag — Saddle Pad Patch</h2>
+    <p class="chapter-desc">Premium QR patch, worn on the saddle pad. Works embroidered or printed. Scanned to surface the horse's full digital profile.</p>
+  </div>
+
+  <div class="g2" style="margin-bottom:2px;">
+
+    <!-- Light saddle pad version -->
+    <div class="cell">
+      <div class="patch-stage" style="background: linear-gradient(160deg,#ECEAE6 0%,#D8D4CE 100%);">
+        <div style="display:flex; flex-direction:column; align-items:center; gap:20px;">
+          <!-- Saddle pad -->
+          <div class="saddle-pad saddle-pad-light">
+            <div class="saddle-pad-inner"></div>
+            <!-- Patch on pad -->
+            <div class="equitag-patch etp-navy">
+              <div class="patch-top-row">
+                <svg width="13" height="13" viewBox="0 0 72 72" fill="none" style="flex-shrink:0;">
+                  <rect width="72" height="72" rx="14" fill="#1A3B5A"/>
+                  <rect x="15" y="13" width="10" height="46" rx="2.5" fill="#E9E3D8"/>
+                  <rect x="47" y="13" width="10" height="46" rx="2.5" fill="#E9E3D8"/>
+                  <rect x="25" y="30" width="22" height="12" rx="2.5" fill="#2D5438"/>
+                </svg>
+                <span style="font-family:var(--f-sans); font-size:9px; font-weight:300; color:#E9E3D8; letter-spacing:-0.2px;">Horse</span>
+                <span style="font-family:var(--f-sans); font-size:9px; font-weight:800; color:#E9E3D8; letter-spacing:-0.2px;">Roster</span>
+              </div>
+              <div class="patch-qr-area">
+                <div class="patch-qr-bg">
+                  <svg viewBox="0 0 80 80" width="58" height="58" fill="none">
+                    <!-- Finder TL -->
+                    <rect x="2" y="2" width="22" height="22" rx="2" fill="#0F2A44"/>
+                    <rect x="5" y="5" width="16" height="16" rx="1" fill="white"/>
+                    <rect x="8" y="8" width="10" height="10" rx="0.5" fill="#0F2A44"/>
+                    <!-- Finder TR -->
+                    <rect x="56" y="2" width="22" height="22" rx="2" fill="#0F2A44"/>
+                    <rect x="59" y="5" width="16" height="16" rx="1" fill="white"/>
+                    <rect x="62" y="8" width="10" height="10" rx="0.5" fill="#0F2A44"/>
+                    <!-- Finder BL -->
+                    <rect x="2" y="56" width="22" height="22" rx="2" fill="#0F2A44"/>
+                    <rect x="5" y="59" width="16" height="16" rx="1" fill="white"/>
+                    <rect x="8" y="62" width="10" height="10" rx="0.5" fill="#0F2A44"/>
+                    <!-- Data pattern -->
+                    <rect x="28" y="2" width="4" height="4" fill="#0F2A44"/><rect x="34" y="2" width="4" height="4" fill="#0F2A44"/>
+                    <rect x="28" y="8" width="4" height="4" fill="#0F2A44"/><rect x="40" y="8" width="4" height="4" fill="#0F2A44"/><rect x="46" y="8" width="4" height="4" fill="#0F2A44"/>
+                    <rect x="34" y="14" width="4" height="4" fill="#0F2A44"/><rect x="46" y="14" width="4" height="4" fill="#0F2A44"/>
+                    <rect x="28" y="20" width="4" height="4" fill="#0F2A44"/><rect x="40" y="20" width="4" height="4" fill="#0F2A44"/>
+                    <rect x="28" y="28" width="4" height="4" fill="#0F2A44"/><rect x="34" y="28" width="4" height="4" fill="#0F2A44"/><rect x="46" y="28" width="4" height="4" fill="#0F2A44"/>
+                    <rect x="56" y="28" width="4" height="4" fill="#0F2A44"/><rect x="68" y="28" width="4" height="4" fill="#0F2A44"/>
+                    <rect x="2" y="28" width="4" height="4" fill="#0F2A44"/><rect x="14" y="28" width="4" height="4" fill="#0F2A44"/>
+                    <rect x="2" y="34" width="4" height="4" fill="#0F2A44"/><rect x="20" y="34" width="4" height="4" fill="#0F2A44"/><rect x="34" y="34" width="4" height="4" fill="#0F2A44"/><rect x="46" y="34" width="4" height="4" fill="#0F2A44"/><rect x="62" y="34" width="4" height="4" fill="#0F2A44"/>
+                    <rect x="8" y="40" width="4" height="4" fill="#0F2A44"/><rect x="28" y="40" width="4" height="4" fill="#0F2A44"/><rect x="40" y="40" width="4" height="4" fill="#0F2A44"/><rect x="56" y="40" width="4" height="4" fill="#0F2A44"/><rect x="74" y="40" width="4" height="4" fill="#0F2A44"/>
+                    <rect x="2" y="46" width="4" height="4" fill="#0F2A44"/><rect x="14" y="46" width="4" height="4" fill="#0F2A44"/><rect x="34" y="46" width="4" height="4" fill="#0F2A44"/><rect x="52" y="46" width="4" height="4" fill="#0F2A44"/><rect x="68" y="46" width="4" height="4" fill="#0F2A44"/>
+                    <rect x="28" y="56" width="4" height="4" fill="#0F2A44"/><rect x="40" y="56" width="4" height="4" fill="#0F2A44"/><rect x="56" y="56" width="4" height="4" fill="#0F2A44"/><rect x="68" y="56" width="4" height="4" fill="#0F2A44"/>
+                    <rect x="28" y="62" width="4" height="4" fill="#0F2A44"/><rect x="46" y="62" width="4" height="4" fill="#0F2A44"/><rect x="62" y="62" width="4" height="4" fill="#0F2A44"/>
+                    <rect x="34" y="68" width="4" height="4" fill="#0F2A44"/><rect x="46" y="68" width="4" height="4" fill="#0F2A44"/><rect x="56" y="68" width="4" height="4" fill="#0F2A44"/><rect x="74" y="68" width="4" height="4" fill="#0F2A44"/>
+                    <rect x="28" y="74" width="4" height="4" fill="#0F2A44"/><rect x="40" y="74" width="4" height="4" fill="#0F2A44"/><rect x="62" y="74" width="4" height="4" fill="#0F2A44"/>
+                  </svg>
+                </div>
+              </div>
+              <p class="patch-bottom" style="color:rgba(233,227,216,0.4);">SCAN FOR HORSE PROFILE</p>
+            </div>
+          </div>
+          <span style="font-size:11px; color:rgba(15,42,68,0.35); font-weight:500; letter-spacing:0.05em;">Light saddle pad</span>
+        </div>
+      </div>
+      <div style="padding:24px 32px; background:white; border-top:1px solid var(--rule-lt);">
+        <span class="label-xs">EquiTag — Navy patch on light pad</span>
+        <p style="font-size:12px; color:var(--mid); margin-top:6px; line-height:1.6;">Navy #0F2A44 base · Cream marks · White QR field. Works on grey, white, and light tan pads.</p>
+      </div>
+    </div>
+
+    <!-- Dark saddle pad version -->
+    <div class="cell">
+      <div class="patch-stage" style="background: linear-gradient(160deg,#2A2A2A 0%,#141414 100%);">
+        <div style="display:flex; flex-direction:column; align-items:center; gap:20px;">
+          <div class="saddle-pad saddle-pad-dark">
+            <div class="saddle-pad-inner"></div>
+            <div class="equitag-patch etp-cream">
+              <div class="patch-top-row">
+                <svg width="13" height="13" viewBox="0 0 72 72" fill="none" style="flex-shrink:0;">
+                  <rect width="72" height="72" rx="14" fill="#0F2A44"/>
+                  <rect x="15" y="13" width="10" height="46" rx="2.5" fill="#E9E3D8"/>
+                  <rect x="47" y="13" width="10" height="46" rx="2.5" fill="#E9E3D8"/>
+                  <rect x="25" y="30" width="22" height="12" rx="2.5" fill="#2D5438"/>
+                </svg>
+                <span style="font-family:var(--f-sans); font-size:9px; font-weight:300; color:#0F2A44; letter-spacing:-0.2px;">Horse</span>
+                <span style="font-family:var(--f-sans); font-size:9px; font-weight:800; color:#0F2A44; letter-spacing:-0.2px;">Roster</span>
+              </div>
+              <div class="patch-qr-area">
+                <div class="patch-qr-bg" style="background:#F0EBE2;">
+                  <svg viewBox="0 0 80 80" width="58" height="58" fill="none">
+                    <rect x="2" y="2" width="22" height="22" rx="2" fill="#0F2A44"/>
+                    <rect x="5" y="5" width="16" height="16" rx="1" fill="#F0EBE2"/>
+                    <rect x="8" y="8" width="10" height="10" rx="0.5" fill="#0F2A44"/>
+                    <rect x="56" y="2" width="22" height="22" rx="2" fill="#0F2A44"/>
+                    <rect x="59" y="5" width="16" height="16" rx="1" fill="#F0EBE2"/>
+                    <rect x="62" y="8" width="10" height="10" rx="0.5" fill="#0F2A44"/>
+                    <rect x="2" y="56" width="22" height="22" rx="2" fill="#0F2A44"/>
+                    <rect x="5" y="59" width="16" height="16" rx="1" fill="#F0EBE2"/>
+                    <rect x="8" y="62" width="10" height="10" rx="0.5" fill="#0F2A44"/>
+                    <rect x="28" y="2" width="4" height="4" fill="#0F2A44"/><rect x="34" y="2" width="4" height="4" fill="#0F2A44"/>
+                    <rect x="28" y="8" width="4" height="4" fill="#0F2A44"/><rect x="40" y="8" width="4" height="4" fill="#0F2A44"/><rect x="46" y="8" width="4" height="4" fill="#0F2A44"/>
+                    <rect x="34" y="14" width="4" height="4" fill="#0F2A44"/><rect x="46" y="14" width="4" height="4" fill="#0F2A44"/>
+                    <rect x="28" y="20" width="4" height="4" fill="#0F2A44"/><rect x="40" y="20" width="4" height="4" fill="#0F2A44"/>
+                    <rect x="28" y="28" width="4" height="4" fill="#0F2A44"/><rect x="34" y="28" width="4" height="4" fill="#0F2A44"/><rect x="46" y="28" width="4" height="4" fill="#0F2A44"/>
+                    <rect x="56" y="28" width="4" height="4" fill="#0F2A44"/><rect x="68" y="28" width="4" height="4" fill="#0F2A44"/>
+                    <rect x="2" y="28" width="4" height="4" fill="#0F2A44"/><rect x="14" y="28" width="4" height="4" fill="#0F2A44"/>
+                    <rect x="2" y="34" width="4" height="4" fill="#0F2A44"/><rect x="20" y="34" width="4" height="4" fill="#0F2A44"/><rect x="34" y="34" width="4" height="4" fill="#0F2A44"/><rect x="46" y="34" width="4" height="4" fill="#0F2A44"/><rect x="62" y="34" width="4" height="4" fill="#0F2A44"/>
+                    <rect x="8" y="40" width="4" height="4" fill="#0F2A44"/><rect x="28" y="40" width="4" height="4" fill="#0F2A44"/><rect x="40" y="40" width="4" height="4" fill="#0F2A44"/><rect x="56" y="40" width="4" height="4" fill="#0F2A44"/><rect x="74" y="40" width="4" height="4" fill="#0F2A44"/>
+                    <rect x="2" y="46" width="4" height="4" fill="#0F2A44"/><rect x="14" y="46" width="4" height="4" fill="#0F2A44"/><rect x="34" y="46" width="4" height="4" fill="#0F2A44"/><rect x="52" y="46" width="4" height="4" fill="#0F2A44"/>
+                    <rect x="28" y="56" width="4" height="4" fill="#0F2A44"/><rect x="40" y="56" width="4" height="4" fill="#0F2A44"/><rect x="56" y="56" width="4" height="4" fill="#0F2A44"/>
+                    <rect x="34" y="62" width="4" height="4" fill="#0F2A44"/><rect x="46" y="62" width="4" height="4" fill="#0F2A44"/><rect x="62" y="62" width="4" height="4" fill="#0F2A44"/>
+                    <rect x="28" y="68" width="4" height="4" fill="#0F2A44"/><rect x="46" y="68" width="4" height="4" fill="#0F2A44"/>
+                    <rect x="34" y="74" width="4" height="4" fill="#0F2A44"/><rect x="56" y="74" width="4" height="4" fill="#0F2A44"/><rect x="68" y="74" width="4" height="4" fill="#0F2A44"/>
+                  </svg>
+                </div>
+              </div>
+              <p class="patch-bottom" style="color:rgba(15,42,68,0.35);">SCAN FOR HORSE PROFILE</p>
+            </div>
+          </div>
+          <span style="font-size:11px; color:rgba(233,227,216,0.25); font-weight:500; letter-spacing:0.05em;">Dark saddle pad</span>
+        </div>
+      </div>
+      <div style="padding:24px 32px; background:white; border-top:1px solid var(--rule-lt);">
+        <span class="label-xs">EquiTag — Cream patch on dark pad</span>
+        <p style="font-size:12px; color:var(--mid); margin-top:6px; line-height:1.6;">Sand #E9E3D8 base · Navy marks · Sand-tinted QR field. Works on black, navy, and dark chocolate pads.</p>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Patch specs -->
+  <div class="cell" style="padding:28px 36px; border-top:2px solid var(--green);">
+    <div style="display:flex; gap:48px; flex-wrap:wrap;">
+      <div><span class="label-xs green">Standard size</span><p style="font-size:13px; color:var(--charcoal); margin-top:4px;">7.5 × 7.5 cm · Compact: 5 × 5 cm</p></div>
+      <div><span class="label-xs green">Material</span><p style="font-size:13px; color:var(--charcoal); margin-top:4px;">Woven base · UV-stable QR print · Velcro or sewn</p></div>
+      <div><span class="label-xs green">URL format</span><p style="font-family:var(--f-mono); font-size:12px; color:var(--green); margin-top:4px;">horseroster.com/h/[horse-id]</p></div>
+      <div><span class="label-xs green">SKU</span><p style="font-size:13px; color:var(--charcoal); margin-top:4px;">2 SKUs — Navy + Cream. Works on all pad colours.</p></div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════
+     §3 — APP + PLATFORM ICON
+════════════════════════════════════════════════ -->
+<div class="chapter">
+  <div class="chapter-header">
+    <span class="chapter-num">03</span>
+    <h2 class="chapter-title">App &amp; Platform Icon</h2>
+    <p class="chapter-desc">Direction B — The geometric H with green crossbar. Simple, bold, and recognisable at every size from 16px to 1024px.</p>
+  </div>
+
+  <div class="g2" style="margin-bottom:2px;">
+
+    <!-- Icon family -->
+    <div class="cell" style="padding:52px;">
+      <div class="app-icon-grid" style="padding:0; margin-bottom:36px;">
+
+        <!-- 120px -->
+        <div class="app-icon-item">
+          <div style="--sz:120px;" class="app-icon-wrap">
+            <svg width="52" height="52" viewBox="0 0 72 72" fill="none" style="flex-shrink:0;">
+              <rect x="15" y="13" width="10" height="46" rx="2.5" fill="#E9E3D8"/>
+              <rect x="47" y="13" width="10" height="46" rx="2.5" fill="#E9E3D8"/>
+              <rect x="25" y="30" width="22" height="12" rx="2.5" fill="#2D5438"/>
+            </svg>
+          </div>
+          <span class="app-icon-size-label">App Store<br>1024px</span>
+        </div>
+
+        <!-- 80px -->
+        <div class="app-icon-item">
+          <div style="--sz:80px; border-radius:17px; width:80px; height:80px; background:var(--navy); display:flex; align-items:center; justify-content:center; position:relative; overflow:hidden;">
+            <div style="position:absolute; inset:0; background:linear-gradient(135deg,rgba(255,255,255,0.07) 0%,transparent 60%);"></div>
+            <svg width="48" height="48" viewBox="0 0 72 72" fill="none">
+              <rect x="15" y="13" width="10" height="46" rx="2.5" fill="#E9E3D8"/>
+              <rect x="47" y="13" width="10" height="46" rx="2.5" fill="#E9E3D8"/>
+              <rect x="25" y="30" width="22" height="12" rx="2.5" fill="#2D5438"/>
+            </svg>
+          </div>
+          <span class="app-icon-size-label">Home Screen<br>180px</span>
+        </div>
+
+        <!-- 60px -->
+        <div class="app-icon-item">
+          <div style="border-radius:13px; width:60px; height:60px; background:var(--navy); display:flex; align-items:center; justify-content:center; position:relative; overflow:hidden;">
+            <div style="position:absolute; inset:0; background:linear-gradient(135deg,rgba(255,255,255,0.07) 0%,transparent 60%);"></div>
+            <svg width="36" height="36" viewBox="0 0 72 72" fill="none">
+              <rect x="15" y="13" width="10" height="46" rx="2.5" fill="#E9E3D8"/>
+              <rect x="47" y="13" width="10" height="46" rx="2.5" fill="#E9E3D8"/>
+              <rect x="25" y="30" width="22" height="12" rx="2.5" fill="#2D5438"/>
+            </svg>
+          </div>
+          <span class="app-icon-size-label">Spotlight<br>120px</span>
+        </div>
+
+        <!-- 44px -->
+        <div class="app-icon-item">
+          <div style="border-radius:9px; width:44px; height:44px; background:var(--navy); display:flex; align-items:center; justify-content:center;">
+            <svg width="26" height="26" viewBox="0 0 72 72" fill="none">
+              <rect x="15" y="13" width="10" height="46" rx="2.5" fill="#E9E3D8"/>
+              <rect x="47" y="13" width="10" height="46" rx="2.5" fill="#E9E3D8"/>
+              <rect x="25" y="30" width="22" height="12" rx="2.5" fill="#2D5438"/>
+            </svg>
+          </div>
+          <span class="app-icon-size-label">Settings<br>87px</span>
+        </div>
+
+        <!-- 32px -->
+        <div class="app-icon-item">
+          <div style="border-radius:7px; width:32px; height:32px; background:var(--navy); display:flex; align-items:center; justify-content:center;">
+            <svg width="20" height="20" viewBox="0 0 72 72" fill="none">
+              <rect x="15" y="13" width="10" height="46" rx="2.5" fill="#E9E3D8"/>
+              <rect x="47" y="13" width="10" height="46" rx="2.5" fill="#E9E3D8"/>
+              <rect x="25" y="30" width="22" height="12" rx="2.5" fill="#2D5438"/>
+            </svg>
+          </div>
+          <span class="app-icon-size-label">Notification<br>40px</span>
+        </div>
+
+        <!-- 20px -->
+        <div class="app-icon-item">
+          <div style="border-radius:4px; width:20px; height:20px; background:var(--navy); display:flex; align-items:center; justify-content:center;">
+            <svg width="12" height="12" viewBox="0 0 72 72" fill="none">
+              <rect x="15" y="13" width="10" height="46" rx="2.5" fill="#E9E3D8"/>
+              <rect x="47" y="13" width="10" height="46" rx="2.5" fill="#E9E3D8"/>
+              <rect x="25" y="30" width="22" height="12" rx="2.5" fill="#2D5438"/>
+            </svg>
+          </div>
+          <span class="app-icon-size-label">Favicon<br>32px</span>
+        </div>
+
+      </div>
+      <span class="label-xs">Icon family — Navy (#0F2A44) base, all sizes</span>
+    </div>
+
+    <!-- Comparisons + alt versions -->
+    <div class="cell offwhite" style="padding:52px;">
+      <p class="label-xs" style="margin-bottom:24px;">Alternate containers</p>
+      <div style="display:flex; gap:16px; align-items:flex-end; margin-bottom:36px; flex-wrap:wrap;">
+        <!-- Green bg -->
+        <div style="display:flex; flex-direction:column; align-items:center; gap:8px;">
+          <div style="border-radius:18px; width:80px; height:80px; background:var(--green); display:flex; align-items:center; justify-content:center;">
+            <svg width="48" height="48" viewBox="0 0 72 72" fill="none">
+              <rect x="15" y="13" width="10" height="46" rx="2.5" fill="#E9E3D8"/>
+              <rect x="47" y="13" width="10" height="46" rx="2.5" fill="#E9E3D8"/>
+              <rect x="25" y="30" width="22" height="12" rx="2.5" fill="rgba(233,227,216,0.35)"/>
+            </svg>
+          </div>
+          <span class="label-xs">Hunter</span>
+        </div>
+        <!-- White bg -->
+        <div style="display:flex; flex-direction:column; align-items:center; gap:8px;">
+          <div style="border-radius:18px; width:80px; height:80px; background:#fff; border:1px solid rgba(15,42,68,0.1); display:flex; align-items:center; justify-content:center;">
+            <svg width="48" height="48" viewBox="0 0 72 72" fill="none">
+              <rect x="15" y="13" width="10" height="46" rx="2.5" fill="#0F2A44"/>
+              <rect x="47" y="13" width="10" height="46" rx="2.5" fill="#0F2A44"/>
+              <rect x="25" y="30" width="22" height="12" rx="2.5" fill="#2D5438"/>
+            </svg>
+          </div>
+          <span class="label-xs">White</span>
+        </div>
+        <!-- Circle -->
+        <div style="display:flex; flex-direction:column; align-items:center; gap:8px;">
+          <div style="border-radius:50%; width:80px; height:80px; background:var(--navy); display:flex; align-items:center; justify-content:center;">
+            <svg width="48" height="48" viewBox="0 0 72 72" fill="none">
+              <rect x="15" y="13" width="10" height="46" rx="2.5" fill="#E9E3D8"/>
+              <rect x="47" y="13" width="10" height="46" rx="2.5" fill="#E9E3D8"/>
+              <rect x="25" y="30" width="22" height="12" rx="2.5" fill="#2D5438"/>
+            </svg>
+          </div>
+          <span class="label-xs">Circle</span>
+        </div>
+        <!-- Sand -->
+        <div style="display:flex; flex-direction:column; align-items:center; gap:8px;">
+          <div style="border-radius:18px; width:80px; height:80px; background:var(--sand); display:flex; align-items:center; justify-content:center;">
+            <svg width="48" height="48" viewBox="0 0 72 72" fill="none">
+              <rect x="15" y="13" width="10" height="46" rx="2.5" fill="#0F2A44"/>
+              <rect x="47" y="13" width="10" height="46" rx="2.5" fill="#0F2A44"/>
+              <rect x="25" y="30" width="22" height="12" rx="2.5" fill="#2D5438"/>
+            </svg>
+          </div>
+          <span class="label-xs">Sand</span>
+        </div>
+      </div>
+
+      <p class="label-xs" style="margin-bottom:12px;">Export specifications</p>
+      <div style="display:flex; flex-direction:column; gap:6px;">
+        <div style="display:flex; justify-content:space-between; padding:7px 0; border-bottom:1px solid var(--rule-lt);">
+          <span style="font-size:12px; color:var(--charcoal);">App Store / Play Store</span>
+          <span style="font-family:var(--f-mono); font-size:11px; color:var(--mid);">1024 × 1024px PNG</span>
+        </div>
+        <div style="display:flex; justify-content:space-between; padding:7px 0; border-bottom:1px solid var(--rule-lt);">
+          <span style="font-size:12px; color:var(--charcoal);">iOS Home Screen</span>
+          <span style="font-family:var(--f-mono); font-size:11px; color:var(--mid);">180 × 180px PNG</span>
+        </div>
+        <div style="display:flex; justify-content:space-between; padding:7px 0; border-bottom:1px solid var(--rule-lt);">
+          <span style="font-size:12px; color:var(--charcoal);">Android Adaptive</span>
+          <span style="font-family:var(--f-mono); font-size:11px; color:var(--mid);">108 × 108px PNG</span>
+        </div>
+        <div style="display:flex; justify-content:space-between; padding:7px 0; border-bottom:1px solid var(--rule-lt);">
+          <span style="font-size:12px; color:var(--charcoal);">Favicon</span>
+          <span style="font-family:var(--f-mono); font-size:11px; color:var(--mid);">32 × 32px · 16 × 16px ICO</span>
+        </div>
+        <div style="display:flex; justify-content:space-between; padding:7px 0;">
+          <span style="font-size:12px; color:var(--charcoal);">OG / Social preview</span>
+          <span style="font-family:var(--f-mono); font-size:11px; color:var(--mid);">1200 × 630px PNG</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════
+     §4 — WEBSITE HEADER
+════════════════════════════════════════════════ -->
+<div class="chapter">
+  <div class="chapter-header">
+    <span class="chapter-num">04</span>
+    <h2 class="chapter-title">Website Header</h2>
+    <p class="chapter-desc">Modern SaaS-style header. Clean, confident, and scalable. Inspired by Stripe and Linear.</p>
+  </div>
+
+  <div class="cell" style="overflow:hidden;">
+    <!-- Browser chrome -->
+    <div class="browser-chrome">
+      <div class="browser-dots">
+        <div class="browser-dot" style="background:#FF5F56;"></div>
+        <div class="browser-dot" style="background:#FFBD2E;"></div>
+        <div class="browser-dot" style="background:#27C93F;"></div>
+      </div>
+      <div class="browser-url">horseroster.com</div>
+    </div>
+    <!-- Site header -->
+    <div class="site-header">
+      <div style="display:flex; align-items:center; gap:10px;">
+        <svg width="28" height="28" viewBox="0 0 72 72" fill="none">
+          <rect width="72" height="72" rx="10" fill="#0F2A44"/>
+          <rect x="15" y="13" width="10" height="46" rx="2.5" fill="#E9E3D8"/>
+          <rect x="47" y="13" width="10" height="46" rx="2.5" fill="#E9E3D8"/>
+          <rect x="25" y="30" width="22" height="12" rx="2.5" fill="#2D5438"/>
+        </svg>
+        <div style="display:flex; align-items:baseline;">
+          <span class="wm wm-bold wm-navy" style="font-size:18px; letter-spacing:-0.8px;">Horse</span>
+          <span class="wm wm-light wm-navy" style="font-size:18px; letter-spacing:-0.8px;">Roster</span>
+        </div>
+      </div>
+      <nav class="site-nav">
+        <a href="#">Browse Horses</a>
+        <a href="#">MyBarn</a>
+        <a href="#">Sellers</a>
+      </nav>
+      <div class="site-nav-actions">
+        <button class="btn-ghost">Login</button>
+        <button class="btn-primary">List a horse →</button>
+      </div>
+    </div>
+    <!-- Hero -->
+    <div class="site-hero">
+      <div class="site-hero-badge">Now in Wellington &amp; Europe</div>
+      <h1>Find your<br><em>next horse.</em></h1>
+      <p>The professional marketplace for sport horse buyers, trainers, and barns. Verified profiles. Digital passports. Every detail, on one platform.</p>
+      <div class="site-hero-cta">
+        <button class="cta-primary">Browse horses</button>
+        <button class="cta-secondary">List your barn</button>
+      </div>
+      <div class="site-stats">
+        <div class="site-stat"><strong>4,200+</strong><span>Active listings</span></div>
+        <div class="site-stat"><strong>380+</strong><span>Verified barns</span></div>
+        <div class="site-stat"><strong>62</strong><span>Countries</span></div>
+        <div class="site-stat"><strong>EquiTag™</strong><span>QR profiles on every horse</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════
+     §5 — SOCIAL MEDIA BRANDING
+════════════════════════════════════════════════ -->
+<div class="chapter">
+  <div class="chapter-header">
+    <span class="chapter-num">05</span>
+    <h2 class="chapter-title">Social Media Branding</h2>
+    <p class="chapter-desc">Instagram profile, social post template, and horse listing card. Consistent across all touchpoints.</p>
+  </div>
+
+  <div class="g3" style="margin-bottom:2px;">
+
+    <!-- Instagram profile -->
+    <div class="cell">
+      <div style="padding:12px 20px 8px;"><span class="label-xs">Instagram Profile</span></div>
+      <div class="ig-profile">
+        <div class="ig-header">
+          <div class="ig-avatar-ring">
+            <div class="ig-avatar-inner">
+              <svg width="52" height="52" viewBox="0 0 72 72" fill="none">
+                <rect x="15" y="13" width="10" height="46" rx="2.5" fill="#E9E3D8"/>
+                <rect x="47" y="13" width="10" height="46" rx="2.5" fill="#E9E3D8"/>
+                <rect x="25" y="30" width="22" height="12" rx="2.5" fill="#2D5438"/>
+              </svg>
+            </div>
+          </div>
+          <div class="ig-info">
+            <div class="ig-username">horseroster</div>
+            <div class="ig-stats-row">
+              <div class="ig-stat"><strong>1.2k</strong><span>posts</span></div>
+              <div class="ig-stat"><strong>48.4k</strong><span>followers</span></div>
+              <div class="ig-stat"><strong>314</strong><span>following</span></div>
+            </div>
+          </div>
+        </div>
+        <div class="ig-bio-name">HorseRoster™</div>
+        <div class="ig-bio-text">The professional sport horse platform.<br>Profiles · Rosters · EquiTag QR · EquiVault 🐴</div>
+        <div class="ig-link">🔗 horseroster.com</div>
+      </div>
+    </div>
+
+    <!-- Social post -->
+    <div class="cell" style="background:var(--offwhite);">
+      <div style="padding:12px 20px 8px;"><span class="label-xs">Post Template — 1080×1080</span></div>
+      <div style="padding:16px;">
+        <div class="social-post" style="border-radius:4px; overflow:hidden;">
+          <div class="post-bg-pattern"></div>
+          <div class="post-content">
+            <div class="post-header">
+              <div style="display:flex; align-items:center; gap:8px;">
+                <svg width="22" height="22" viewBox="0 0 72 72" fill="none">
+                  <rect x="15" y="13" width="10" height="46" rx="2.5" fill="#E9E3D8"/>
+                  <rect x="47" y="13" width="10" height="46" rx="2.5" fill="#E9E3D8"/>
+                  <rect x="25" y="30" width="22" height="12" rx="2.5" fill="#2D5438"/>
+                </svg>
+                <div style="display:flex; align-items:baseline;">
+                  <span class="wm wm-bold wm-cream" style="font-size:14px; letter-spacing:-0.5px;">Horse</span>
+                  <span class="wm wm-light wm-cream" style="font-size:14px; letter-spacing:-0.5px;">Roster</span>
+                </div>
+              </div>
+              <span style="font-family:var(--f-mono); font-size:9px; color:rgba(233,227,216,0.3);">NEW LISTING</span>
+            </div>
+            <div style="flex:1; display:flex; align-items:center; justify-content:center;">
+              <div style="text-align:center;">
+                <div style="width:100px; height:100px; border-radius:8px; background:rgba(233,227,216,0.08); margin:0 auto 16px; display:flex; align-items:center; justify-content:center; border:1px solid rgba(233,227,216,0.1);">
+                  <span style="font-size:10px; color:rgba(233,227,216,0.2); letter-spacing:0.05em;">PHOTO</span>
+                </div>
+              </div>
+            </div>
+            <div class="post-body">
+              <span class="post-tag">Wellington · FL</span>
+              <p class="post-headline">Bolt Action Z<br>1.50m · KWPN</p>
+            </div>
+            <div class="post-footer">
+              <span style="font-size:11px; color:rgba(233,227,216,0.4); font-family:var(--f-mono);">horseroster.com</span>
+              <span style="font-size:11px; color:rgba(233,227,216,0.5); font-weight:500;">View profile →</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Listing card -->
+    <div class="cell" style="background:var(--offwhite);">
+      <div style="padding:12px 20px 8px;"><span class="label-xs">Horse Listing Card</span></div>
+      <div style="padding:16px;">
+        <div class="listing-card">
+          <div class="listing-photo">
+            <span class="listing-photo-label">HORSE PHOTO</span>
+            <div class="listing-badge">Verified</div>
+            <div class="listing-equitag">
+              <svg width="12" height="12" viewBox="0 0 72 72" fill="none">
+                <rect x="2" y="2" width="28" height="28" rx="3" fill="none" stroke="white" stroke-width="6"/>
+                <rect x="10" y="10" width="12" height="12" fill="white"/>
+                <rect x="42" y="2" width="28" height="28" rx="3" fill="none" stroke="white" stroke-width="6"/>
+                <rect x="50" y="10" width="12" height="12" fill="white"/>
+                <rect x="2" y="42" width="28" height="28" rx="3" fill="none" stroke="white" stroke-width="6"/>
+                <rect x="10" y="50" width="12" height="12" fill="white"/>
+              </svg>
+              <span style="font-size:8px; color:rgba(255,255,255,0.7); font-family:var(--f-mono); letter-spacing:0.05em;">EquiTag</span>
+            </div>
+          </div>
+          <div class="listing-info">
+            <div class="listing-name">Bolt Action Z</div>
+            <div class="listing-meta">KWPN · 2018 · 16.3hh · Stallion · Wellington, FL</div>
+            <div class="listing-tags">
+              <span class="listing-tag lt-sand">Show Jumping</span>
+              <span class="listing-tag lt-green">1.50m</span>
+              <span class="listing-tag lt-navy">KWPN</span>
+              <span class="listing-tag lt-green">Verified PPE</span>
+            </div>
+            <div class="listing-footer">
+              <div>
+                <div class="listing-price">€185,000</div>
+                <div class="listing-price-sub">Oaklane Sport Horses</div>
+              </div>
+              <button class="listing-cta">View profile</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════
+     COLOR PALETTE
+════════════════════════════════════════════════ -->
+<div class="chapter">
+  <div class="chapter-header">
+    <span class="chapter-num">06</span>
+    <h2 class="chapter-title">Colour System</h2>
+    <p class="chapter-desc">5 colours. Used with restraint. The brand operates primarily in Navy and Off-White.</p>
+  </div>
+
+  <div class="palette-row">
+    <div class="palette-swatch cell"><div class="ps-color" style="background:#0F2A44;"></div><div class="ps-name">Navy</div><div class="ps-hex">#0F2A44</div><div class="ps-role">Primary · brand, UI, type</div></div>
+    <div class="palette-swatch cell sand"><div class="ps-color" style="background:#E9E3D8; border:1px solid rgba(0,0,0,0.05);"></div><div class="ps-name">Sand</div><div class="ps-hex">#E9E3D8</div><div class="ps-role">Secondary · reversed logo, cards</div></div>
+    <div class="palette-swatch cell"><div class="ps-color" style="background:#2D5438;"></div><div class="ps-name">Hunter</div><div class="ps-hex">#2D5438</div><div class="ps-role">Accent · icon crossbar, CTAs only</div></div>
+    <div class="palette-swatch cell"><div class="ps-color" style="background:#2B2B2B;"></div><div class="ps-name">Charcoal</div><div class="ps-hex">#2B2B2B</div><div class="ps-role">Body text, secondary UI</div></div>
+    <div class="palette-swatch cell sand"><div class="ps-color" style="background:#F8F6F2; border:1px solid rgba(0,0,0,0.05);"></div><div class="ps-name">Off-White</div><div class="ps-hex">#F8F6F2</div><div class="ps-role">Page bg, panel backgrounds</div></div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════
+     §7 — BRAND USAGE RULES
+════════════════════════════════════════════════ -->
+<div class="chapter">
+  <div class="chapter-header">
+    <span class="chapter-num">07</span>
+    <h2 class="chapter-title">Brand Usage Rules</h2>
+    <p class="chapter-desc">Concise rules that protect the identity. Follow these to keep the brand clean and premium at all times.</p>
+  </div>
+
+  <div class="rules-grid">
+
+    <!-- Clearspace -->
+    <div class="rule-cell">
+      <h3>Logo Clearspace</h3>
+      <p>Maintain a minimum clearspace equal to the cap-height of the "H" in HorseRoster on all four sides. Never place content, borders, or images inside this zone.</p>
+      <div style="margin:20px 0;">
+        <div class="clearspace-demo">
+          <span class="cs-arrow cs-top">× H</span>
+          <span class="cs-arrow cs-bottom">× H</span>
+          <span class="cs-arrow cs-left">× H</span>
+          <span class="cs-arrow cs-right">× H</span>
+          <div style="display:flex; align-items:baseline; padding:4px 0;">
+            <span style="font-family:var(--f-sans); font-size:18px; font-weight:300; color:var(--navy); letter-spacing:-0.8px;">Horse</span>
+            <span style="font-family:var(--f-sans); font-size:18px; font-weight:800; color:var(--navy); letter-spacing:-0.8px;">Roster</span>
+          </div>
+        </div>
+      </div>
+      <h3>Minimum Sizes</h3>
+      <p>Wordmark: 80px wide minimum on screen. 20mm in print. Icon mark: 16px minimum. Below these sizes, use the monogram only.</p>
+    </div>
+
+    <!-- Approved combos -->
+    <div class="rule-cell">
+      <h3>Approved Colour Combinations</h3>
+      <p>Use these pairings only. Approved = meets WCAG AA contrast.</p>
+      <div style="margin-top:16px; display:flex; flex-direction:column; gap:10px;">
+        <div style="display:flex; align-items:center; gap:10px;">
+          <div style="width:40px; height:28px; border-radius:4px; background:#0F2A44; display:flex; align-items:center; justify-content:center;"><span style="font-size:9px; font-weight:700; color:#E9E3D8;">Aa</span></div>
+          <span style="font-size:12px; color:var(--charcoal);">Navy on White / Off-white</span>
+          <span style="font-size:9px; color:var(--green); font-weight:700; margin-left:auto;">✓ AA</span>
+        </div>
+        <div style="display:flex; align-items:center; gap:10px;">
+          <div style="width:40px; height:28px; border-radius:4px; background:#E9E3D8; display:flex; align-items:center; justify-content:center;"><span style="font-size:9px; font-weight:700; color:#0F2A44;">Aa</span></div>
+          <span style="font-size:12px; color:var(--charcoal);">Cream on Navy</span>
+          <span style="font-size:9px; color:var(--green); font-weight:700; margin-left:auto;">✓ AA</span>
+        </div>
+        <div style="display:flex; align-items:center; gap:10px;">
+          <div style="width:40px; height:28px; border-radius:4px; background:#2D5438; display:flex; align-items:center; justify-content:center;"><span style="font-size:9px; font-weight:700; color:#F8F6F2;">Aa</span></div>
+          <span style="font-size:12px; color:var(--charcoal);">Cream on Hunter Green</span>
+          <span style="font-size:9px; color:var(--green); font-weight:700; margin-left:auto;">✓ AA</span>
+        </div>
+        <div style="display:flex; align-items:center; gap:10px;">
+          <div style="width:40px; height:28px; border-radius:4px; background:#F8F6F2; border:1px solid rgba(0,0,0,0.08); display:flex; align-items:center; justify-content:center;"><span style="font-size:9px; font-weight:700; color:#2B2B2B;">Aa</span></div>
+          <span style="font-size:12px; color:var(--charcoal);">Charcoal on Off-white</span>
+          <span style="font-size:9px; color:var(--green); font-weight:700; margin-left:auto;">✓ AA</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Do / don't -->
+    <div class="rule-cell">
+      <h3>Do</h3>
+      <div class="do-dont">
+        <div class="do-item">Use approved colour combinations only</div>
+        <div class="do-item">Maintain the bold/light weight split in the wordmark</div>
+        <div class="do-item">Use DM Sans as the primary typeface</div>
+        <div class="do-item">Keep generous whitespace around the logo</div>
+        <div class="do-item">Use the H icon for app and small-format contexts</div>
+      </div>
+      <h3 style="margin-top:20px;">Don't</h3>
+      <div class="do-dont">
+        <div class="dont-item">Stretch, distort or rotate the logo</div>
+        <div class="dont-item">Change the weight split (make both bold or both light)</div>
+        <div class="dont-item">Place on a busy photographic background without overlay</div>
+        <div class="dont-item">Use hunter green for decorative purposes</div>
+        <div class="dont-item">Add drop shadows, glows, or gradients to the logo</div>
+      </div>
+    </div>
+
+    <!-- Background usage -->
+    <div class="rule-cell">
+      <h3>Background Usage</h3>
+      <p style="margin-bottom:16px;">The logo works on these backgrounds. When placing on photography, use a semi-transparent navy overlay at 70% minimum.</p>
+      <div style="display:grid; grid-template-columns:repeat(4,1fr); gap:6px;">
+        <div style="display:flex; flex-direction:column; gap:4px;">
+          <div style="height:40px; border-radius:3px; background:#fff; border:1px solid rgba(0,0,0,0.08); display:flex; align-items:center; justify-content:center;"><svg width="20" height="20" viewBox="0 0 72 72" fill="none"><rect x="15" y="13" width="10" height="46" rx="2.5" fill="#0F2A44"/><rect x="47" y="13" width="10" height="46" rx="2.5" fill="#0F2A44"/><rect x="25" y="30" width="22" height="12" rx="2.5" fill="#2D5438"/></svg></div>
+          <span style="font-size:8px; color:var(--mid); text-align:center;">White</span>
+        </div>
+        <div style="display:flex; flex-direction:column; gap:4px;">
+          <div style="height:40px; border-radius:3px; background:#F8F6F2; display:flex; align-items:center; justify-content:center;"><svg width="20" height="20" viewBox="0 0 72 72" fill="none"><rect x="15" y="13" width="10" height="46" rx="2.5" fill="#0F2A44"/><rect x="47" y="13" width="10" height="46" rx="2.5" fill="#0F2A44"/><rect x="25" y="30" width="22" height="12" rx="2.5" fill="#2D5438"/></svg></div>
+          <span style="font-size:8px; color:var(--mid); text-align:center;">Off-white</span>
+        </div>
+        <div style="display:flex; flex-direction:column; gap:4px;">
+          <div style="height:40px; border-radius:3px; background:#0F2A44; display:flex; align-items:center; justify-content:center;"><svg width="20" height="20" viewBox="0 0 72 72" fill="none"><rect x="15" y="13" width="10" height="46" rx="2.5" fill="#E9E3D8"/><rect x="47" y="13" width="10" height="46" rx="2.5" fill="#E9E3D8"/><rect x="25" y="30" width="22" height="12" rx="2.5" fill="#2D5438"/></svg></div>
+          <span style="font-size:8px; color:var(--mid); text-align:center;">Navy</span>
+        </div>
+        <div style="display:flex; flex-direction:column; gap:4px;">
+          <div style="height:40px; border-radius:3px; background:#2D5438; display:flex; align-items:center; justify-content:center;"><svg width="20" height="20" viewBox="0 0 72 72" fill="none"><rect x="15" y="13" width="10" height="46" rx="2.5" fill="#E9E3D8"/><rect x="47" y="13" width="10" height="46" rx="2.5" fill="#E9E3D8"/><rect x="25" y="30" width="22" height="12" rx="2.5" fill="rgba(233,227,216,0.25)"/></svg></div>
+          <span style="font-size:8px; color:var(--mid); text-align:center;">Hunter</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Typography rules -->
+    <div class="rule-cell">
+      <h3>Typography Hierarchy</h3>
+      <div style="display:flex; flex-direction:column; gap:10px; margin-top:12px;">
+        <div style="padding:10px 12px; background:var(--offwhite); border-radius:3px;">
+          <span style="font-size:9px; font-family:var(--f-mono); color:var(--mid);">DISPLAY</span>
+          <p style="font-family:var(--f-sans); font-size:28px; font-weight:800; color:var(--navy); letter-spacing:-0.04em; line-height:1;">DM Sans 800</p>
+        </div>
+        <div style="padding:10px 12px; background:var(--offwhite); border-radius:3px;">
+          <span style="font-size:9px; font-family:var(--f-mono); color:var(--mid);">HEADING</span>
+          <p style="font-family:var(--f-sans); font-size:18px; font-weight:700; color:var(--navy); letter-spacing:-0.03em;">DM Sans 700</p>
+        </div>
+        <div style="padding:10px 12px; background:var(--offwhite); border-radius:3px;">
+          <span style="font-size:9px; font-family:var(--f-mono); color:var(--mid);">BODY</span>
+          <p style="font-family:var(--f-sans); font-size:14px; font-weight:400; color:var(--charcoal);">DM Sans 400 Regular</p>
+        </div>
+        <div style="padding:10px 12px; background:var(--offwhite); border-radius:3px;">
+          <span style="font-size:9px; font-family:var(--f-mono); color:var(--mid);">LABELS / CODE</span>
+          <p style="font-family:var(--f-mono); font-size:11px; color:var(--green);">IBM Plex Mono 400</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Brand tone -->
+    <div class="rule-cell">
+      <h3>Brand Tone</h3>
+      <p style="margin-bottom:16px;">HorseRoster is a technology platform, not a farm brand. Every touchpoint should feel like it belongs at a top-tier show, not a county fair.</p>
+      <div style="display:flex; flex-direction:column; gap:8px;">
+        <div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid var(--rule-lt);">
+          <span style="font-size:12px; font-weight:600; color:var(--green);">"Find your next horse."</span>
+          <span style="font-size:9px; color:var(--green); font-weight:700;">✓ DO</span>
+        </div>
+        <div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid var(--rule-lt);">
+          <span style="font-size:12px; color:#C0392B; text-decoration:line-through; opacity:0.6;">"Welcome to the HorseRoster family!"</span>
+          <span style="font-size:9px; color:#C0392B; font-weight:700;">✗</span>
+        </div>
+        <div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid var(--rule-lt);">
+          <span style="font-size:12px; font-weight:600; color:var(--green);">"Verified. Professional. Trusted."</span>
+          <span style="font-size:9px; color:var(--green); font-weight:700;">✓ DO</span>
+        </div>
+        <div style="display:flex; justify-content:space-between; padding:8px 0;">
+          <span style="font-size:12px; color:#C0392B; text-decoration:line-through; opacity:0.6;">"Giddy up and list your horse!"</span>
+          <span style="font-size:9px; color:#C0392B; font-weight:700;">✗</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════
+     FOOTER
+════════════════════════════════════════════════ -->
+<div class="doc-footer">
+  <div style="display:flex; align-items:center; gap:10px;">
+    <svg width="22" height="22" viewBox="0 0 72 72" fill="none">
+      <rect width="72" height="72" rx="8" fill="#0F2A44"/>
+      <rect x="15" y="13" width="10" height="46" rx="2.5" fill="#E9E3D8"/>
+      <rect x="47" y="13" width="10" height="46" rx="2.5" fill="#E9E3D8"/>
+      <rect x="25" y="30" width="22" height="12" rx="2.5" fill="#2D5438"/>
+    </svg>
+    <div style="display:flex; align-items:baseline;">
+      <span style="font-family:var(--f-sans); font-size:14px; font-weight:300; color:var(--navy); letter-spacing:-0.5px;">Horse</span>
+      <span style="font-family:var(--f-sans); font-size:14px; font-weight:800; color:var(--navy); letter-spacing:-0.5px;">Roster</span>
+    </div>
+  </div>
+  <p>Production Brand Package · v1.0 · Directions A + B · Finalised</p>
+  <p>horseroster.com · EquiTag™ · EquiVault™</p>
+</div>
+
+</div><!-- /pg -->
+</body>
+</html>

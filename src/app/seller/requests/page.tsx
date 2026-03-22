@@ -26,7 +26,7 @@ export default async function SellerRequestsPage() {
   });
 
   if (!seller) {
-    redirect("/seller/onboard");
+    redirect("/mybarn/onboard");
   }
 
   const requests = await prisma.accessRequest.findMany({
@@ -90,16 +90,16 @@ export default async function SellerRequestsPage() {
   );
 
   return (
-    <main className="min-h-screen bg-stone-50 text-stone-900">
+    <main className="min-h-screen bg-[color:var(--background)] text-[color:var(--foreground)]">
       <AppHeader variant="seller" />
 
       <section className="mx-auto max-w-6xl px-6 py-10">
         <div className="mb-8">
-          <p className="text-sm font-medium uppercase tracking-[0.18em] text-stone-500">
-            Seller Requests
+          <p className="mono text-sm font-medium uppercase tracking-[0.18em] text-[color:var(--foreground-soft)]">
+            Barn Requests
           </p>
-          <h1 className="mt-2 font-serif text-4xl">Vault Access Requests</h1>
-          <p className="mt-3 max-w-2xl text-stone-600">
+          <h1 className="mt-2 text-4xl font-extrabold">Vault Access Requests</h1>
+          <p className="mt-3 max-w-2xl text-[color:var(--foreground-soft)]">
             Review buyer requests for private horse documents and decide who gets access.
           </p>
         </div>
@@ -107,8 +107,8 @@ export default async function SellerRequestsPage() {
         {requests.length === 0 ? (
           <Card className="rounded-3xl border-stone-200 shadow-sm">
             <CardContent className="p-10 text-center">
-              <p className="text-lg text-stone-700">No requests yet</p>
-              <p className="mt-2 text-sm text-stone-500">
+              <p className="text-lg text-[color:var(--foreground)]">No requests yet</p>
+              <p className="mt-2 text-sm text-[color:var(--foreground-soft)]">
                 Buyer access requests will appear here.
               </p>
             </CardContent>
@@ -122,7 +122,7 @@ export default async function SellerRequestsPage() {
               <Card key={request.id} className="rounded-3xl border-stone-200 shadow-sm">
                 <CardHeader>
                   <CardTitle className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
-                    <div className="font-serif text-2xl text-stone-900">
+                    <div className="text-2xl font-extrabold text-[color:var(--foreground-strong)]">
                       {request.horse.name}
                     </div>
 
@@ -147,40 +147,40 @@ export default async function SellerRequestsPage() {
                 <CardContent className="space-y-5">
                   <div className="grid gap-4 md:grid-cols-3">
                     <div>
-                      <p className="text-xs uppercase tracking-[0.16em] text-stone-500">
+                      <p className="text-xs uppercase tracking-[0.16em] text-[color:var(--foreground-soft)]">
                         Buyer
                       </p>
-                      <p className="mt-1 text-sm font-medium text-stone-900">
+                      <p className="mt-1 text-sm font-medium text-[color:var(--foreground-strong)]">
                         {request.buyer.name || "Unnamed buyer"}
                       </p>
-                      <p className="text-sm text-stone-500">{request.buyer.email}</p>
+                      <p className="text-sm text-[color:var(--foreground-soft)]">{request.buyer.email}</p>
                     </div>
 
                     <div>
-                      <p className="text-xs uppercase tracking-[0.16em] text-stone-500">
+                      <p className="text-xs uppercase tracking-[0.16em] text-[color:var(--foreground-soft)]">
                         Requested At
                       </p>
-                      <p className="mt-1 text-sm text-stone-900">
+                      <p className="mt-1 text-sm text-[color:var(--foreground)]">
                         {new Date(request.createdAt).toLocaleString()}
                       </p>
                     </div>
 
                     <div>
-                      <p className="text-xs uppercase tracking-[0.16em] text-stone-500">
+                      <p className="text-xs uppercase tracking-[0.16em] text-[color:var(--foreground-soft)]">
                         Message
                       </p>
-                      <p className="mt-1 text-sm text-stone-900">
+                      <p className="mt-1 text-sm text-[color:var(--foreground)]">
                         {request.message || "No message provided"}
                       </p>
                     </div>
                   </div>
 
                   {grant ? (
-                    <div className="rounded-2xl border border-stone-200 bg-white p-4">
-                      <p className="text-xs uppercase tracking-[0.16em] text-stone-500">
+                    <div className="rounded-2xl border border-[color:var(--border)] bg-[color:var(--background-elevated)] p-4">
+                      <p className="text-xs uppercase tracking-[0.16em] text-[color:var(--foreground-soft)]">
                         Current Grant
                       </p>
-                      <div className="mt-2 space-y-1 text-sm text-stone-700">
+                      <div className="mt-2 space-y-1 text-sm text-[color:var(--foreground)]">
                         <p>
                           Status:{" "}
                           <span className="font-medium">
@@ -200,7 +200,7 @@ export default async function SellerRequestsPage() {
                           </span>
                         </p>
                         <p>
-                          Seller note:{" "}
+                          Barn note:{" "}
                           <span className="font-medium">{grant.note || "None"}</span>
                         </p>
                       </div>

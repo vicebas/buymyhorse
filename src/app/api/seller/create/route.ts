@@ -3,13 +3,18 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 
 import { authOptions } from "@/lib/auth/options";
+import { isAdminRole, isSuperAdminRole } from "@/lib/admin/roles";
+import { type BillingCadenceKey } from "@/lib/billing/plans";
+import { getBillingSettings } from "@/lib/billing/settings";
+import { createActivationCheckoutSession } from "@/lib/billing/stripe";
 import prisma from "@/lib/db/prisma";
 
 const sellerSchema = z.object({
-  displayName: z.string().trim().min(2, "Seller display name is required."),
+  displayName: z.string().trim().min(2, "Barn display name is required."),
   location: z.string().trim().max(120).optional().or(z.literal("")),
   website: z.url("Website must be a valid URL.").optional().or(z.literal("")),
   bio: z.string().trim().max(2000).optional().or(z.literal("")),
+  cadence: z.enum(["MONTHLY", "YEARLY"]),
 });
 
 function slugify(text: string) {
@@ -21,7 +26,8 @@ function slugify(text: string) {
 }
 
 async function uniqueSellerSlug(baseSlug: string) {
-  let slug = baseSlug || "seller";
+  const normalizedBaseSlug = baseSlug || "barn";
+  let slug = normalizedBaseSlug;
   let counter = 1;
 
   while (true) {
@@ -33,7 +39,7 @@ async function uniqueSellerSlug(baseSlug: string) {
     if (!existing) return slug;
 
     counter += 1;
-    slug = `${baseSlug}-${counter}`;
+    slug = `${normalizedBaseSlug}-${counter}`;
   }
 }
 
@@ -43,6 +49,18 @@ export async function POST(req: Request) {
 
     if (!session?.user?.id) {
       return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
+    }
+
+    const currentUser = await prisma.user.findUnique({
+      where: { id: session.user.id },
+      select: { role: true },
+    });
+
+    if (isAdminRole(currentUser?.role) && !isSuperAdminRole(currentUser?.role)) {
+      return NextResponse.json(
+        { error: "Internal staff accounts cannot create barn profiles." },
+        { status: 403 }
+      );
     }
 
     const body = await req.json();
@@ -69,6 +87,9 @@ export async function POST(req: Request) {
 
     const baseSlug = slugify(parsed.data.displayName);
     const slug = await uniqueSellerSlug(baseSlug);
+    const now = new Date();
+    const billingSettings = await getBillingSettings();
+    const hasTrial = billingSettings.activationTrialEnabled && billingSettings.activationTrialDays > 0;
 
     const seller = await prisma.sellerProfile.create({
       data: {
@@ -78,18 +99,65 @@ export async function POST(req: Request) {
         location: parsed.data.location || null,
         website: parsed.data.website || null,
         bio: parsed.data.bio || null,
+        plan: "ACTIVATION",
+        billingCadence: parsed.data.cadence,
+        billingStatus: hasTrial ? "TRIALING" : "INCOMPLETE",
+        trialEndsAt: hasTrial
+          ? new Date(now.getTime() + billingSettings.activationTrialDays * 24 * 60 * 60 * 1000)
+          : null,
       },
       select: {
         id: true,
         displayName: true,
         slug: true,
+        plan: true,
+        billingCadence: true,
       },
     });
 
-    return NextResponse.json(seller, { status: 201 });
-  } catch {
+    await prisma.user.update({
+      where: {
+        id: session.user.id,
+      },
+      data: {
+        role: "SELLER",
+      },
+    });
+
+    if (hasTrial) {
+      return NextResponse.json(
+        {
+          seller,
+          redirectTo: "/mybarn",
+        },
+        { status: 201 }
+      );
+    }
+
+    const origin = new URL(req.url).origin;
+    const checkoutSession = await createActivationCheckoutSession({
+      sellerId: seller.id,
+      userId: session.user.id,
+      displayName: seller.displayName,
+      cadence: parsed.data.cadence as BillingCadenceKey,
+      origin,
+    });
+
     return NextResponse.json(
-      { error: "Unable to create seller profile right now." },
+      {
+        seller,
+        redirectTo: checkoutSession.url || "/mybarn/billing",
+      },
+      { status: 201 }
+    );
+  } catch (error) {
+    return NextResponse.json(
+      {
+        error:
+          error instanceof Error
+            ? error.message
+            : "Unable to create barn profile right now.",
+      },
       { status: 500 }
     );
   }

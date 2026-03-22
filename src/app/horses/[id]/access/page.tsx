@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 
 import AppHeader from "@/components/layout/app-header";
 import { authOptions } from "@/lib/auth/options";
+import { getUserAppHeaderVariant } from "@/lib/auth/get-user-app-header-variant";
 import { getBuyerHorseAccess } from "@/lib/vault/access";
 
 interface PageProps {
@@ -30,11 +31,12 @@ export default async function HorseAccessPage({ params }: PageProps) {
     redirect("/login");
   }
 
+  const headerVariant = await getUserAppHeaderVariant(session.user.id);
   const access = await getBuyerHorseAccess(session.user.id, id);
 
   return (
     <main className="min-h-screen bg-stone-50 text-stone-900">
-      <AppHeader variant="buyer" />
+      <AppHeader variant={headerVariant} />
 
       <section className="mx-auto max-w-5xl px-6 py-10">
         <div className="mb-8">
@@ -89,7 +91,7 @@ export default async function HorseAccessPage({ params }: PageProps) {
 
             {access.grant?.note ? (
               <div className="rounded-2xl border border-stone-200 bg-white px-4 py-3 text-sm text-stone-700 shadow-sm">
-                Seller note: {access.grant.note}
+                Barn note: {access.grant.note}
               </div>
             ) : null}
 

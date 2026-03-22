@@ -1,81 +1,91 @@
 import prisma from "@/lib/db/prisma";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth/options";
-import { redirect } from "next/navigation";
 import AppHeader from "@/components/layout/app-header";
-import BuyerDashboardHero from "@/components/dashboard/buyer-dashboard-hero";
-import { Search } from "lucide-react";
-import Image from "next/image"
-import Link from "next/link";
-import HorseMarketplaceCard from "@/components/horses/horse-marketplace-card";
+import MainHeader from "@/components/layout/main-header";
+import DashboardExperience from "@/components/dashboard/dashboard-experience";
+import { isHorsePubliclyVisible } from "@/lib/billing/entitlements";
 
 export default async function UserDashboardPage() {
     const session = await getServerSession(authOptions);
 
-    if (!session?.user?.id) {
-        redirect("/login");
-    }
 
-    if (session.user.role === "ADMIN") {
-        redirect("/admin");
-    }
-
-
-
-    const sellerProfile = await prisma.sellerProfile.findUnique({
-        where: {
-            userId: session.user.id,
-        },
-        select: {
-            id: true,
-            displayName: true,
-        },
-    });
-
-    if (sellerProfile) {
-        //redirect("/seller");
-    }
+    const sellerProfile = session?.user?.id
+        ? await prisma.sellerProfile.findUnique({
+            where: {
+                userId: session.user.id,
+            },
+            select: {
+                id: true,
+            },
+        })
+        : null;
 
     const horses = await prisma.horse.findMany({
         where: {
             isPublished: true,
+            deletedAt: null,
+            adminDisabledAt: null,
+            sellerProfile: {
+                adminDisabledAt: null,
+            },
         },
         include: {
-            sellerProfile: true,
+            sellerProfile: {
+                select: {
+                    displayName: true,
+                    plan: true,
+                    billingCadence: true,
+                    billingStatus: true,
+                    adminPlanOverride: true,
+                    adminBillingCadenceOverride: true,
+                    adminBillingStatusOverride: true,
+                    adminBillingOverrideReason: true,
+                    adminBillingOverrideExpiresAt: true,
+                    trialEndsAt: true,
+                    currentPeriodEndsAt: true,
+                    adminDisabledAt: true,
+                },
+            },
         },
-        take: 12,
+        take: 48,
     });
+
+    const visibleHorses = horses.filter((horse) => isHorsePubliclyVisible(horse)).slice(0, 12);
+
+    const horseCards = visibleHorses.map((horse) => ({
+        id: horse.id,
+        name: horse.name,
+        breed: horse.breed,
+        age: horse.age,
+        height: horse.height,
+        gender: horse.gender,
+        discipline: horse.discipline,
+        level: horse.level,
+        price: horse.price ? Number(horse.price) : null,
+        image: horse.image,
+        location: horse.location,
+        saleStatus: horse.saleStatus,
+        sellerProfile: {
+            displayName: horse.sellerProfile.displayName,
+        },
+    }));
+
+    const isLoggedIn = Boolean(session?.user?.id);
+    const isSeller = Boolean(sellerProfile);
+
     return (
-        <main className="min-h-screen bg-stone-50 text-stone-900">
-            <AppHeader variant="buyer" />
-            <BuyerDashboardHero />
-
-            <section className="mx-auto max-w-5xl px-6 py-12">
-                <p className="text-sm text-stone-600">{horses.length} listings</p>
-
- {horses.length === 0 ? (
-    <div className="mt-20 flex flex-col items-center gap-4 text-center">
-        <div className="flex h-14 w-14 items-center justify-center rounded-full bg-stone-200 text-stone-600">
-            <Search size={28} />
-        </div>
-
-        <h2 className="font-serif text-3xl text-stone-900">No listings found</h2>
-
-        <p className="max-w-md text-sm leading-6 text-stone-500">
-            No horses have been posted to listings yet.
-        </p>
-    </div>
-) : (
-    <div className="mt-10 w-full space-y-6">
-        {horses.map((horse) => (
-            <HorseMarketplaceCard
-                key={horse.id}
-                horse={horse}
+        <main className="min-h-screen bg-[color:var(--background)] text-[color:var(--foreground)]">
+            {isLoggedIn ? (
+                <AppHeader variant={isSeller ? "seller" : "buyer"} />
+            ) : (
+                <MainHeader activeItem="dashboard" />
+            )}
+            <DashboardExperience
+                horses={horseCards}
+                isLoggedIn={isLoggedIn}
+                isSeller={isSeller}
             />
-        ))}
-    </div>
-)}
-            </section>
         </main>
     );
 }

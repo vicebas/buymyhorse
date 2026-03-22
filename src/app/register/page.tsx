@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useMemo, useState } from "react";
 import { Loader2, LockKeyhole, Mail, User } from "lucide-react";
 
@@ -12,6 +12,7 @@ import { Label } from "@/components/ui/label";
 
 export default function RegisterPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
 
   const [form, setForm] = useState({
     firstName: "",
@@ -23,6 +24,7 @@ export default function RegisterPage() {
 
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
+  const callbackUrl = searchParams.get("callbackUrl") || "/dashboard";
 
   const fullName = useMemo(() => {
     return `${form.firstName} ${form.lastName}`.trim();
@@ -64,29 +66,29 @@ export default function RegisterPage() {
       return;
     }
 
-    router.push("/login");
+    router.push(`/login?callbackUrl=${encodeURIComponent(callbackUrl)}`);
   }
 
   return (
-    <main className="min-h-screen bg-stone-50 text-stone-900">
+    <main className="min-h-screen text-[color:var(--foreground)]">
       <div className="mx-auto flex min-h-screen max-w-6xl items-center px-6 py-10 md:px-8">
         <div className="grid w-full gap-8 lg:grid-cols-2">
           <div className="hidden flex-col justify-center lg:flex">
-            <p className="text-sm font-medium uppercase tracking-[0.18em] text-stone-500">
-              BuyMyHorse
+            <p className="mono text-sm font-medium uppercase tracking-[0.18em] text-[color:var(--foreground-soft)]">
+              HorseRoster
             </p>
-            <h1 className="mt-4 font-serif text-5xl leading-tight">
-              Create your account and enter the marketplace
+            <h1 className="mt-4 text-5xl leading-tight font-extrabold">
+              Create your HorseRoster account
             </h1>
-            <p className="mt-6 max-w-xl text-lg leading-8 text-stone-600">
-              Join as a buyer today and expand into a seller account whenever you are ready to publish listings.
+            <p className="mt-6 max-w-xl text-lg leading-8 text-[color:var(--foreground-soft)]">
+              Join as a buyer today, then expand into a polished seller presence whenever you are ready to publish listings.
             </p>
           </div>
 
           <div className="flex items-center justify-center">
-            <Card className="w-full max-w-xl rounded-3xl border-stone-200 shadow-sm">
+            <Card className="w-full max-w-xl rounded-3xl border-[color:var(--border)] shadow-[var(--shadow-card)]">
               <CardHeader className="space-y-2">
-                <CardTitle className="font-serif text-3xl">Create account</CardTitle>
+                <CardTitle className="text-3xl font-extrabold">Create account</CardTitle>
                 <CardDescription>
                   Start with your basic account details.
                 </CardDescription>
@@ -98,7 +100,7 @@ export default function RegisterPage() {
                     <div className="space-y-2">
                       <Label htmlFor="firstName">First name</Label>
                       <div className="relative">
-                        <User className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-stone-400" />
+                        <User className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[color:var(--foreground-soft)]" />
                         <Input
                           id="firstName"
                           placeholder="John"
@@ -125,7 +127,7 @@ export default function RegisterPage() {
                   <div className="space-y-2">
                     <Label htmlFor="email">Email</Label>
                     <div className="relative">
-                      <Mail className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-stone-400" />
+                      <Mail className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[color:var(--foreground-soft)]" />
                       <Input
                         id="email"
                         type="email"
@@ -142,7 +144,7 @@ export default function RegisterPage() {
                     <div className="space-y-2">
                       <Label htmlFor="password">Password</Label>
                       <div className="relative">
-                        <LockKeyhole className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-stone-400" />
+                        <LockKeyhole className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[color:var(--foreground-soft)]" />
                         <Input
                           id="password"
                           type="password"
@@ -185,9 +187,12 @@ export default function RegisterPage() {
                     )}
                   </Button>
 
-                  <p className="text-center text-sm text-stone-600">
+                  <p className="text-center text-sm text-[color:var(--foreground-soft)]">
                     Already have an account?{" "}
-                    <Link href="/login" className="font-medium text-stone-900 underline underline-offset-4">
+                    <Link
+                      href={`/login?callbackUrl=${encodeURIComponent(callbackUrl)}`}
+                      className="font-medium text-[color:var(--foreground-strong)] underline underline-offset-4"
+                    >
                       Sign in
                     </Link>
                   </p>

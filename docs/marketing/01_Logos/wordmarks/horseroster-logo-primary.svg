@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 335 52" width="335" height="52">
+<rect width="335" height="52" fill="#FFFFFF"/>
+<rect x="0" y="2" width="48" height="48" rx="8.6" fill="#0F2A44"/>
+<rect x="9.98" y="11.98" width="6.67" height="28.03" rx="1.87" fill="#E9E3D8"/>
+<rect x="31.34" y="11.98" width="6.67" height="28.03" rx="1.87" fill="#E9E3D8"/>
+<rect x="16.66" y="22.02" width="14.69" height="8.02" rx="2.24" fill="#2D5438"/>
+<text x="63" y="40" font-family="'DM Sans','Helvetica Neue',Helvetica,Arial,sans-serif" font-size="40" font-weight="300" fill="#0F2A44" letter-spacing="-1.52">Horse</text>
+<text x="162.5" y="40" font-family="'DM Sans','Helvetica Neue',Helvetica,Arial,sans-serif" font-size="40" font-weight="800" fill="#0F2A44" letter-spacing="-1.52">Roster</text>
+</svg>

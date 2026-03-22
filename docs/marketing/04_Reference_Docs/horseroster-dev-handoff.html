@@ -1,0 +1,1234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HorseRoster — Brand & EquiTag Implementation Guide</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600;9..40,700;9..40,800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+:root{
+  --navy:#0F2A44; --navy-mid:#1A3B5A; --navy-dk:#091C2E;
+  --sand:#E9E3D8; --sand-lt:#F0EBE2;
+  --green:#2D5438; --green-lt:#3A6847;
+  --charcoal:#2B2B2B; --off:#F8F6F2; --white:#fff;
+  --mid:#8A9099; --mid-lt:#B8BEC6;
+  --rule:rgba(15,42,68,0.09); --rule-lt:rgba(15,42,68,0.05);
+  --f:'DM Sans','Helvetica Neue',Helvetica,Arial,sans-serif;
+  --fm:'IBM Plex Mono','Courier New',monospace;
+}
+html{scroll-behavior:smooth;-webkit-font-smoothing:antialiased;}
+body{font-family:var(--f);background:var(--off);color:var(--charcoal);font-size:14px;line-height:1.65;overflow-x:hidden;}
+
+/* ── LAYOUT ── */
+.wrap{max-width:980px;margin:0 auto;padding:0 40px;}
+
+/* ── COVER ── */
+.cover{background:var(--navy-dk);padding:52px 48px 44px;position:relative;overflow:hidden;}
+.cover::after{content:'';position:absolute;width:480px;height:480px;border-radius:50%;
+  background:radial-gradient(circle,rgba(45,84,56,0.18) 0%,transparent 70%);
+  top:-160px;right:-80px;pointer-events:none;}
+.cover-kicker{font-family:var(--fm);font-size:10px;letter-spacing:0.18em;color:rgba(233,227,216,0.28);margin-bottom:20px;}
+.cover-title{font-size:clamp(26px,4vw,44px);font-weight:300;color:var(--sand);letter-spacing:-0.04em;line-height:1.0;margin-bottom:4px;}
+.cover-title strong{font-weight:800;}
+.cover-desc{font-size:14px;color:rgba(233,227,216,0.38);font-weight:300;margin-bottom:36px;max-width:560px;line-height:1.6;}
+.cover-meta{display:flex;gap:36px;flex-wrap:wrap;padding-top:24px;border-top:1px solid rgba(233,227,216,0.07);}
+.cm-item p:first-child{font-family:var(--fm);font-size:9px;letter-spacing:0.15em;color:rgba(233,227,216,0.22);margin-bottom:3px;}
+.cm-item p:last-child{font-size:12px;color:rgba(233,227,216,0.48);}
+
+/* ── MESSAGE ── */
+.message{background:white;border-left:3px solid var(--green);padding:28px 32px;}
+.msg-from{font-family:var(--fm);font-size:9px;letter-spacing:0.16em;color:var(--mid);margin-bottom:14px;}
+.msg-body{font-size:13px;color:var(--charcoal);line-height:1.8;max-width:680px;}
+.msg-body p+p{margin-top:10px;}
+.msg-sig{margin-top:16px;font-size:13px;color:var(--charcoal);}
+
+/* ── SECTION ── */
+.section{padding:60px 0 0;}
+.sec-hd{display:flex;align-items:baseline;gap:14px;margin-bottom:28px;padding-bottom:14px;border-bottom:1px solid var(--rule);}
+.sec-num{font-family:var(--fm);font-size:10px;color:var(--mid-lt);letter-spacing:0.08em;flex-shrink:0;}
+.sec-title{font-size:16px;font-weight:700;color:var(--navy);letter-spacing:-0.025em;}
+.sec-note{font-size:12px;color:var(--mid);margin-left:auto;}
+
+/* ── PRIORITY CALLOUT ── */
+.priority-banner{background:var(--navy);padding:24px 28px;display:flex;gap:20px;align-items:flex-start;margin-bottom:2px;}
+.pb-dot{width:8px;height:8px;border-radius:50%;background:var(--green);flex-shrink:0;margin-top:5px;}
+.pb-label{font-family:var(--fm);font-size:9px;letter-spacing:0.18em;text-transform:uppercase;color:var(--green);margin-bottom:5px;}
+.pb-text{font-size:13px;color:var(--sand);line-height:1.6;}
+
+/* ── CHECKLIST ── */
+.checklist{background:white;border:1px solid var(--rule-lt);}
+.cl-header{padding:14px 20px;border-bottom:1px solid var(--rule-lt);display:flex;align-items:center;gap:10px;}
+.cl-title{font-size:13px;font-weight:700;color:var(--navy);letter-spacing:-0.01em;}
+.cl-tag{font-family:var(--fm);font-size:9px;padding:2px 8px;border-radius:2px;font-weight:500;}
+.cl-new{background:rgba(45,84,56,0.1);color:var(--green);}
+.cl-update{background:rgba(15,42,68,0.08);color:var(--navy);}
+.cl-item{display:flex;align-items:flex-start;gap:14px;padding:13px 20px;border-bottom:1px solid var(--rule-lt);}
+.cl-item:last-child{border-bottom:none;}
+.cl-checkbox{width:16px;height:16px;border-radius:3px;border:1.5px solid var(--mid-lt);flex-shrink:0;margin-top:1px;}
+.cl-content{flex:1;min-width:0;}
+.cl-name{font-size:13px;font-weight:600;color:var(--navy);letter-spacing:-0.01em;margin-bottom:2px;}
+.cl-detail{font-size:11px;color:var(--mid);line-height:1.55;}
+.cl-code{font-family:var(--fm);font-size:10px;color:var(--green);background:rgba(45,84,56,0.07);padding:2px 6px;border-radius:3px;display:inline-block;margin-top:4px;}
+
+/* ── CODE BLOCK ── */
+.code{background:var(--navy-dk);border-radius:5px;padding:18px 22px;font-family:var(--fm);font-size:11.5px;line-height:1.8;overflow-x:auto;max-width:100%;}
+.code pre{white-space:pre-wrap;word-break:break-word;}
+.cm{color:rgba(233,227,216,0.25);}
+.ck{color:#7DB9DE;}
+.cv{color:#E9E3D8;}
+.cs{color:#98C379;}
+.cn{color:#D19A66;}
+.cg{color:#56B6C2;}
+
+/* ── SPEC TABLE ── */
+.spec-table{width:100%;border-collapse:collapse;background:white;}
+.spec-table th{font-family:var(--fm);font-size:9px;letter-spacing:0.14em;text-transform:uppercase;color:var(--mid);padding:10px 16px;text-align:left;border-bottom:1px solid var(--rule);font-weight:500;background:var(--off);}
+.spec-table td{font-size:12px;padding:11px 16px;border-bottom:1px solid var(--rule-lt);vertical-align:top;}
+.spec-table td:first-child{font-weight:600;color:var(--navy);white-space:nowrap;width:180px;}
+.spec-table td:last-child{font-family:var(--fm);font-size:11px;color:var(--mid);}
+.spec-table tr:last-child td{border-bottom:none;}
+
+/* ── DB TABLE ── */
+.db-badge{display:inline-block;padding:1px 5px;border-radius:2px;font-family:var(--fm);font-size:8px;font-weight:600;margin-left:4px;}
+.db-pk{background:rgba(15,42,68,0.08);color:var(--navy);}
+.db-fk{background:rgba(45,84,56,0.1);color:var(--green);}
+.db-uq{background:rgba(138,144,153,0.12);color:var(--mid);}
+
+/* ── 2-COL GRID ── */
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:2px;background:var(--rule);}
+.g2>*{min-width:0;overflow:hidden;}
+.cell-w{background:white;padding:24px 28px;}
+.cell-o{background:var(--off);padding:24px 28px;}
+
+/* ── COLOUR PALETTE ── */
+.palette{display:grid;grid-template-columns:repeat(5,1fr);gap:2px;background:var(--rule);}
+.palette>*{min-width:0;}
+.swatch{background:white;}
+.sw-color{height:48px;}
+.sw-info{padding:12px 14px;}
+.sw-name{font-size:12px;font-weight:700;color:var(--navy);}
+.sw-hex{font-family:var(--fm);font-size:11px;color:var(--mid);margin-top:1px;}
+.sw-use{font-size:10px;color:var(--mid-lt);margin-top:3px;line-height:1.4;}
+
+/* ── LOGO GRID ── */
+.logo-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:2px;background:var(--rule);}
+.logo-grid>*{min-width:0;}
+.lc{display:flex;flex-direction:column;padding:28px 24px;}
+.lc-lt{background:white;}
+.lc-dk{background:var(--navy);}
+.lc-off{background:var(--off);}
+.lc-display{flex:1;display:flex;align-items:center;margin-bottom:16px;overflow:hidden;}
+.lc-foot{border-top:1px solid var(--rule-lt);padding-top:10px;}
+.lc-foot-dk{border-top-color:rgba(233,227,216,0.08);}
+.lc-file{font-family:var(--fm);font-size:10px;color:var(--green);margin-bottom:2px;}
+.lc-fmt{font-size:11px;color:var(--mid);}
+.lc-fmt-dk{color:rgba(233,227,216,0.28);}
+
+/* ── WORDMARK ── */
+.wm{font-family:var(--f);letter-spacing:-0.04em;line-height:1;display:inline-flex;align-items:baseline;white-space:nowrap;}
+.wm-h{font-weight:300;}
+.wm-r{font-weight:800;}
+.wm-navy .wm-h,.wm-navy .wm-r{color:var(--navy);}
+.wm-cream .wm-h,.wm-cream .wm-r{color:var(--sand);}
+
+/* ── HEADER MOCKUP ── */
+.header-demo{background:white;border:1px solid var(--rule-lt);border-radius:3px;overflow:hidden;}
+.header-bar{height:58px;border-bottom:1px solid var(--rule-lt);display:flex;align-items:center;justify-content:space-between;padding:0 28px;gap:16px;}
+.hnav{display:flex;align-items:center;gap:22px;}
+.hnav a{font-size:12px;font-weight:500;color:var(--mid);text-decoration:none;}
+.hact{display:flex;align-items:center;gap:8px;}
+.btn-g{font-size:12px;font-weight:600;color:var(--navy);padding:6px 13px;border:1.5px solid var(--rule);border-radius:4px;cursor:pointer;background:none;}
+.btn-p{font-size:12px;font-weight:700;color:white;padding:7px 15px;background:var(--navy);border-radius:4px;cursor:pointer;border:none;}
+.header-note{background:var(--off);padding:10px 20px;font-size:11px;color:var(--mid);font-family:var(--fm);}
+
+/* ── LISTING CARD ── */
+.card{background:white;border-radius:7px;overflow:hidden;box-shadow:0 2px 8px rgba(15,42,68,0.08);max-width:280px;}
+.card-img{height:160px;background:linear-gradient(150deg,#D4D0C9 0%,#BDB8AF 100%);position:relative;display:flex;align-items:center;justify-content:center;}
+.card-img-label{font-size:9px;color:rgba(15,42,68,0.25);letter-spacing:0.08em;font-weight:500;}
+.card-v{position:absolute;top:8px;left:8px;background:var(--green);color:white;font-size:8px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;padding:2px 6px;border-radius:2px;}
+.card-eq{position:absolute;bottom:8px;right:8px;background:rgba(9,28,46,0.6);padding:3px 6px;border-radius:3px;display:flex;align-items:center;gap:3px;}
+.card-eq-lbl{font-size:7px;color:rgba(233,227,216,0.7);font-family:var(--fm);}
+.card-body{padding:12px 14px;}
+.card-name{font-size:14px;font-weight:800;color:var(--navy);letter-spacing:-0.02em;margin-bottom:2px;}
+.card-meta{font-size:10px;color:var(--mid);margin-bottom:8px;}
+.card-tags{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:10px;}
+.ct{font-size:8px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;padding:2px 6px;border-radius:2px;}
+.ct-s{background:var(--sand-lt);color:var(--navy);}
+.ct-g{background:rgba(45,84,56,0.1);color:var(--green);}
+.card-ft{display:flex;align-items:center;justify-content:space-between;padding-top:9px;border-top:1px solid var(--rule-lt);}
+.card-price{font-size:15px;font-weight:800;color:var(--navy);letter-spacing:-0.03em;}
+.card-price-sub{font-size:9px;color:var(--mid);}
+.card-cta{background:var(--navy);color:white;font-size:10px;font-weight:700;padding:6px 12px;border-radius:3px;border:none;cursor:pointer;}
+
+/* ── ROUTING DIAGRAM ── */
+.routing{background:white;padding:24px 28px;border:1px solid var(--rule-lt);}
+.route-row{display:flex;align-items:center;gap:0;flex-wrap:wrap;row-gap:6px;margin-bottom:10px;}
+.route-row:last-child{margin-bottom:0;}
+.rb{padding:8px 12px;border-radius:4px;font-family:var(--fm);font-size:11px;}
+.rb-perm{background:var(--navy);color:var(--sand);}
+.rb-dest{background:rgba(45,84,56,0.08);color:var(--green);border:1px solid rgba(45,84,56,0.15);}
+.rb-arrow{padding:0 12px;color:var(--mid-lt);font-size:16px;}
+.rb-note{margin-left:10px;font-size:11px;color:var(--mid);}
+
+/* ── PHONE MOCKUP ── */
+.phone-wrap{display:flex;justify-content:center;padding:32px;}
+.phone{width:240px;border-radius:32px;background:#111;padding:8px;box-shadow:0 24px 60px rgba(0,0,0,0.3),0 0 0 1px rgba(255,255,255,0.05);flex-shrink:0;}
+.phone-screen{border-radius:25px;overflow:hidden;background:var(--off);}
+.phone-bar{background:#111;height:24px;display:flex;align-items:center;justify-content:center;}
+.phone-pill{width:64px;height:16px;background:#000;border-radius:8px;}
+.scan-hero{height:148px;background:linear-gradient(150deg,#C8C4BC 0%,#ADA89F 100%);position:relative;}
+.scan-ov{position:absolute;inset:0;background:linear-gradient(to top,rgba(9,28,46,0.5) 0%,transparent 55%);}
+.scan-info{position:absolute;bottom:10px;left:12px;z-index:2;}
+.scan-name{font-size:16px;font-weight:800;color:white;letter-spacing:-0.03em;line-height:1;}
+.scan-pills{display:flex;gap:3px;margin-top:4px;}
+.sp{font-size:7px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;padding:2px 5px;border-radius:2px;}
+.sp-g{background:var(--green);color:white;}
+.sp-n{background:rgba(15,42,68,0.7);color:rgba(233,227,216,0.9);}
+.scan-body{padding:11px 12px;}
+.scan-eq{display:inline-flex;align-items:center;gap:4px;background:rgba(45,84,56,0.08);border-radius:20px;padding:3px 8px;margin-bottom:9px;}
+.scan-eq span{font-size:8px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--green);}
+.scan-facts{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:7px;}
+.scan-fact{font-size:9px;color:var(--mid);}
+.scan-fact strong{color:var(--charcoal);font-weight:600;}
+.scan-desc{font-size:10px;color:var(--mid);line-height:1.55;margin-bottom:11px;}
+.scan-btn{background:var(--navy);color:white;font-size:11px;font-weight:700;padding:9px;border-radius:5px;text-align:center;margin-bottom:5px;}
+.scan-btn-ghost{border:1.5px solid var(--rule);color:var(--navy);font-size:10px;font-weight:600;padding:7px;border-radius:5px;text-align:center;}
+.scan-footer{display:flex;align-items:center;justify-content:center;gap:5px;padding:8px;border-top:1px solid var(--rule-lt);}
+.scan-footer span{font-size:8px;color:var(--mid-lt);letter-spacing:0.04em;}
+
+/* ── PATCH ── */
+.patch-stage{display:flex;align-items:center;justify-content:center;padding:36px;background:#E8E6E2;min-height:260px;overflow:hidden;}
+.spad-wrap{position:relative;width:300px;flex-shrink:0;}
+.spad-wrap svg{width:100%;height:auto;display:block;}
+.patch-anchor{position:absolute;bottom:17%;left:7%;}
+.etpatch{display:flex;flex-direction:column;align-items:center;padding:8px 7px 7px;gap:6px;border-radius:5px;width:84px;background:var(--navy);box-shadow:0 4px 14px rgba(9,28,46,0.45);}
+.etpatch::before{content:'';position:absolute;inset:2px;border-radius:4px;border:1px solid rgba(255,255,255,0.07);pointer-events:none;}
+.etpatch-cream{background:var(--sand-lt);}
+.etpatch-cream::before{border-color:rgba(15,42,68,0.07);}
+.pt-top{display:flex;align-items:center;gap:3px;width:100%;overflow:hidden;}
+.pt-qr{background:white;border-radius:3px;padding:4px;width:62px;height:62px;display:flex;align-items:center;justify-content:center;}
+.pt-qr-sand{background:var(--sand);}
+.pt-label{font-family:var(--fm);font-size:5px;letter-spacing:0.1em;text-transform:uppercase;text-align:center;}
+
+/* ── TYPE SCALE ── */
+.type-row{display:flex;align-items:baseline;gap:20px;padding:12px 0;border-bottom:1px solid var(--rule-lt);}
+.type-row:last-child{border-bottom:none;}
+.type-lbl{font-family:var(--fm);font-size:9px;color:var(--mid);width:110px;flex-shrink:0;letter-spacing:0.08em;}
+.type-sample{font-family:var(--f);color:var(--navy);min-width:0;}
+.type-spec{font-family:var(--fm);font-size:9px;color:var(--mid-lt);margin-left:auto;white-space:nowrap;flex-shrink:0;}
+
+/* ── INFO ROWS ── */
+.info-row{display:flex;justify-content:space-between;align-items:flex-start;padding:10px 0;border-bottom:1px solid var(--rule-lt);gap:16px;}
+.info-row:last-child{border-bottom:none;}
+.ir-key{font-size:12px;font-weight:600;color:var(--navy);flex-shrink:0;}
+.ir-val{font-size:12px;color:var(--mid);font-family:var(--fm);text-align:right;}
+
+/* ── FOOTER ── */
+.doc-footer{padding:36px 0 64px;border-top:1px solid var(--rule);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-top:64px;}
+.doc-footer p{font-size:11px;color:var(--mid-lt);}
+
+/* ── RESPONSIVE ── */
+@media(max-width:860px){
+  .wrap{padding:0 20px;}
+  .cover{padding:36px 24px 32px;}
+  .g2,.logo-grid,.palette{grid-template-columns:1fr;}
+  .palette{grid-template-columns:1fr 1fr;}
+  .logo-grid{grid-template-columns:1fr 1fr;}
+  .type-spec{display:none;}
+  .hnav{display:none;}
+}
+@media(max-width:560px){
+  .logo-grid{grid-template-columns:1fr;}
+  .palette{grid-template-columns:1fr;}
+}
+</style>
+</head>
+<body>
+
+<!-- COVER -->
+<div class="cover">
+  <p class="cover-kicker">HorseRoster · Brand & EquiTag Implementation Guide</p>
+  <h1 class="cover-title"><strong>Horse</strong>Roster<br>Implementation Guide</h1>
+  <p class="cover-desc">This document covers everything you need to implement the finalized brand and the EquiTag QR system into the existing platform. The platform core is already built — this is about layering the visual identity on top and adding EquiTag as a new feature.</p>
+  <div class="cover-meta">
+    <div class="cm-item"><p>For</p><p>Vinicius — Developer</p></div>
+    <div class="cm-item"><p>From</p><p>Tyler</p></div>
+    <div class="cm-item"><p>Status</p><p>Platform exists · Brand finalized · EquiTag = new feature</p></div>
+    <div class="cm-item"><p>Assets included</p><p>SVG logos · CSS tokens · Brand reference · EquiTag spec</p></div>
+  </div>
+</div>
+
+<div class="wrap">
+
+<!-- MESSAGE -->
+<div class="message" style="margin-top:2px;">
+  <p class="msg-from">FROM TYLER</p>
+  <div class="msg-body">
+    <p>Hi Vinicius,</p>
+    <p>Here is the HorseRoster brand and development package. Everything needed to implement the platform is included in this folder.</p>
+    <p>Please review the <strong>EquiTag system section first</strong>, because it is the core feature of the platform.</p>
+    <p>Inside this package you will find:</p>
+    <ul style="margin:8px 0 8px 20px;display:flex;flex-direction:column;gap:4px;">
+      <li>Logo and branding files — <code style="font-family:var(--fm);font-size:11px;background:rgba(45,84,56,0.08);color:var(--green);padding:1px 5px;border-radius:3px;">01_Logos/</code></li>
+      <li>Brand colors and typography — <code style="font-family:var(--fm);font-size:11px;background:rgba(45,84,56,0.08);color:var(--green);padding:1px 5px;border-radius:3px;">02_Brand_System/brand-tokens.css</code></li>
+      <li>EquiTag and EquiVault assets — <code style="font-family:var(--fm);font-size:11px;background:rgba(45,84,56,0.08);color:var(--green);padding:1px 5px;border-radius:3px;">03_EquiTag/</code></li>
+      <li>Full development handoff document — <code style="font-family:var(--fm);font-size:11px;background:rgba(45,84,56,0.08);color:var(--green);padding:1px 5px;border-radius:3px;">04_Reference_Docs/</code></li>
+      <li>QR code system architecture — see §5 in this document</li>
+    </ul>
+    <p>Let me know if anything needs clarification before development begins.</p>
+  </div>
+  <p class="msg-sig">— Tyler</p>
+</div>
+
+<!-- ══════════════════════════
+     §1 WHAT NEEDS TO BE DONE
+══════════════════════════ -->
+<div class="section" id="s1">
+  <div class="sec-hd">
+    <span class="sec-num">01</span>
+    <h2 class="sec-title">What Needs To Be Done</h2>
+    <span class="sec-note">Start here</span>
+  </div>
+
+  <div class="priority-banner" style="margin-bottom:2px;">
+    <div class="pb-dot"></div>
+    <div>
+      <p class="pb-label">New feature — build from scratch</p>
+      <p class="pb-text">EquiTag QR system — permanent per-account QR codes with a reassignable redirect. See §5 for the full spec. This is the main new thing to build.</p>
+    </div>
+  </div>
+
+  <!-- Branding checklist -->
+  <div class="checklist" style="margin-bottom:12px;">
+    <div class="cl-header">
+      <span class="cl-title">Brand Updates — Apply to existing platform</span>
+      <span class="cl-tag cl-update">Updates to existing UI</span>
+    </div>
+
+    <div class="cl-item">
+      <div class="cl-checkbox"></div>
+      <div class="cl-content">
+        <p class="cl-name">Replace fonts with DM Sans</p>
+        <p class="cl-detail">Primary typeface throughout the platform. Add the Google Fonts import to your <code>&lt;head&gt;</code>. Remove whatever font you're currently using for headings and nav. IBM Plex Mono for horse IDs, QR codes, and metadata only.</p>
+        <span class="cl-code">fonts.googleapis.com/css2?family=DM+Sans:opsz,<a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="e790808f93a7dec9c9d3d7">[email&#160;protected]</a>,300;9..40,400;9..40,500;9..40,600;9..40,700;9..40,800</span>
+      </div>
+    </div>
+
+    <div class="cl-item">
+      <div class="cl-checkbox"></div>
+      <div class="cl-content">
+        <p class="cl-name">Apply brand color tokens</p>
+        <p class="cl-detail">Paste the <code>:root</code> block from <strong>brand-tokens.css</strong> into your global stylesheet. Then replace hardcoded colors in your existing CSS with the CSS variables. Primary action color = <code>--color-navy</code>. Accent = <code>--color-green</code> (use sparingly — CTAs only).</p>
+        <span class="cl-code">02_Brand_System/brand-tokens.css</span>
+      </div>
+    </div>
+
+    <div class="cl-item">
+      <div class="cl-checkbox"></div>
+      <div class="cl-content">
+        <p class="cl-name">Swap in the logo files</p>
+        <p class="cl-detail">Use <strong>horseroster-logo-primary.svg</strong> in the site header (height: 26px). Use <strong>horseroster-icon.svg</strong> as the app icon and favicon source. All files are in the <code>01_Logos/</code> folder — SVG only, scalable to any size. One important detail: "Horse" is weight 300 (light) and "Roster" is weight 800 (bold) in the wordmark.</p>
+        <span class="cl-code">01_Logos/wordmarks/horseroster-logo-primary.svg</span>
+      </div>
+    </div>
+
+    <div class="cl-item">
+      <div class="cl-checkbox"></div>
+      <div class="cl-content">
+        <p class="cl-name">Update site header layout</p>
+        <p class="cl-detail">Height 60px, sticky, white with blur backdrop. Nav items: Browse Horses · MyBarn · Sellers. Actions: Login (ghost button) + List a horse (navy CTA). See §3 for the live preview and exact specs.</p>
+      </div>
+    </div>
+
+    <div class="cl-item">
+      <div class="cl-checkbox"></div>
+      <div class="cl-content">
+        <p class="cl-name">Update horse listing cards</p>
+        <p class="cl-detail">Check your existing card component against the spec in §4. Key things: horse name is weight 800, price is weight 800, "Verified" badge is hunter green (#2D5438), EquiTag badge sits bottom-right of the photo. The card should hover with a subtle lift (translateY -2px).</p>
+      </div>
+    </div>
+
+    <div class="cl-item">
+      <div class="cl-checkbox"></div>
+      <div class="cl-content">
+        <p class="cl-name">Page background color</p>
+        <p class="cl-detail">Set page background to Off-White <strong>#F8F6F2</strong>, not pure white. Pure white is for card surfaces only. This gives the platform a warmer, more premium feel.</p>
+        <span class="cl-code">background: #F8F6F2</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- EquiTag checklist -->
+  <div class="checklist">
+    <div class="cl-header">
+      <span class="cl-title">EquiTag QR System — Build new</span>
+      <span class="cl-tag cl-new">New feature</span>
+    </div>
+
+    <div class="cl-item">
+      <div class="cl-checkbox"></div>
+      <div class="cl-content">
+        <p class="cl-name">Generate a QR code for every account at signup</p>
+        <p class="cl-detail">Use the <code>qrcode</code> npm package. The QR encodes the URL <code>horseroster.com/u/[account_id]</code>. Store the short code in the database. Generate SVG + PNG and save both to S3. See §5 and §7 for full code.</p>
+        <span class="cl-code">npm install qrcode</span>
+      </div>
+    </div>
+
+    <div class="cl-item">
+      <div class="cl-checkbox"></div>
+      <div class="cl-content">
+        <p class="cl-name">Add 3 new database tables</p>
+        <p class="cl-detail"><code>equitag_codes</code> (one per account, permanent), <code>equitag_redirects</code> (the current destination, can be updated), <code>equitag_assignment_log</code> (audit trail). Full schema in §5.</p>
+      </div>
+    </div>
+
+    <div class="cl-item">
+      <div class="cl-checkbox"></div>
+      <div class="cl-content">
+        <p class="cl-name">Add redirect route: GET /u/:account_id</p>
+        <p class="cl-detail">Looks up the current destination in <code>equitag_redirects</code> and returns a 302 redirect. This is the URL inside the QR code — it must never change. The destination is what changes.</p>
+        <span class="cl-code">GET /u/:account_id → 302 → current destination</span>
+      </div>
+    </div>
+
+    <div class="cl-item">
+      <div class="cl-checkbox"></div>
+      <div class="cl-content">
+        <p class="cl-name">Build the mobile scan landing page: GET /s/:account_id</p>
+        <p class="cl-detail">This is what someone sees when they scan the QR. This page shows a clean preview card of the horse, barn, or trainer profile with a <strong>View Full Profile</strong> button. No login required. Must be SSR for fast load. Design in §6.</p>
+        <span class="cl-code">GET /s/:account_id → ScanLandingPage (public, SSR)</span>
+      </div>
+    </div>
+
+    <div class="cl-item">
+      <div class="cl-checkbox"></div>
+      <div class="cl-content">
+        <p class="cl-name">Add EquiTag Manager to MyBarn dashboard</p>
+        <p class="cl-detail">A section where the user can view their QR code, download it (SVG and PNG), and assign it to a horse, barn, or trainer profile. Assignment updates the redirect table. Include an assignment history log.</p>
+      </div>
+    </div>
+
+    <div class="cl-item">
+      <div class="cl-checkbox"></div>
+      <div class="cl-content">
+        <p class="cl-name">Show EquiTag badge on horse profile + listing cards</p>
+        <p class="cl-detail">If a horse has an EquiTag assigned to it, show the small EquiTag badge on its listing card (bottom-right of photo) and on the full horse profile page.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════
+     §1B EQUITAG SYSTEM FLOW
+══════════════════════════ -->
+<div class="section" id="s1b">
+  <div class="sec-hd">
+    <span class="sec-num">01B</span>
+    <h2 class="sec-title">EquiTag System Flow</h2>
+    <span class="sec-note">Step-by-step logic</span>
+  </div>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:2px;background:var(--rule);">
+
+    <!-- Step-by-step flow -->
+    <div style="background:white;padding:28px 32px;">
+      <p style="font-family:var(--fm);font-size:9px;letter-spacing:0.14em;text-transform:uppercase;color:var(--mid);margin-bottom:20px;">How it works — in order</p>
+      <div style="display:flex;flex-direction:column;gap:0;">
+
+        <div style="display:flex;gap:16px;align-items:flex-start;padding:12px 0;border-bottom:1px solid var(--rule-lt);">
+          <span style="font-family:var(--fm);font-size:10px;color:var(--green);font-weight:600;flex-shrink:0;width:20px;">1</span>
+          <div><p style="font-size:13px;font-weight:600;color:var(--navy);margin-bottom:2px;">User creates a HorseRoster account</p></div>
+        </div>
+
+        <div style="display:flex;gap:16px;align-items:flex-start;padding:12px 0;border-bottom:1px solid var(--rule-lt);">
+          <span style="font-family:var(--fm);font-size:10px;color:var(--green);font-weight:600;flex-shrink:0;width:20px;">2</span>
+          <div><p style="font-size:13px;font-weight:600;color:var(--navy);margin-bottom:2px;">System generates ONE permanent QR code for that account</p><p style="font-size:11px;color:var(--mid);">This happens automatically at signup. The QR code never changes.</p></div>
+        </div>
+
+        <div style="display:flex;gap:16px;align-items:flex-start;padding:12px 0;border-bottom:1px solid var(--rule-lt);">
+          <span style="font-family:var(--fm);font-size:10px;color:var(--green);font-weight:600;flex-shrink:0;width:20px;">3</span>
+          <div><p style="font-size:13px;font-weight:600;color:var(--navy);margin-bottom:2px;">QR code points to a permanent URL</p><span style="font-family:var(--fm);font-size:11px;color:var(--green);background:rgba(45,84,56,0.07);padding:3px 8px;border-radius:3px;display:inline-block;margin-top:4px;">horseroster.com/u/{account_id}</span></div>
+        </div>
+
+        <div style="display:flex;gap:16px;align-items:flex-start;padding:12px 0;border-bottom:1px solid var(--rule-lt);">
+          <span style="font-family:var(--fm);font-size:10px;color:var(--green);font-weight:600;flex-shrink:0;width:20px;">4</span>
+          <div>
+            <p style="font-size:13px;font-weight:600;color:var(--navy);margin-bottom:6px;">User chooses what the QR links to</p>
+            <div style="display:flex;flex-direction:column;gap:4px;">
+              <span style="font-size:12px;color:var(--mid);display:flex;align-items:center;gap:6px;"><span style="color:var(--green);">→</span> A horse profile</span>
+              <span style="font-size:12px;color:var(--mid);display:flex;align-items:center;gap:6px;"><span style="color:var(--green);">→</span> A barn page</span>
+              <span style="font-size:12px;color:var(--mid);display:flex;align-items:center;gap:6px;"><span style="color:var(--green);">→</span> A trainer page</span>
+            </div>
+          </div>
+        </div>
+
+        <div style="display:flex;gap:16px;align-items:flex-start;padding:12px 0;border-bottom:1px solid var(--rule-lt);">
+          <span style="font-family:var(--fm);font-size:10px;color:var(--green);font-weight:600;flex-shrink:0;width:20px;">5</span>
+          <div><p style="font-size:13px;font-weight:600;color:var(--navy);margin-bottom:2px;">User controls the destination in EquiTag Manager</p><p style="font-size:11px;color:var(--mid);">A section inside the MyBarn dashboard. User can reassign anytime without reprinting the QR.</p></div>
+        </div>
+
+        <div style="display:flex;gap:16px;align-items:flex-start;padding:12px 0;border-bottom:1px solid var(--rule-lt);">
+          <span style="font-family:var(--fm);font-size:10px;color:var(--green);font-weight:600;flex-shrink:0;width:20px;">6</span>
+          <div><p style="font-size:13px;font-weight:600;color:var(--navy);margin-bottom:2px;">Someone scans the QR — they land on the scan page</p><span style="font-family:var(--fm);font-size:11px;color:var(--green);background:rgba(45,84,56,0.07);padding:3px 8px;border-radius:3px;display:inline-block;margin-top:4px;">horseroster.com/s/{account_id}</span></div>
+        </div>
+
+        <div style="display:flex;gap:16px;align-items:flex-start;padding:12px 0;">
+          <span style="font-family:var(--fm);font-size:10px;color:var(--green);font-weight:600;flex-shrink:0;width:20px;">7</span>
+          <div><p style="font-size:13px;font-weight:600;color:var(--navy);margin-bottom:2px;">Scan page shows a preview card with a button</p><p style="font-size:11px;color:var(--mid);">This page shows a clean preview card of the horse, barn, or trainer profile with a <strong style="color:var(--navy);">View Full Profile</strong> button. No login required.</p></div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- QR Generation -->
+    <div style="background:var(--off);padding:28px 32px;">
+      <p style="font-family:var(--fm);font-size:9px;letter-spacing:0.14em;text-transform:uppercase;color:var(--mid);margin-bottom:20px;">QR Code Generation</p>
+
+      <div style="background:white;border:1px solid var(--rule-lt);border-radius:4px;padding:16px 18px;margin-bottom:14px;">
+        <p style="font-size:13px;font-weight:600;color:var(--navy);margin-bottom:6px;">Generate automatically at account creation</p>
+        <p style="font-size:12px;color:var(--mid);line-height:1.65;">The QR code should be created the moment a user account is created. It should not require a manual step from the user.</p>
+      </div>
+
+      <div style="background:white;border:1px solid var(--rule-lt);border-radius:4px;padding:16px 18px;margin-bottom:14px;">
+        <p style="font-size:13px;font-weight:600;color:var(--navy);margin-bottom:6px;">The QR encodes this URL</p>
+        <span style="font-family:var(--fm);font-size:11px;color:var(--green);background:rgba(45,84,56,0.07);padding:5px 10px;border-radius:3px;display:block;">horseroster.com/u/{account_id}</span>
+        <p style="font-size:11px;color:var(--mid);margin-top:8px;">Example: <span style="font-family:var(--fm);color:var(--mid);">horseroster.com/u/12345</span></p>
+      </div>
+
+      <div style="background:white;border:1px solid var(--rule-lt);border-radius:4px;padding:16px 18px;margin-bottom:14px;">
+        <p style="font-size:13px;font-weight:600;color:var(--navy);margin-bottom:6px;">Save to the user record</p>
+        <p style="font-size:12px;color:var(--mid);line-height:1.65;">The QR image (SVG + PNG) should be saved to the user's record so it can be downloaded from the dashboard and printed on saddle pads or other physical materials.</p>
+      </div>
+
+      <div style="background:white;border:1px solid var(--rule-lt);border-radius:4px;padding:16px 18px;">
+        <p style="font-size:13px;font-weight:600;color:var(--navy);margin-bottom:6px;">Package to use</p>
+        <span style="font-family:var(--fm);font-size:11px;color:var(--green);background:rgba(45,84,56,0.07);padding:5px 10px;border-radius:3px;display:block;">npm install qrcode</span>
+        <p style="font-size:11px;color:var(--mid);margin-top:8px;">Use error correction Level H — the QR lives on saddle pads and will get dirty and worn. Full generation code is in §5.</p>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══════════════════════════
+     §2 BRAND SYSTEM
+══════════════════════════ -->
+<div class="section" id="s2">
+  <div class="sec-hd">
+    <span class="sec-num">02</span>
+    <h2 class="sec-title">Brand System</h2>
+    <span class="sec-note">Colors · fonts · tokens</span>
+  </div>
+
+  <!-- Colours -->
+  <div class="palette" style="margin-bottom:2px;">
+    <div class="swatch"><div class="sw-color" style="background:#0F2A44;"></div><div class="sw-info"><p class="sw-name">Navy</p><p class="sw-hex">#0F2A44</p><p class="sw-use">Primary — brand, headings, all UI elements</p></div></div>
+    <div class="swatch"><div class="sw-color" style="background:#E9E3D8;border-bottom:1px solid rgba(0,0,0,0.06);"></div><div class="sw-info"><p class="sw-name">Sand</p><p class="sw-hex">#E9E3D8</p><p class="sw-use">Reversed text on dark backgrounds</p></div></div>
+    <div class="swatch"><div class="sw-color" style="background:#2D5438;"></div><div class="sw-info"><p class="sw-name">Hunter</p><p class="sw-hex">#2D5438</p><p class="sw-use">Accent — CTAs and Verified badge only</p></div></div>
+    <div class="swatch"><div class="sw-color" style="background:#2B2B2B;"></div><div class="sw-info"><p class="sw-name">Charcoal</p><p class="sw-hex">#2B2B2B</p><p class="sw-use">Body copy</p></div></div>
+    <div class="swatch"><div class="sw-color" style="background:#F8F6F2;border-bottom:1px solid rgba(0,0,0,0.06);"></div><div class="sw-info"><p class="sw-name">Off-White</p><p class="sw-hex">#F8F6F2</p><p class="sw-use">Page background</p></div></div>
+  </div>
+
+  <!-- Color usage rule -->
+  <div style="background:white;border:1px solid var(--rule-lt);border-left:3px solid var(--navy);padding:16px 20px;margin-bottom:12px;display:flex;gap:16px;align-items:flex-start;">
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" style="flex-shrink:0;margin-top:1px;"><circle cx="8" cy="8" r="7" stroke="#0F2A44" stroke-width="1.5"/><rect x="7.25" y="4" width="1.5" height="5" rx="0.75" fill="#0F2A44"/><circle cx="8" cy="11.5" r="0.75" fill="#0F2A44"/></svg>
+    <div>
+      <p style="font-size:13px;font-weight:700;color:var(--navy);margin-bottom:4px;">Color usage rule</p>
+      <p style="font-size:12px;color:var(--mid);line-height:1.65;">Primary UI colors are <strong style="color:var(--navy);">Navy (#0F2A44)</strong> and <strong style="color:var(--charcoal);">Sand (#E9E3D8)</strong>. Hunter Green <strong style="color:var(--green);">(#2D5438)</strong> should only be used for actions, highlights, and call-to-action buttons — not as a general UI color or decorative element.</p>
+    </div>
+  </div>
+  <div style="background:white;border:1px solid var(--rule-lt);margin-bottom:12px;">
+    <div style="padding:12px 20px;border-bottom:1px solid var(--rule-lt);display:flex;justify-content:space-between;align-items:center;">
+      <span style="font-family:var(--fm);font-size:9px;letter-spacing:0.14em;text-transform:uppercase;color:var(--mid);">CSS Variables — paste into :root</span>
+      <span style="font-size:11px;color:var(--mid);">full file in 02_Brand_System/brand-tokens.css</span>
+    </div>
+    <div class="code">
+<pre><span class="ck">:root</span> {
+  <span class="cm">/* Colours */</span>
+  <span class="ck">--color-navy</span>:      <span class="cs">#0F2A44</span>;
+  <span class="ck">--color-navy-mid</span>:  <span class="cs">#1A3B5A</span>;
+  <span class="ck">--color-sand</span>:      <span class="cs">#E9E3D8</span>;
+  <span class="ck">--color-sand-lt</span>:   <span class="cs">#F0EBE2</span>;
+  <span class="ck">--color-green</span>:     <span class="cs">#2D5438</span>;   <span class="cm">/* use sparingly */</span>
+  <span class="ck">--color-charcoal</span>:  <span class="cs">#2B2B2B</span>;
+  <span class="ck">--color-offwhite</span>:  <span class="cs">#F8F6F2</span>;
+
+  <span class="cm">/* Typography */</span>
+  <span class="ck">--font-sans</span>: <span class="cs">'DM Sans'</span>, <span class="cs">'Helvetica Neue'</span>, Helvetica, Arial, sans-serif;
+  <span class="ck">--font-mono</span>: <span class="cs">'IBM Plex Mono'</span>, <span class="cs">'Courier New'</span>, monospace;
+
+  <span class="cm">/* Borders */</span>
+  <span class="ck">--rule</span>:    <span class="cs">rgba(15,42,68,0.09)</span>;
+  <span class="ck">--rule-lt</span>: <span class="cs">rgba(15,42,68,0.05)</span>;
+}</pre>
+    </div>
+  </div>
+
+  <!-- Type scale -->
+  <div style="background:white;border:1px solid var(--rule-lt);padding:16px 24px 20px;">
+    <p style="font-family:var(--fm);font-size:9px;letter-spacing:0.14em;text-transform:uppercase;color:var(--mid);margin-bottom:16px;">Typography Scale — DM Sans</p>
+    <div class="type-row">
+      <span class="type-lbl">DISPLAY · 800</span>
+      <span class="type-sample" style="font-size:32px;font-weight:800;letter-spacing:-0.04em;line-height:1;">Find your next horse.</span>
+      <span class="type-spec">48–64px · -0.04em</span>
+    </div>
+    <div class="type-row">
+      <span class="type-lbl">H1 · 700</span>
+      <span class="type-sample" style="font-size:24px;font-weight:700;letter-spacing:-0.03em;">Sport Horse Platform</span>
+      <span class="type-spec">32–40px · -0.03em</span>
+    </div>
+    <div class="type-row">
+      <span class="type-lbl">H2 · 600</span>
+      <span class="type-sample" style="font-size:18px;font-weight:600;letter-spacing:-0.025em;">Browse Horses</span>
+      <span class="type-spec">22–28px · -0.025em</span>
+    </div>
+    <div class="type-row">
+      <span class="type-lbl">BODY · 400</span>
+      <span class="type-sample" style="font-size:14px;font-weight:400;color:var(--charcoal);">The professional marketplace for sport horse buyers and barns.</span>
+      <span class="type-spec">14–15px · 1.65 line-height</span>
+    </div>
+    <div class="type-row">
+      <span class="type-lbl">MONO · IDs</span>
+      <span class="type-sample" style="font-family:var(--fm);font-size:12px;color:var(--green);">HR-2024-0091 · horseroster.com/eq/A7F2C</span>
+      <span class="type-spec">IBM Plex Mono — codes only</span>
+    </div>
+    <div class="type-row">
+      <span class="type-lbl">WORDMARK</span>
+      <span class="type-sample"><span class="wm wm-navy" style="font-size:22px;"><span class="wm-h">Horse</span><span class="wm-r">Roster</span></span></span>
+      <span class="type-spec">Horse=300 · Roster=800</span>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════
+     §3 LOGO FILES
+══════════════════════════ -->
+<div class="section" id="s3">
+  <div class="sec-hd">
+    <span class="sec-num">03</span>
+    <h2 class="sec-title">Logo Files</h2>
+    <span class="sec-note">All SVG — in 01_Logos folder</span>
+  </div>
+
+  <div class="logo-grid" style="margin-bottom:12px;">
+
+    <div class="lc lc-lt">
+      <div class="lc-display">
+        <div style="display:flex;align-items:center;gap:9px;">
+          <svg width="30" height="30" viewBox="0 0 72 72" fill="none"><rect width="72" height="72" rx="12" fill="#0F2A44"/><rect x="15" y="13" width="10" height="46" rx="2.5" fill="#E9E3D8"/><rect x="47" y="13" width="10" height="46" rx="2.5" fill="#E9E3D8"/><rect x="25" y="30" width="22" height="12" rx="2.5" fill="#2D5438"/></svg>
+          <span class="wm wm-navy" style="font-size:clamp(16px,2.4vw,24px);"><span class="wm-h">Horse</span><span class="wm-r">Roster</span></span>
+        </div>
+      </div>
+      <div class="lc-foot">
+        <p class="lc-file">horseroster-logo-primary.svg</p>
+        <p class="lc-fmt">Header, emails, documents</p>
+      </div>
+    </div>
+
+    <div class="lc lc-dk">
+      <div class="lc-display">
+        <div style="display:flex;align-items:center;gap:9px;">
+          <svg width="30" height="30" viewBox="0 0 72 72" fill="none"><rect width="72" height="72" rx="12" fill="#1A3B5A"/><rect x="15" y="13" width="10" height="46" rx="2.5" fill="#E9E3D8"/><rect x="47" y="13" width="10" height="46" rx="2.5" fill="#E9E3D8"/><rect x="25" y="30" width="22" height="12" rx="2.5" fill="#2D5438"/></svg>
+          <span class="wm wm-cream" style="font-size:clamp(16px,2.4vw,24px);"><span class="wm-h">Horse</span><span class="wm-r">Roster</span></span>
+        </div>
+      </div>
+      <div class="lc-foot lc-foot-dk">
+        <p class="lc-file">horseroster-logo-primary-dark.svg</p>
+        <p class="lc-fmt lc-fmt-dk">Dark backgrounds</p>
+      </div>
+    </div>
+
+    <div class="lc lc-off">
+      <div class="lc-display" style="gap:14px;align-items:flex-end;flex-wrap:wrap;">
+        <div style="display:flex;flex-direction:column;align-items:center;gap:5px;">
+          <svg width="48" height="48" viewBox="0 0 72 72" fill="none"><rect width="72" height="72" rx="14" fill="#0F2A44"/><rect x="15" y="13" width="10" height="46" rx="2.5" fill="#E9E3D8"/><rect x="47" y="13" width="10" height="46" rx="2.5" fill="#E9E3D8"/><rect x="25" y="30" width="22" height="12" rx="2.5" fill="#2D5438"/></svg>
+          <span style="font-family:var(--fm);font-size:8px;color:var(--mid);">app-icon</span>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:center;gap:5px;">
+          <svg width="20" height="20" viewBox="0 0 72 72" fill="none"><rect width="72" height="72" rx="6" fill="#0F2A44"/><rect x="15" y="13" width="10" height="46" rx="2.5" fill="#E9E3D8"/><rect x="47" y="13" width="10" height="46" rx="2.5" fill="#E9E3D8"/><rect x="25" y="30" width="22" height="12" rx="2.5" fill="#2D5438"/></svg>
+          <span style="font-family:var(--fm);font-size:8px;color:var(--mid);">favicon</span>
+        </div>
+      </div>
+      <div class="lc-foot">
+        <p class="lc-file">horseroster-icon.svg · app-icons/</p>
+        <p class="lc-fmt">App store, browser tab, social avatar</p>
+      </div>
+    </div>
+
+  </div>
+
+  <div style="background:white;border:1px solid var(--rule-lt);padding:16px 22px;">
+    <p style="font-size:12px;color:var(--mid);line-height:1.7;">All logo files are SVG — scalable to any size. For PNG exports (email, app store), open the SVG in Figma or Illustrator and export at the size you need. The wordmark files use the DM Sans font-family stack — for print production, open in Illustrator and do <strong style="color:var(--charcoal);">Type → Create Outlines</strong> to make the file self-contained.</p>
+  </div>
+</div>
+
+<!-- ══════════════════════════
+     §4 UI COMPONENTS
+══════════════════════════ -->
+<div class="section" id="s4">
+  <div class="sec-hd">
+    <span class="sec-num">04</span>
+    <h2 class="sec-title">UI Components</h2>
+    <span class="sec-note">Header · listing card</span>
+  </div>
+
+  <!-- Header -->
+  <div style="margin-bottom:12px;">
+    <div class="header-demo">
+      <div class="header-bar">
+        <div style="display:flex;align-items:center;gap:8px;">
+          <svg width="24" height="24" viewBox="0 0 72 72" fill="none"><rect width="72" height="72" rx="10" fill="#0F2A44"/><rect x="15" y="13" width="10" height="46" rx="2.5" fill="#E9E3D8"/><rect x="47" y="13" width="10" height="46" rx="2.5" fill="#E9E3D8"/><rect x="25" y="30" width="22" height="12" rx="2.5" fill="#2D5438"/></svg>
+          <span class="wm wm-navy" style="font-size:15px;"><span class="wm-h">Horse</span><span class="wm-r">Roster</span></span>
+        </div>
+        <nav class="hnav">
+          <a href="#">Browse Horses</a>
+          <a href="#">MyBarn</a>
+          <a href="#">Sellers</a>
+        </nav>
+        <div class="hact">
+          <button class="btn-g">Login</button>
+          <button class="btn-p">List a horse →</button>
+        </div>
+      </div>
+      <div class="header-note">↑ Site header — sticky, 60px tall, white with backdrop-filter:blur(12px)</div>
+    </div>
+  </div>
+
+  <div class="g2" style="margin-bottom:12px;">
+    <div class="cell-w">
+      <p style="font-family:var(--fm);font-size:9px;letter-spacing:0.14em;text-transform:uppercase;color:var(--mid);margin-bottom:14px;">Header Spec</p>
+      <div class="info-row"><span class="ir-key">Height</span><span class="ir-val">60px</span></div>
+      <div class="info-row"><span class="ir-key">Position</span><span class="ir-val">sticky · top:0 · z-index:100</span></div>
+      <div class="info-row"><span class="ir-key">Background</span><span class="ir-val">rgba(255,255,255,0.96)</span></div>
+      <div class="info-row"><span class="ir-key">Backdrop</span><span class="ir-val">blur(12px)</span></div>
+      <div class="info-row"><span class="ir-key">Border bottom</span><span class="ir-val">1px rgba(15,42,68,0.05)</span></div>
+      <div class="info-row"><span class="ir-key">Logo height</span><span class="ir-val">26px</span></div>
+      <div class="info-row"><span class="ir-key">Nav font</span><span class="ir-val">DM Sans 500 · 13px</span></div>
+      <div class="info-row"><span class="ir-key">CTA button</span><span class="ir-val">bg:#0F2A44 · white · bold · 4px radius</span></div>
+    </div>
+    <div class="cell-o">
+      <p style="font-family:var(--fm);font-size:9px;letter-spacing:0.14em;text-transform:uppercase;color:var(--mid);margin-bottom:14px;">Header HTML</p>
+      <div class="code" style="font-size:11px;">
+<pre><span class="cv">&lt;header</span> <span class="ck">class</span>=<span class="cs">"site-header"</span><span class="cv">&gt;</span>
+  <span class="cv">&lt;div</span> <span class="ck">class</span>=<span class="cs">"logo"</span><span class="cv">&gt;</span>
+    <span class="cv">&lt;img</span> <span class="ck">src</span>=<span class="cs">"/logos/horseroster-logo-primary.svg"</span>
+         <span class="ck">height</span>=<span class="cs">"26"</span> <span class="ck">alt</span>=<span class="cs">"HorseRoster"</span> <span class="cv">/&gt;</span>
+  <span class="cv">&lt;/div&gt;</span>
+  <span class="cv">&lt;nav&gt;</span>
+    <span class="cv">&lt;a</span> <span class="ck">href</span>=<span class="cs">"/browse"</span><span class="cv">&gt;</span>Browse Horses<span class="cv">&lt;/a&gt;</span>
+    <span class="cv">&lt;a</span> <span class="ck">href</span>=<span class="cs">"/mybarn"</span><span class="cv">&gt;</span>MyBarn<span class="cv">&lt;/a&gt;</span>
+    <span class="cv">&lt;a</span> <span class="ck">href</span>=<span class="cs">"/sellers"</span><span class="cv">&gt;</span>Sellers<span class="cv">&lt;/a&gt;</span>
+  <span class="cv">&lt;/nav&gt;</span>
+  <span class="cv">&lt;div</span> <span class="ck">class</span>=<span class="cs">"actions"</span><span class="cv">&gt;</span>
+    <span class="cv">&lt;a</span> <span class="ck">href</span>=<span class="cs">"/login"</span> <span class="ck">class</span>=<span class="cs">"btn-ghost"</span><span class="cv">&gt;</span>Login<span class="cv">&lt;/a&gt;</span>
+    <span class="cv">&lt;a</span> <span class="ck">href</span>=<span class="cs">"/list"</span> <span class="ck">class</span>=<span class="cs">"btn-primary"</span><span class="cv">&gt;</span>List a horse →<span class="cv">&lt;/a&gt;</span>
+  <span class="cv">&lt;/div&gt;</span>
+<span class="cv">&lt;/header&gt;</span></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- Listing card -->
+  <div class="g2">
+    <div class="cell-o" style="display:flex;justify-content:center;align-items:flex-start;padding:32px;">
+      <div class="card">
+        <div class="card-img">
+          <span class="card-img-label">HORSE PHOTO</span>
+          <span class="card-v">Verified</span>
+          <div class="card-eq">
+            <svg width="9" height="9" viewBox="0 0 72 72" fill="none"><rect x="2" y="2" width="28" height="28" rx="3" fill="none" stroke="rgba(233,227,216,0.7)" stroke-width="6"/><rect x="10" y="10" width="12" height="12" fill="rgba(233,227,216,0.7)"/><rect x="42" y="2" width="28" height="28" rx="3" fill="none" stroke="rgba(233,227,216,0.7)" stroke-width="6"/><rect x="50" y="10" width="12" height="12" fill="rgba(233,227,216,0.7)"/><rect x="2" y="42" width="28" height="28" rx="3" fill="none" stroke="rgba(233,227,216,0.7)" stroke-width="6"/><rect x="10" y="50" width="12" height="12" fill="rgba(233,227,216,0.7)"/></svg>
+            <span class="card-eq-lbl">EquiTag</span>
+          </div>
+        </div>
+        <div class="card-body">
+          <p class="card-name">Bolt Action Z</p>
+          <p class="card-meta">KWPN · 2018 · 16.3hh · Wellington, FL</p>
+          <div class="card-tags">
+            <span class="ct ct-s">Show Jumping</span>
+            <span class="ct ct-g">1.50m</span>
+          </div>
+          <div class="card-ft">
+            <div><p class="card-price">€185,000</p><p class="card-price-sub">Oaklane Sport Horses</p></div>
+            <button class="card-cta">View Profile</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="cell-w">
+      <p style="font-family:var(--fm);font-size:9px;letter-spacing:0.14em;text-transform:uppercase;color:var(--mid);margin-bottom:14px;">Card Spec</p>
+      <div class="info-row"><span class="ir-key">Width</span><span class="ir-val">280–320px (fluid grid)</span></div>
+      <div class="info-row"><span class="ir-key">Photo height</span><span class="ir-val">160–172px · object-fit:cover</span></div>
+      <div class="info-row"><span class="ir-key">Border radius</span><span class="ir-val">7–8px</span></div>
+      <div class="info-row"><span class="ir-key">Shadow</span><span class="ir-val">0 2px 8px rgba(15,42,68,0.08)</span></div>
+      <div class="info-row"><span class="ir-key">Horse name</span><span class="ir-val">weight:800 · #0F2A44</span></div>
+      <div class="info-row"><span class="ir-key">Price</span><span class="ir-val">weight:800 · 15–16px</span></div>
+      <div class="info-row"><span class="ir-key">Verified badge</span><span class="ir-val">top-left · bg:#2D5438 · white</span></div>
+      <div class="info-row"><span class="ir-key">EquiTag badge</span><span class="ir-val">bottom-right · dark translucent</span></div>
+      <div class="info-row"><span class="ir-key">Hover</span><span class="ir-val">translateY(-2px) · stronger shadow</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════
+     §5 EQUITAG SYSTEM
+══════════════════════════ -->
+<div class="section" id="s5">
+  <div class="sec-hd">
+    <span class="sec-num">05</span>
+    <h2 class="sec-title">EquiTag — How It Works</h2>
+    <span class="sec-note">New feature to build</span>
+  </div>
+
+  <div class="priority-banner" style="margin-bottom:16px;">
+    <div class="pb-dot"></div>
+    <div>
+      <p class="pb-label">Core concept</p>
+      <p class="pb-text">Each account gets one QR code that points to <code style="font-family:var(--fm);background:rgba(255,255,255,0.1);padding:1px 6px;border-radius:3px;">horseroster.com/u/[account_id]</code>. This URL is printed on physical items and never changes. The user controls what it redirects to from their dashboard. They can point it at a horse, their barn, or their trainer profile — and change it anytime without reprinting anything.</p>
+    </div>
+  </div>
+
+  <!-- Routing diagram -->
+  <div style="margin-bottom:12px;">
+    <div style="background:white;border:1px solid var(--rule-lt);padding:22px 26px;">
+      <p style="font-family:var(--fm);font-size:9px;letter-spacing:0.14em;text-transform:uppercase;color:var(--mid);margin-bottom:18px;">Redirect Flow</p>
+      <div class="route-row" style="margin-bottom:20px;">
+        <span class="rb rb-perm">horseroster.com/u/acc_12345</span>
+        <span class="rb-arrow">→</span>
+        <span class="rb rb-dest">302 redirect → current destination</span>
+        <span class="rb-note">URL inside the QR code. Never changes.</span>
+      </div>
+      <div style="border-top:1px solid var(--rule-lt);padding-top:16px;display:flex;flex-direction:column;gap:8px;">
+        <div class="route-row" style="margin-bottom:0;">
+          <span class="rb rb-perm" style="opacity:0.35;min-width:200px;">horseroster.com/u/acc_12345</span>
+          <span class="rb-arrow">→</span>
+          <span class="rb rb-dest">horseroster.com/h/bolt-action-z</span>
+          <span class="rb-note">Horse profile</span>
+        </div>
+        <div class="route-row" style="margin-bottom:0;">
+          <span class="rb rb-perm" style="opacity:0.35;min-width:200px;">horseroster.com/u/acc_12345</span>
+          <span class="rb-arrow">→</span>
+          <span class="rb rb-dest">horseroster.com/barn/oaklane</span>
+          <span class="rb-note">Barn roster</span>
+        </div>
+        <div class="route-row" style="margin-bottom:0;">
+          <span class="rb rb-perm" style="opacity:0.35;min-width:200px;">horseroster.com/u/acc_12345</span>
+          <span class="rb-arrow">→</span>
+          <span class="rb rb-dest">horseroster.com/trainer/sarah-v</span>
+          <span class="rb-note">Trainer profile</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Routes + DB -->
+  <div class="g2" style="margin-bottom:12px;">
+    <div class="cell-w">
+      <p style="font-family:var(--fm);font-size:9px;letter-spacing:0.14em;text-transform:uppercase;color:var(--mid);margin-bottom:14px;">Routes to add</p>
+      <div class="code" style="font-size:11px;">
+<pre><span class="cm">// QR redirect — the permanent URL</span>
+<span class="cg">GET</span>   <span class="cs">/u/:account_id</span>
+      → <span class="cv">302</span> to equitag_redirects.destination_url
+
+<span class="cm">// Mobile scan landing page (public, SSR)</span>
+<span class="cg">GET</span>   <span class="cs">/s/:account_id</span>
+      → render scan preview page
+
+<span class="cm">// Dashboard: update assignment</span>
+<span class="cg">PATCH</span> <span class="cs">/api/equitag/assign</span>
+      body: { destination_type, destination_id }
+
+<span class="cm">// Dashboard: get QR download URLs</span>
+<span class="cg">GET</span>   <span class="cs">/api/equitag/download</span>
+      → { svgUrl, pngUrl }</pre>
+      </div>
+    </div>
+    <div class="cell-o">
+      <p style="font-family:var(--fm);font-size:9px;letter-spacing:0.14em;text-transform:uppercase;color:var(--mid);margin-bottom:14px;">Database tables</p>
+      <div class="code" style="font-size:11px;">
+<pre><span class="cm">-- One per account, created at signup</span>
+<span class="cv">equitag_codes</span>
+  id          uuid  <span class="cg">PK</span>
+  account_id  uuid  <span class="cg">FK</span> <span class="cg">UNIQUE</span>  <span class="cm">→ users</span>
+  short_code  varchar(8) <span class="cg">UNIQUE</span>  <span class="cm">base-32</span>
+  created_at  timestamptz          <span class="cm">never updated</span>
+
+<span class="cm">-- Current assignment (can be updated)</span>
+<span class="cv">equitag_redirects</span>
+  equitag_id       uuid  <span class="cg">FK UNIQUE</span>
+  destination_type enum  <span class="cm">'horse'|'barn'|'trainer'</span>
+  destination_id   uuid
+  destination_url  varchar(500)
+  updated_at       timestamptz
+
+<span class="cm">-- Audit trail (append-only)</span>
+<span class="cv">equitag_assignment_log</span>
+  id            uuid  <span class="cg">PK</span>
+  equitag_id    uuid  <span class="cg">FK</span>
+  previous_dest varchar(500)
+  new_dest      varchar(500)
+  changed_at    timestamptz</pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- QR generation code -->
+  <div style="background:white;border:1px solid var(--rule-lt);">
+    <div style="padding:12px 20px;border-bottom:1px solid var(--rule-lt);display:flex;justify-content:space-between;">
+      <span style="font-family:var(--fm);font-size:9px;letter-spacing:0.14em;text-transform:uppercase;color:var(--mid);">QR Generation — run at account creation</span>
+      <span style="font-size:11px;color:var(--mid);">npm install qrcode</span>
+    </div>
+    <div class="code" style="border-radius:0;">
+<pre><span class="ck">import</span> QRCode <span class="ck">from</span> <span class="cs">'qrcode'</span>
+
+<span class="ck">async function</span> <span class="cv">createEquiTag</span>(accountId: <span class="cn">string</span>) {
+  <span class="ck">const</span> url = <span class="cs">`https://horseroster.com/u/<span class="cv">${accountId}</span>`</span>
+
+  <span class="cm">// SVG — for print, patch manufacturing</span>
+  <span class="ck">const</span> svg = <span class="ck">await</span> QRCode.toString(url, {
+    type: <span class="cs">'svg'</span>,
+    errorCorrectionLevel: <span class="cs">'H'</span>, <span class="cm">// high — survives embroidery wear</span>
+    margin: <span class="cn">4</span>,
+    color: { dark: <span class="cs">'#0F2A44'</span>, light: <span class="cs">'#FFFFFF'</span> }
+  })
+
+  <span class="cm">// PNG — for digital download, business cards</span>
+  <span class="ck">const</span> png = <span class="ck">await</span> QRCode.toBuffer(url, {
+    type: <span class="cs">'png'</span>, width: <span class="cn">1200</span>, errorCorrectionLevel: <span class="cs">'H'</span>, margin: <span class="cn">4</span>
+  })
+
+  <span class="cm">// Save both to S3</span>
+  <span class="ck">await</span> Promise.all([
+    s3.put(<span class="cs">`equitag/<span class="cv">${accountId}</span>.svg`</span>, svg, <span class="cs">'image/svg+xml'</span>),
+    s3.put(<span class="cs">`equitag/<span class="cv">${accountId}</span>.png`</span>, png, <span class="cs">'image/png'</span>)
+  ])
+
+  <span class="cm">// Save to database</span>
+  <span class="ck">await</span> db.equitag_codes.insert({ account_id: accountId })
+}</pre>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════
+     §6 SCAN LANDING PAGE
+══════════════════════════ -->
+<div class="section" id="s6">
+  <div class="sec-hd">
+    <span class="sec-num">06</span>
+    <h2 class="sec-title">Scan Landing Page</h2>
+    <span class="sec-note">horseroster.com/s/:account_id</span>
+  </div>
+
+  <div class="g2">
+    <div class="cell-o" style="display:flex;justify-content:center;padding:36px 24px;">
+      <div>
+        <p style="font-family:var(--fm);font-size:9px;color:var(--mid);letter-spacing:0.1em;text-align:center;margin-bottom:14px;">/s/acc_12345 — what the scanner sees</p>
+        <div class="phone">
+          <div class="phone-bar"><div class="phone-pill"></div></div>
+          <div class="phone-screen">
+            <div class="scan-hero">
+              <div class="scan-ov"></div>
+              <div class="scan-info">
+                <p class="scan-name">Bolt Action Z</p>
+                <div class="scan-pills">
+                  <span class="sp sp-g">Verified</span>
+                  <span class="sp sp-n">1.50m</span>
+                  <span class="sp sp-n">KWPN</span>
+                </div>
+              </div>
+            </div>
+            <div class="scan-body">
+              <div class="scan-eq">
+                <svg width="9" height="9" viewBox="0 0 72 72" fill="none"><rect x="15" y="13" width="10" height="46" rx="2" fill="#2D5438"/><rect x="47" y="13" width="10" height="46" rx="2" fill="#2D5438"/><rect x="25" y="30" width="22" height="12" rx="2" fill="#2D5438" opacity="0.4"/></svg>
+                <span>EquiTag Profile</span>
+              </div>
+              <div class="scan-facts">
+                <span class="scan-fact"><strong>2018</strong> · 7yr</span>
+                <span class="scan-fact"><strong>Show Jumping</strong></span>
+                <span class="scan-fact"><strong>16.3hh</strong></span>
+              </div>
+              <p class="scan-desc">Approved KWPN stallion. 1.50m international results. Wellington, FL.</p>
+              <div class="scan-btn">View Full Profile</div>
+              <div class="scan-btn-ghost">Contact Barn</div>
+            </div>
+            <div class="scan-footer">
+              <svg width="11" height="11" viewBox="0 0 72 72" fill="none"><rect x="15" y="13" width="10" height="46" rx="2" fill="#B8BEC6"/><rect x="47" y="13" width="10" height="46" rx="2" fill="#B8BEC6"/><rect x="25" y="30" width="22" height="12" rx="2" fill="#B8BEC6" opacity="0.5"/></svg>
+              <span>Powered by HorseRoster</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="cell-w">
+      <p style="font-family:var(--fm);font-size:9px;letter-spacing:0.14em;text-transform:uppercase;color:var(--mid);margin-bottom:14px;">Page Requirements</p>
+      <div class="info-row"><span class="ir-key">URL</span><span class="ir-val">/s/:account_id</span></div>
+      <div class="info-row"><span class="ir-key">Render</span><span class="ir-val">SSR — critical for scan speed</span></div>
+      <div class="info-row"><span class="ir-key">Auth</span><span class="ir-val">None — fully public</span></div>
+      <div class="info-row"><span class="ir-key">OG tags</span><span class="ir-val">og:image + og:title from horse/barn</span></div>
+      <div class="info-row"><span class="ir-key">New visitor</span><span class="ir-val">"Save this horse — join free" prompt</span></div>
+      <div class="info-row"><span class="ir-key">If barn scan</span><span class="ir-val">Show barn name + roster preview + "View Barn" CTA</span></div>
+
+      <div style="margin-top:20px;">
+        <div class="code" style="font-size:11px;">
+<pre><span class="cm">// GET /s/:account_id</span>
+<span class="ck">const</span> redirect = <span class="ck">await</span> db.equitag_redirects
+  .findOne({ account_id })
+
+<span class="ck">if</span> (redirect.destination_type === <span class="cs">'horse'</span>) {
+  <span class="ck">const</span> horse = <span class="ck">await</span> getHorse(redirect.destination_id)
+  <span class="ck">return</span> render(<span class="cs">ScanHorsePage</span>, { horse })
+}
+<span class="ck">if</span> (redirect.destination_type === <span class="cs">'barn'</span>) {
+  <span class="ck">const</span> barn = <span class="ck">await</span> getBarnWithRoster(redirect.destination_id)
+  <span class="ck">return</span> render(<span class="cs">ScanBarnPage</span>, { barn })
+}</pre>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════
+     §7 EQUITAG PATCH
+══════════════════════════ -->
+<div class="section" id="s7">
+  <div class="sec-hd">
+    <span class="sec-num">07</span>
+    <h2 class="sec-title">EquiTag Patch — Physical Product</h2>
+    <span class="sec-note">For reference — not a dev task</span>
+  </div>
+
+  <div class="g2" style="margin-bottom:2px;">
+    <!-- Light pad -->
+    <div style="background:#E8E6E2;min-height:300px;overflow:hidden;" class="cell-o" style="padding:0;">
+      <div class="patch-stage">
+        <div class="spad-wrap">
+          <svg viewBox="0 0 480 340" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M60 40 C60 40 120 28 240 28 C340 28 400 36 430 52 C452 64 460 82 458 110 C456 145 440 200 420 240 C400 278 370 308 330 318 C295 327 255 326 215 322 C170 317 130 305 100 285 C72 267 52 240 44 205 C34 165 34 120 40 85 C44 65 54 48 60 40 Z" fill="white" stroke="#E0DDDA" stroke-width="2"/>
+            <path d="M80 80 Q240 70 420 85" stroke="#ECEAE6" stroke-width="1" fill="none"/><path d="M72 105 Q240 95 435 110" stroke="#ECEAE6" stroke-width="1" fill="none"/><path d="M66 130 Q240 120 438 135" stroke="#ECEAE6" stroke-width="1" fill="none"/><path d="M62 155 Q240 145 440 160" stroke="#ECEAE6" stroke-width="1" fill="none"/><path d="M60 180 Q240 170 440 185" stroke="#ECEAE6" stroke-width="1" fill="none"/><path d="M62 205 Q240 197 438 210" stroke="#ECEAE6" stroke-width="1" fill="none"/><path d="M68 230 Q240 222 432 235" stroke="#ECEAE6" stroke-width="1" fill="none"/><path d="M80 255 Q240 248 420 258" stroke="#ECEAE6" stroke-width="1" fill="none"/>
+            <path d="M120 35 Q115 180 108 310" stroke="#ECEAE6" stroke-width="1" fill="none"/><path d="M160 30 Q157 180 152 318" stroke="#ECEAE6" stroke-width="1" fill="none"/><path d="M200 29 Q200 180 198 322" stroke="#ECEAE6" stroke-width="1" fill="none"/><path d="M240 28 Q242 180 242 324" stroke="#ECEAE6" stroke-width="1" fill="none"/><path d="M280 29 Q283 180 286 322" stroke="#ECEAE6" stroke-width="1" fill="none"/><path d="M320 30 Q324 175 326 316" stroke="#ECEAE6" stroke-width="1" fill="none"/><path d="M360 32 Q366 165 365 305" stroke="#ECEAE6" stroke-width="1" fill="none"/><path d="M400 40 Q406 155 398 285" stroke="#ECEAE6" stroke-width="1" fill="none"/>
+            <path d="M240 28 Q238 180 242 324" stroke="#D8D5D0" stroke-width="2" fill="none" stroke-dasharray="5,4"/>
+            <path d="M60 40 C60 40 120 28 240 28 C340 28 400 36 430 52 C452 64 460 82 458 110 C456 145 440 200 420 240 C400 278 370 308 330 318 C295 327 255 326 215 322 C170 317 130 305 100 285 C72 267 52 240 44 205 C34 165 34 120 40 85 C44 65 54 48 60 40 Z" fill="none" stroke="#C8C4BF" stroke-width="3"/>
+            <ellipse cx="240" cy="28" rx="42" ry="14" fill="#E8E6E2"/>
+            <path d="M198 28 Q240 15 282 28" stroke="#C8C4BF" stroke-width="1.5" fill="none"/>
+          </svg>
+          <div class="patch-anchor">
+            <div class="etpatch">
+              <div class="pt-top">
+                <svg width="11" height="11" viewBox="0 0 72 72" fill="none" style="flex-shrink:0;"><rect width="72" height="72" rx="14" fill="#1A3B5A"/><rect x="15" y="13" width="10" height="46" rx="2.5" fill="#E9E3D8"/><rect x="47" y="13" width="10" height="46" rx="2.5" fill="#E9E3D8"/><rect x="25" y="30" width="22" height="12" rx="2.5" fill="#2D5438"/></svg>
+                <span style="font-family:var(--f);font-size:6.5px;font-weight:300;color:#E9E3D8;letter-spacing:-0.02em;white-space:nowrap;">Horse</span><span style="font-family:var(--f);font-size:6.5px;font-weight:800;color:#E9E3D8;letter-spacing:-0.02em;white-space:nowrap;">Roster</span>
+                <div style="flex:1;height:1px;background:#E9E3D8;opacity:0.1;min-width:1px;"></div>
+                <span style="font-family:var(--f);font-size:5px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:rgba(233,227,216,0.4);white-space:nowrap;">EquiTag</span>
+              </div>
+              <div class="pt-qr">
+                <svg viewBox="0 0 80 80" width="54" height="54" fill="none">
+                  <rect x="2" y="2" width="22" height="22" rx="2" fill="#0F2A44"/><rect x="5" y="5" width="16" height="16" rx="1" fill="white"/><rect x="8" y="8" width="10" height="10" rx="1" fill="#0F2A44"/>
+                  <rect x="56" y="2" width="22" height="22" rx="2" fill="#0F2A44"/><rect x="59" y="5" width="16" height="16" rx="1" fill="white"/><rect x="62" y="8" width="10" height="10" rx="1" fill="#0F2A44"/>
+                  <rect x="2" y="56" width="22" height="22" rx="2" fill="#0F2A44"/><rect x="5" y="59" width="16" height="16" rx="1" fill="white"/><rect x="8" y="62" width="10" height="10" rx="1" fill="#0F2A44"/>
+                  <rect x="28" y="2" width="4" height="4" fill="#0F2A44"/><rect x="34" y="2" width="4" height="4" fill="#0F2A44"/><rect x="44" y="2" width="4" height="4" fill="#0F2A44"/>
+                  <rect x="28" y="8" width="4" height="4" fill="#0F2A44"/><rect x="40" y="8" width="4" height="4" fill="#0F2A44"/>
+                  <rect x="28" y="28" width="4" height="4" fill="#0F2A44"/><rect x="40" y="28" width="4" height="4" fill="#0F2A44"/><rect x="56" y="28" width="4" height="4" fill="#0F2A44"/>
+                  <rect x="4" y="36" width="4" height="4" fill="#0F2A44"/><rect x="34" y="36" width="4" height="4" fill="#0F2A44"/><rect x="48" y="36" width="4" height="4" fill="#0F2A44"/>
+                  <rect x="28" y="56" width="4" height="4" fill="#0F2A44"/><rect x="44" y="56" width="4" height="4" fill="#0F2A44"/>
+                  <rect x="34" y="64" width="4" height="4" fill="#0F2A44"/><rect x="48" y="64" width="4" height="4" fill="#0F2A44"/>
+                </svg>
+              </div>
+              <p class="pt-label" style="color:rgba(233,227,216,0.3);">SCAN FOR HORSE PROFILE</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div style="padding:14px 20px;background:white;border-top:1px solid var(--rule-lt);">
+        <p style="font-size:11px;font-weight:700;color:var(--navy);">Version A — Navy patch on white/light pad</p>
+      </div>
+    </div>
+
+    <!-- Dark pad -->
+    <div style="background:#1A1A1A;min-height:300px;overflow:hidden;">
+      <div class="patch-stage" style="background:#1A1A1A;">
+        <div class="spad-wrap">
+          <svg viewBox="0 0 480 340" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M60 40 C60 40 120 28 240 28 C340 28 400 36 430 52 C452 64 460 82 458 110 C456 145 440 200 420 240 C400 278 370 308 330 318 C295 327 255 326 215 322 C170 317 130 305 100 285 C72 267 52 240 44 205 C34 165 34 120 40 85 C44 65 54 48 60 40 Z" fill="#0F2A44" stroke="#1A3B5A" stroke-width="2"/>
+            <path d="M80 80 Q240 70 420 85" stroke="#1A3B5A" stroke-width="1" fill="none"/><path d="M72 105 Q240 95 435 110" stroke="#1A3B5A" stroke-width="1" fill="none"/><path d="M66 130 Q240 120 438 135" stroke="#1A3B5A" stroke-width="1" fill="none"/><path d="M62 155 Q240 145 440 160" stroke="#1A3B5A" stroke-width="1" fill="none"/><path d="M60 180 Q240 170 440 185" stroke="#1A3B5A" stroke-width="1" fill="none"/><path d="M62 205 Q240 197 438 210" stroke="#1A3B5A" stroke-width="1" fill="none"/><path d="M68 230 Q240 222 432 235" stroke="#1A3B5A" stroke-width="1" fill="none"/>
+            <path d="M120 35 Q115 180 108 310" stroke="#1A3B5A" stroke-width="1" fill="none"/><path d="M160 30 Q157 180 152 318" stroke="#1A3B5A" stroke-width="1" fill="none"/><path d="M200 29 Q200 180 198 322" stroke="#1A3B5A" stroke-width="1" fill="none"/><path d="M240 28 Q242 180 242 324" stroke="#1A3B5A" stroke-width="1" fill="none"/><path d="M280 29 Q283 180 286 322" stroke="#1A3B5A" stroke-width="1" fill="none"/><path d="M320 30 Q324 175 326 316" stroke="#1A3B5A" stroke-width="1" fill="none"/>
+            <path d="M240 28 Q238 180 242 324" stroke="#091C2E" stroke-width="2" fill="none" stroke-dasharray="5,4"/>
+            <path d="M60 40 C60 40 120 28 240 28 C340 28 400 36 430 52 C452 64 460 82 458 110 C456 145 440 200 420 240 C400 278 370 308 330 318 C295 327 255 326 215 322 C170 317 130 305 100 285 C72 267 52 240 44 205 C34 165 34 120 40 85 C44 65 54 48 60 40 Z" fill="none" stroke="#091C2E" stroke-width="3"/>
+            <ellipse cx="240" cy="28" rx="42" ry="14" fill="#1A1A1A"/>
+            <path d="M198 28 Q240 15 282 28" stroke="#091C2E" stroke-width="1.5" fill="none"/>
+          </svg>
+          <div class="patch-anchor">
+            <div class="etpatch etpatch-cream">
+              <div class="pt-top">
+                <svg width="11" height="11" viewBox="0 0 72 72" fill="none" style="flex-shrink:0;"><rect width="72" height="72" rx="14" fill="#0F2A44"/><rect x="15" y="13" width="10" height="46" rx="2.5" fill="#E9E3D8"/><rect x="47" y="13" width="10" height="46" rx="2.5" fill="#E9E3D8"/><rect x="25" y="30" width="22" height="12" rx="2.5" fill="#2D5438"/></svg>
+                <span style="font-family:var(--f);font-size:6.5px;font-weight:300;color:#0F2A44;letter-spacing:-0.02em;white-space:nowrap;">Horse</span><span style="font-family:var(--f);font-size:6.5px;font-weight:800;color:#0F2A44;letter-spacing:-0.02em;white-space:nowrap;">Roster</span>
+                <div style="flex:1;height:1px;background:#0F2A44;opacity:0.1;min-width:1px;"></div>
+                <span style="font-family:var(--f);font-size:5px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:rgba(15,42,68,0.35);white-space:nowrap;">EquiTag</span>
+              </div>
+              <div class="pt-qr pt-qr-sand">
+                <svg viewBox="0 0 80 80" width="54" height="54" fill="none">
+                  <rect x="2" y="2" width="22" height="22" rx="2" fill="#0F2A44"/><rect x="5" y="5" width="16" height="16" rx="1" fill="#F0EBE2"/><rect x="8" y="8" width="10" height="10" rx="1" fill="#0F2A44"/>
+                  <rect x="56" y="2" width="22" height="22" rx="2" fill="#0F2A44"/><rect x="59" y="5" width="16" height="16" rx="1" fill="#F0EBE2"/><rect x="62" y="8" width="10" height="10" rx="1" fill="#0F2A44"/>
+                  <rect x="2" y="56" width="22" height="22" rx="2" fill="#0F2A44"/><rect x="5" y="59" width="16" height="16" rx="1" fill="#F0EBE2"/><rect x="8" y="62" width="10" height="10" rx="1" fill="#0F2A44"/>
+                  <rect x="28" y="2" width="4" height="4" fill="#0F2A44"/><rect x="34" y="2" width="4" height="4" fill="#0F2A44"/><rect x="44" y="2" width="4" height="4" fill="#0F2A44"/>
+                  <rect x="28" y="8" width="4" height="4" fill="#0F2A44"/><rect x="40" y="8" width="4" height="4" fill="#0F2A44"/>
+                  <rect x="28" y="28" width="4" height="4" fill="#0F2A44"/><rect x="40" y="28" width="4" height="4" fill="#0F2A44"/><rect x="56" y="28" width="4" height="4" fill="#0F2A44"/>
+                  <rect x="4" y="36" width="4" height="4" fill="#0F2A44"/><rect x="34" y="36" width="4" height="4" fill="#0F2A44"/><rect x="48" y="36" width="4" height="4" fill="#0F2A44"/>
+                  <rect x="28" y="56" width="4" height="4" fill="#0F2A44"/><rect x="44" y="56" width="4" height="4" fill="#0F2A44"/>
+                  <rect x="34" y="64" width="4" height="4" fill="#0F2A44"/><rect x="48" y="64" width="4" height="4" fill="#0F2A44"/>
+                </svg>
+              </div>
+              <p class="pt-label" style="color:rgba(15,42,68,0.28);">SCAN FOR HORSE PROFILE</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div style="padding:14px 20px;background:white;border-top:1px solid var(--rule-lt);">
+        <p style="font-size:11px;font-weight:700;color:var(--navy);">Version B — Cream patch on navy/dark pad</p>
+      </div>
+    </div>
+  </div>
+
+  <div style="background:white;border:1px solid var(--rule-lt);display:grid;grid-template-columns:repeat(4,1fr);gap:0;">
+    <div style="padding:16px 18px;border-right:1px solid var(--rule-lt);"><p style="font-family:var(--fm);font-size:8px;letter-spacing:0.14em;text-transform:uppercase;color:var(--mid);margin-bottom:5px;">Size</p><p style="font-size:12px;font-weight:600;color:var(--charcoal);">7.5 × 7.5 cm</p><p style="font-size:10px;color:var(--mid);">Compact: 5 × 5 cm</p></div>
+    <div style="padding:16px 18px;border-right:1px solid var(--rule-lt);"><p style="font-family:var(--fm);font-size:8px;letter-spacing:0.14em;text-transform:uppercase;color:var(--mid);margin-bottom:5px;">Material</p><p style="font-size:12px;font-weight:600;color:var(--charcoal);">Woven twill</p><p style="font-size:10px;color:var(--mid);">UV-stable QR · velcro or sewn</p></div>
+    <div style="padding:16px 18px;border-right:1px solid var(--rule-lt);"><p style="font-family:var(--fm);font-size:8px;letter-spacing:0.14em;text-transform:uppercase;color:var(--mid);margin-bottom:5px;">QR Spec</p><p style="font-size:12px;font-weight:600;color:var(--charcoal);">Version 3 · Level H</p><p style="font-size:10px;color:var(--mid);">30% error correction for wear</p></div>
+    <div style="padding:16px 18px;"><p style="font-family:var(--fm);font-size:8px;letter-spacing:0.14em;text-transform:uppercase;color:var(--mid);margin-bottom:5px;">SKUs</p><p style="font-size:12px;font-weight:600;color:var(--charcoal);">2 versions</p><p style="font-size:10px;color:var(--mid);">Navy + Cream — all pad colours</p></div>
+  </div>
+</div>
+
+<!-- ══════════════════════════
+     SYSTEM OVERVIEW
+══════════════════════════ -->
+<div class="section" id="system-overview">
+  <div class="sec-hd">
+    <span class="sec-num">—</span>
+    <h2 class="sec-title">System Overview</h2>
+    <span class="sec-note">Full flow at a glance</span>
+  </div>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:2px;background:var(--rule);">
+
+    <!-- Account → QR flow -->
+    <div style="background:var(--navy);padding:36px 40px;">
+      <p style="font-family:var(--fm);font-size:9px;letter-spacing:0.16em;text-transform:uppercase;color:rgba(233,227,216,0.3);margin-bottom:24px;">Account & QR Assignment Flow</p>
+      <div style="display:flex;flex-direction:column;align-items:flex-start;gap:0;">
+
+        <div style="background:rgba(233,227,216,0.1);border:1px solid rgba(233,227,216,0.15);border-radius:4px;padding:10px 16px;width:100%;">
+          <p style="font-size:13px;font-weight:700;color:var(--sand);letter-spacing:-0.01em;">User Account</p>
+        </div>
+        <div style="padding:4px 22px;display:flex;align-items:center;">
+          <span style="font-family:var(--fm);font-size:18px;color:var(--green);">↓</span>
+        </div>
+
+        <div style="background:rgba(45,84,56,0.25);border:1px solid rgba(45,84,56,0.4);border-radius:4px;padding:10px 16px;width:100%;">
+          <p style="font-size:13px;font-weight:700;color:var(--sand);letter-spacing:-0.01em;">Permanent QR Code generated</p>
+          <p style="font-family:var(--fm);font-size:10px;color:rgba(233,227,216,0.45);margin-top:3px;">Created once at signup · never changes</p>
+        </div>
+        <div style="padding:4px 22px;">
+          <span style="font-family:var(--fm);font-size:18px;color:var(--green);">↓</span>
+        </div>
+
+        <div style="background:rgba(233,227,216,0.08);border:1px solid rgba(233,227,216,0.12);border-radius:4px;padding:10px 16px;width:100%;">
+          <p style="font-size:13px;font-weight:700;color:var(--sand);letter-spacing:-0.01em;">horseroster.com/u/{account_id}</p>
+          <p style="font-size:11px;color:rgba(233,227,216,0.4);margin-top:3px;">This is the URL encoded in the QR</p>
+        </div>
+        <div style="padding:4px 22px;">
+          <span style="font-family:var(--fm);font-size:18px;color:var(--green);">↓</span>
+        </div>
+
+        <div style="background:rgba(233,227,216,0.08);border:1px solid rgba(233,227,216,0.12);border-radius:4px;padding:10px 16px;width:100%;">
+          <p style="font-size:13px;font-weight:700;color:var(--sand);letter-spacing:-0.01em;">EquiTag Manager</p>
+          <p style="font-size:11px;color:rgba(233,227,216,0.4);margin-top:3px;">In the MyBarn dashboard — user sets destination</p>
+        </div>
+        <div style="padding:4px 22px;">
+          <span style="font-family:var(--fm);font-size:18px;color:var(--green);">↓</span>
+        </div>
+
+        <div style="background:rgba(233,227,216,0.08);border:1px solid rgba(233,227,216,0.12);border-radius:4px;padding:12px 16px;width:100%;">
+          <p style="font-size:12px;font-weight:600;color:rgba(233,227,216,0.55);margin-bottom:8px;">Destination (user's choice):</p>
+          <div style="display:flex;flex-direction:column;gap:5px;">
+            <span style="font-family:var(--fm);font-size:11px;color:var(--green);">→ horseroster.com/h/{horse_id}</span>
+            <span style="font-family:var(--fm);font-size:11px;color:var(--green);">→ horseroster.com/barn/{barn_id}</span>
+            <span style="font-family:var(--fm);font-size:11px;color:var(--green);">→ horseroster.com/trainer/{trainer_id}</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Scan flow -->
+    <div style="background:var(--navy-dk);padding:36px 40px;">
+      <p style="font-family:var(--fm);font-size:9px;letter-spacing:0.16em;text-transform:uppercase;color:rgba(233,227,216,0.3);margin-bottom:24px;">QR Scan Flow</p>
+      <div style="display:flex;flex-direction:column;align-items:flex-start;gap:0;">
+
+        <div style="background:rgba(233,227,216,0.1);border:1px solid rgba(233,227,216,0.15);border-radius:4px;padding:10px 16px;width:100%;">
+          <p style="font-size:13px;font-weight:700;color:var(--sand);letter-spacing:-0.01em;">QR Scan</p>
+          <p style="font-size:11px;color:rgba(233,227,216,0.4);margin-top:3px;">Physical item: saddle pad, stall, business card</p>
+        </div>
+        <div style="padding:4px 22px;">
+          <span style="font-family:var(--fm);font-size:18px;color:var(--green);">↓</span>
+        </div>
+
+        <div style="background:rgba(45,84,56,0.25);border:1px solid rgba(45,84,56,0.4);border-radius:4px;padding:10px 16px;width:100%;">
+          <p style="font-size:13px;font-weight:700;color:var(--sand);letter-spacing:-0.01em;">horseroster.com/s/{account_id}</p>
+          <p style="font-size:11px;color:rgba(233,227,216,0.4);margin-top:3px;">Public · SSR · no login required</p>
+        </div>
+        <div style="padding:4px 22px;">
+          <span style="font-family:var(--fm);font-size:18px;color:var(--green);">↓</span>
+        </div>
+
+        <div style="background:rgba(233,227,216,0.08);border:1px solid rgba(233,227,216,0.12);border-radius:4px;padding:10px 16px;width:100%;">
+          <p style="font-size:13px;font-weight:700;color:var(--sand);letter-spacing:-0.01em;">Preview Page</p>
+          <p style="font-size:11px;color:rgba(233,227,216,0.4);margin-top:3px;">Clean preview card — horse, barn, or trainer</p>
+        </div>
+        <div style="padding:4px 22px;">
+          <span style="font-family:var(--fm);font-size:18px;color:var(--green);">↓</span>
+        </div>
+
+        <div style="background:rgba(45,84,56,0.35);border:1px solid rgba(45,84,56,0.5);border-radius:4px;padding:10px 16px;width:100%;">
+          <p style="font-size:13px;font-weight:700;color:var(--sand);letter-spacing:-0.01em;">View Full Profile →</p>
+          <p style="font-size:11px;color:rgba(233,227,216,0.4);margin-top:3px;">CTA button — takes user to the full platform page</p>
+        </div>
+        <div style="padding:4px 22px;">
+          <span style="font-family:var(--fm);font-size:18px;color:var(--green);">↓</span>
+        </div>
+
+        <div style="background:rgba(233,227,216,0.08);border:1px solid rgba(233,227,216,0.12);border-radius:4px;padding:10px 16px;width:100%;">
+          <p style="font-size:13px;font-weight:700;color:var(--sand);letter-spacing:-0.01em;">Full Profile Page</p>
+          <p style="font-size:11px;color:rgba(233,227,216,0.4);margin-top:3px;">horseroster.com/h/{horse_id} or /barn/ etc.</p>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Key rules summary -->
+  <div style="background:white;border:1px solid var(--rule-lt);padding:24px 28px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:24px;margin-top:2px;">
+    <div>
+      <p style="font-family:var(--fm);font-size:9px;letter-spacing:0.14em;text-transform:uppercase;color:var(--mid);margin-bottom:8px;">Rule 1</p>
+      <p style="font-size:13px;font-weight:700;color:var(--navy);margin-bottom:4px;">The QR URL never changes</p>
+      <p style="font-size:12px;color:var(--mid);line-height:1.6;">Once generated, <code style="font-family:var(--fm);font-size:10px;color:var(--green);">/u/{account_id}</code> is permanent. Only the redirect destination changes.</p>
+    </div>
+    <div>
+      <p style="font-family:var(--fm);font-size:9px;letter-spacing:0.14em;text-transform:uppercase;color:var(--mid);margin-bottom:8px;">Rule 2</p>
+      <p style="font-size:13px;font-weight:700;color:var(--navy);margin-bottom:4px;">Scan page is always public</p>
+      <p style="font-size:12px;color:var(--mid);line-height:1.6;">The <code style="font-family:var(--fm);font-size:10px;color:var(--green);">/s/</code> page requires no login. Anyone with a phone can scan and see it.</p>
+    </div>
+    <div>
+      <p style="font-family:var(--fm);font-size:9px;letter-spacing:0.14em;text-transform:uppercase;color:var(--mid);margin-bottom:8px;">Rule 3</p>
+      <p style="font-size:13px;font-weight:700;color:var(--navy);margin-bottom:4px;">One QR per account</p>
+      <p style="font-size:12px;color:var(--mid);line-height:1.6;">One permanent code, created at signup. The user manages it from the EquiTag Manager in their dashboard.</p>
+    </div>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<div class="doc-footer">
+  <div style="display:flex;align-items:center;gap:7px;">
+    <svg width="18" height="18" viewBox="0 0 72 72" fill="none"><rect width="72" height="72" rx="8" fill="#0F2A44"/><rect x="15" y="13" width="10" height="46" rx="2.5" fill="#E9E3D8"/><rect x="47" y="13" width="10" height="46" rx="2.5" fill="#E9E3D8"/><rect x="25" y="30" width="22" height="12" rx="2.5" fill="#2D5438"/></svg>
+    <span class="wm wm-navy" style="font-size:13px;"><span class="wm-h">Horse</span><span class="wm-r">Roster</span></span>
+  </div>
+  <p>

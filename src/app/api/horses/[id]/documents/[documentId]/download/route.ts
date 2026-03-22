@@ -1,9 +1,8 @@
-import { readFile } from "node:fs/promises";
-
 import { getServerSession } from "next-auth";
 import { NextResponse } from "next/server";
 
 import { authOptions } from "@/lib/auth/options";
+import { createPrivateDownloadUrl } from "@/lib/storage/private-assets";
 import { getBuyerHorseAccess } from "@/lib/vault/access";
 
 interface RouteContext {
@@ -34,15 +33,13 @@ export async function GET(_req: Request, { params }: RouteContext) {
       return NextResponse.json({ error: "Document not found." }, { status: 404 });
     }
 
-    const fileBuffer = await readFile(document.filePath);
-
-    return new NextResponse(fileBuffer, {
-      status: 200,
-      headers: {
-        "Content-Type": document.mimeType || "application/octet-stream",
-        "Content-Disposition": `attachment; filename="${document.fileName}"`,
-      },
+    const downloadUrl = await createPrivateDownloadUrl({
+      key: document.filePath,
+      fileName: document.fileName,
+      contentType: document.mimeType,
     });
+
+    return NextResponse.redirect(downloadUrl, { status: 302 });
   } catch (error) {
     console.error("Vault document download failed:", error);
     return NextResponse.json(

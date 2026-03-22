@@ -3,6 +3,7 @@ import { redirect, notFound } from "next/navigation";
 
 import prisma from "@/lib/db/prisma";
 import { authOptions } from "@/lib/auth/options";
+import { getUserAppHeaderVariant } from "@/lib/auth/get-user-app-header-variant";
 import AppHeader from "@/components/layout/app-header";
 import SellerConversationPanel from "@/components/seller/seller-conversation-panel";
 
@@ -18,6 +19,8 @@ export default async function BuyerConversationPage({
   if (!session?.user?.id) {
     redirect("/login");
   }
+
+  const headerVariant = await getUserAppHeaderVariant(session.user.id);
 
   const conversation = await prisma.horseConversation.findUnique({
     where: {
@@ -57,17 +60,17 @@ export default async function BuyerConversationPage({
   }
 
   return (
-    <main className="min-h-screen bg-stone-50 text-stone-900">
-      <AppHeader variant="buyer" />
+    <main className="min-h-screen bg-[color:var(--background)] text-[color:var(--foreground)]">
+      <AppHeader variant={headerVariant} />
 
       <section className="mx-auto max-w-5xl px-6 py-10">
         <div className="mb-8">
-          <p className="text-sm font-medium uppercase tracking-[0.18em] text-stone-500">
+          <p className="mono text-sm font-medium uppercase tracking-[0.18em] text-[color:var(--foreground-soft)]">
             Conversation
           </p>
-          <h1 className="mt-2 font-serif text-4xl">{conversation.horse.name}</h1>
-          <p className="mt-3 text-stone-600">
-            Seller: {conversation.sellerProfile.displayName}
+          <h1 className="mt-2 text-4xl font-extrabold">{conversation.horse.name}</h1>
+          <p className="mt-3 text-[color:var(--foreground-soft)]">
+            Barn: {conversation.sellerProfile.displayName}
           </p>
         </div>
 

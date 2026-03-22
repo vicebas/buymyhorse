@@ -4,10 +4,12 @@ import Link from "next/link";
 
 import prisma from "@/lib/db/prisma";
 import { authOptions } from "@/lib/auth/options";
+import AdminBlockedNotice from "@/components/admin/admin-blocked-notice";
 import AppHeader from "@/components/layout/app-header";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import UploadHorseDocumentForm from "@/components/horses/upload-horse-document-form";
+import { getHorseWriteBlockError } from "@/lib/admin/moderation";
 
 interface PageProps {
   params: Promise<{
@@ -43,7 +45,7 @@ export default async function SellerHorseVaultPage({ params }: PageProps) {
   });
 
   if (!seller) {
-    redirect("/seller/onboard");
+    redirect("/mybarn/onboard");
   }
 
   const horse = await prisma.horse.findFirst({
@@ -52,6 +54,12 @@ export default async function SellerHorseVaultPage({ params }: PageProps) {
       sellerProfileId: seller.id,
     },
     include: {
+      sellerProfile: {
+        select: {
+          adminDisabledAt: true,
+          adminDisableReason: true,
+        },
+      },
       documents: {
         where: {
           deletedAt: null,
@@ -75,93 +83,120 @@ export default async function SellerHorseVaultPage({ params }: PageProps) {
     notFound();
   }
 
+  const horseWriteBlocked = getHorseWriteBlockError(horse);
+
   return (
-    <main className="min-h-screen bg-stone-50 text-stone-900">
+    <main className="min-h-screen bg-background text-foreground">
       <AppHeader variant="seller" />
 
       <section className="mx-auto max-w-5xl px-6 py-10">
         <div className="mb-8 flex items-start justify-between gap-4">
           <div>
-            <p className="text-sm font-medium uppercase tracking-[0.18em] text-stone-500">
+            <p className="mono text-sm font-medium uppercase tracking-[0.18em] text-[color:var(--foreground-soft)]">
               Horse Vault
             </p>
-            <h1 className="mt-2 font-serif text-4xl">{horse.name}</h1>
-            <p className="mt-3 max-w-2xl text-stone-600">
+            <h1 className="mt-2 text-4xl font-extrabold text-[color:var(--foreground-strong)]">
+              {horse.name}
+            </h1>
+            <p className="mt-3 max-w-2xl text-[color:var(--foreground-soft)]">
               Upload private documents that buyers can access only after approval.
             </p>
           </div>
 
-          <Link href="/seller/horses">
-            <Button variant="outline">Back to Horses</Button>
+          <Link href="/mybarn">
+            <Button variant="outline">Back to MyBarn</Button>
           </Link>
         </div>
 
-        <div className="grid gap-6 lg:grid-cols-[1fr_1.2fr]">
-          <Card className="rounded-3xl border-stone-200 shadow-sm">
-            <CardHeader>
-              <CardTitle className="font-serif text-2xl">Upload document</CardTitle>
-              <CardDescription>
-                Add veterinary records, videos, X-rays, pedigree documents, or any other private files.
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <UploadHorseDocumentForm horseId={horse.id} />
-            </CardContent>
-          </Card>
+        {horseWriteBlocked ? (
+          <AdminBlockedNotice
+            title="Horse vault is disabled"
+            message={horseWriteBlocked}
+          />
+        ) : (
+          <div className="grid gap-6 lg:grid-cols-[1fr_1.2fr]">
+            <Card className="rounded-[2rem] border-[color:var(--border)] shadow-[var(--shadow-card)]">
+              <CardHeader>
+                <CardTitle className="text-2xl font-extrabold text-[color:var(--foreground-strong)]">
+                  Upload document
+                </CardTitle>
+                <CardDescription>
+                  Add veterinary records, videos, X-rays, pedigree documents, or any other private files.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <UploadHorseDocumentForm horseId={horse.id} />
+              </CardContent>
+            </Card>
 
-          <Card className="rounded-3xl border-stone-200 shadow-sm">
-            <CardHeader>
-              <CardTitle className="font-serif text-2xl">Vault documents</CardTitle>
-              <CardDescription>
-                Documents currently stored for this horse.
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              {horse.documents.length === 0 ? (
-                <div className="rounded-2xl border border-dashed border-stone-300 p-8 text-center">
-                  <p className="text-lg text-stone-700">No documents yet</p>
-                  <p className="mt-2 text-sm text-stone-500">
-                    Upload the first private file for this horse.
-                  </p>
-                </div>
-              ) : (
-                <div className="space-y-4">
-                  {horse.documents.map((doc) => (
-                    <div
-                      key={doc.id}
-                      className="rounded-2xl border border-stone-200 bg-stone-50 p-4"
-                    >
-                      <div className="flex items-start justify-between gap-4">
-                        <div>
-                          <h3 className="font-medium text-stone-900">{doc.title}</h3>
-                          <p className="mt-1 text-sm text-stone-500">{doc.fileName}</p>
-                          <div className="mt-2 flex flex-wrap gap-2 text-xs uppercase tracking-[0.16em] text-stone-400">
-                            <span>{doc.category.replaceAll("_", " ")}</span>
-                            <span>{formatBytes(doc.fileSizeBytes)}</span>
-                            <span>{doc.mimeType || "Unknown file type"}</span>
+            <Card className="rounded-[2rem] border-[color:var(--border)] shadow-[var(--shadow-card)]">
+              <CardHeader>
+                <CardTitle className="text-2xl font-extrabold text-[color:var(--foreground-strong)]">
+                  Vault documents
+                </CardTitle>
+                <CardDescription>
+                  Documents currently stored for this horse.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                {horse.documents.length === 0 ? (
+                  <div className="rounded-[1.5rem] border border-dashed border-[color:var(--border)] bg-[color:var(--muted)]/50 p-8 text-center">
+                    <p className="text-lg font-semibold text-[color:var(--foreground-strong)]">
+                      No documents yet
+                    </p>
+                    <p className="mt-2 text-sm text-[color:var(--foreground-soft)]">
+                      Upload the first private file for this horse.
+                    </p>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {horse.documents.map((doc) => (
+                      <div
+                        key={doc.id}
+                        className="rounded-[1.5rem] border border-[color:var(--border)] bg-[color:var(--muted)]/45 p-4"
+                      >
+                        <div className="flex items-start justify-between gap-4">
+                          <div>
+                            <h3 className="font-semibold text-[color:var(--foreground-strong)]">
+                              {doc.title}
+                            </h3>
+                            <p className="mt-1 text-sm text-[color:var(--foreground-soft)]">
+                              {doc.fileName}
+                            </p>
+                            <div className="mt-3 flex flex-wrap gap-2">
+                              <span className="rounded-full bg-[color:var(--background-elevated)] px-3 py-1 text-[11px] font-medium uppercase tracking-[0.14em] text-[color:var(--foreground-soft)]">
+                                {doc.category.replaceAll("_", " ")}
+                              </span>
+                              <span className="rounded-full bg-[color:var(--background-elevated)] px-3 py-1 text-[11px] font-medium uppercase tracking-[0.14em] text-[color:var(--foreground-soft)]">
+                                {formatBytes(doc.fileSizeBytes)}
+                              </span>
+                              <span className="rounded-full bg-[color:var(--background-elevated)] px-3 py-1 text-[11px] font-medium uppercase tracking-[0.14em] text-[color:var(--foreground-soft)]">
+                                {doc.mimeType || "Unknown file type"}
+                              </span>
+                            </div>
+                            <p className="mt-3 text-xs text-[color:var(--foreground-soft)]">
+                              Uploaded by {doc.uploadedBy.name || doc.uploadedBy.email || "Unknown user"} on{" "}
+                              {new Date(doc.createdAt).toLocaleString()}
+                            </p>
                           </div>
-                          <p className="mt-2 text-xs text-stone-500">
-                            Uploaded by {doc.uploadedBy.name || doc.uploadedBy.email || "Unknown user"} on{" "}
-                            {new Date(doc.createdAt).toLocaleString()}
-                          </p>
-                        </div>
 
-                        <div className="flex flex-col items-end gap-2">
-                          <span className="rounded-full bg-stone-200 px-3 py-1 text-xs font-medium text-stone-700">
-                            Private
-                          </span>
-                          <span className="rounded-full bg-white px-3 py-1 text-xs font-medium text-stone-600">
-                            Category: {doc.category.replaceAll("_", " ")}
-                          </span>
+                          <div className="flex flex-col items-end gap-2">
+                            <span className="rounded-full bg-[rgba(45,84,56,0.14)] px-3 py-1 text-xs font-medium text-[color:var(--foreground-strong)]">
+                              Private
+                            </span>
+                            <span className="rounded-full bg-[color:var(--background-elevated)] px-3 py-1 text-xs font-medium text-[color:var(--foreground-soft)]">
+                              Category: {doc.category.replaceAll("_", " ")}
+                            </span>
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </div>
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </div>
+        )}
       </section>
     </main>
   );

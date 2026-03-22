@@ -1,10 +1,10 @@
 import { getServerSession } from "next-auth";
 import { NextResponse } from "next/server";
-import { mkdir, writeFile } from "node:fs/promises";
-import path from "node:path";
 
 import prisma from "@/lib/db/prisma";
+import { getHorseWriteBlockError, getSellerWriteBlockError } from "@/lib/admin/moderation";
 import { authOptions } from "@/lib/auth/options";
+import { uploadPrivateAsset } from "@/lib/storage/private-assets";
 
 interface RouteProps {
   params: Promise<{
@@ -44,11 +44,19 @@ export async function POST(req: Request, { params }: RouteProps) {
       },
       select: {
         id: true,
+        adminDisabledAt: true,
+        adminDisableReason: true,
       },
     });
 
     if (!seller) {
       return NextResponse.json({ error: "Seller profile not found." }, { status: 400 });
+    }
+
+    const sellerWriteBlocked = getSellerWriteBlockError(seller);
+
+    if (sellerWriteBlocked) {
+      return NextResponse.json({ error: sellerWriteBlocked }, { status: 403 });
     }
 
     const horse = await prisma.horse.findFirst({
@@ -59,11 +67,25 @@ export async function POST(req: Request, { params }: RouteProps) {
       select: {
         id: true,
         name: true,
+        adminDisabledAt: true,
+        adminDisableReason: true,
+        sellerProfile: {
+          select: {
+            adminDisabledAt: true,
+            adminDisableReason: true,
+          },
+        },
       },
     });
 
     if (!horse) {
       return NextResponse.json({ error: "Horse not found." }, { status: 404 });
+    }
+
+    const horseWriteBlocked = getHorseWriteBlockError(horse);
+
+    if (horseWriteBlocked) {
+      return NextResponse.json({ error: horseWriteBlocked }, { status: 403 });
     }
 
     const formData = await req.formData();
@@ -90,28 +112,22 @@ export async function POST(req: Request, { params }: RouteProps) {
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
 
-    const uploadsDir = path.join(
-      process.cwd(),
-      "private",
-      "uploads",
-      "horses",
-      "documents"
-    );
-
-    await mkdir(uploadsDir, { recursive: true });
-
     const timestamp = Date.now();
     const fileName = safeFileName(file.name);
     const storedName = `${horse.id}-${timestamp}-${fileName}`;
-    const absolutePath = path.join(uploadsDir, storedName);
+    const storageKey = `horses/documents/${horse.id}/${storedName}`;
 
-    await writeFile(absolutePath, buffer);
+    await uploadPrivateAsset({
+      key: storageKey,
+      body: buffer,
+      contentType: file.type || "application/octet-stream",
+    });
 
     const document = await prisma.horseDocument.create({
       data: {
         horseId: horse.id,
         title,
-        filePath: absolutePath,
+        filePath: storageKey,
         fileName: file.name,
         mimeType: file.type || null,
         isPrivate: true,

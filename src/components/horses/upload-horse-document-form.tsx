@@ -78,7 +78,7 @@ export default function UploadHorseDocumentForm({
       <div className="space-y-2">
         <Label htmlFor="title">Document title</Label>
         <div className="relative">
-          <FileText className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-stone-400" />
+          <FileText className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[color:var(--foreground-soft)]" />
           <Input
             id="title"
             placeholder="Veterinary record"
@@ -96,7 +96,7 @@ export default function UploadHorseDocumentForm({
           id="category"
           value={category}
           onChange={(e) => setCategory(e.target.value)}
-          className="flex h-10 w-full rounded-lg border border-stone-300 bg-white px-3 py-2 text-sm"
+          className="flex h-10 w-full rounded-lg border border-input bg-[color:var(--background-elevated)] px-3 py-2 text-sm text-foreground outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
         >
           {documentCategories.map((option) => (
             <option key={option.value} value={option.value}>
@@ -108,16 +108,28 @@ export default function UploadHorseDocumentForm({
 
       <div className="space-y-2">
         <Label htmlFor="file">File</Label>
-        <Input
-          id="file"
-          type="file"
-          onChange={(e) => setFile(e.target.files?.[0] || null)}
-          required
-        />
+        <label
+          htmlFor="file"
+          className="flex cursor-pointer flex-col gap-2 rounded-[1.5rem] border border-dashed border-[color:var(--border)] bg-[color:var(--muted)]/55 px-4 py-5 transition hover:border-[color:var(--primary)] hover:bg-[color:var(--muted)]"
+        >
+          <span className="text-sm font-medium text-[color:var(--foreground-strong)]">
+            {file ? file.name : "Choose a file to upload"}
+          </span>
+          <span className="text-sm text-[color:var(--foreground-soft)]">
+            Private files stay in this horse vault until access is approved for a buyer.
+          </span>
+          <Input
+            id="file"
+            type="file"
+            className="hidden"
+            onChange={(e) => setFile(e.target.files?.[0] || null)}
+            required
+          />
+        </label>
       </div>
 
       {error ? (
-        <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+        <div className="rounded-xl border border-destructive/20 bg-destructive/10 px-4 py-3 text-sm text-destructive">
           {error}
         </div>
       ) : null}

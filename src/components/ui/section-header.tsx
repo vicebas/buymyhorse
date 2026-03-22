@@ -10,13 +10,13 @@ export function SectionHeader({
   return (
     <div className="mb-8 space-y-2">
       {eyebrow ? (
-        <p className="text-sm font-medium uppercase tracking-[0.18em] text-stone-500">
+        <p className="mono text-sm font-medium uppercase tracking-[0.18em] text-[color:var(--foreground-soft)]">
           {eyebrow}
         </p>
       ) : null}
-      <h1 className="text-4xl text-stone-900 md:text-5xl">{title}</h1>
+      <h1 className="text-4xl font-extrabold text-[color:var(--foreground-strong)] md:text-5xl">{title}</h1>
       {description ? (
-        <p className="max-w-2xl text-base leading-7 text-stone-600">{description}</p>
+        <p className="max-w-2xl text-base leading-7 text-[color:var(--foreground-soft)]">{description}</p>
       ) : null}
     </div>
   );

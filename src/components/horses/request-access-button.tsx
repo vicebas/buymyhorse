@@ -70,9 +70,9 @@ export default function RequestAccessButton({
     return (
       <Link
         href="/login"
-        className="inline-flex w-full items-center justify-center rounded-lg bg-stone-900 px-4 py-2 text-sm font-medium text-white"
+        className="inline-flex w-full items-center justify-center rounded-lg bg-[color:var(--accent)] px-4 py-2 text-sm font-medium text-[color:var(--accent-foreground)]"
       >
-        Log in to request documents
+        Log in to interact
       </Link>
     );
   }
@@ -81,7 +81,7 @@ export default function RequestAccessButton({
     return (
       <Link
         href={`/horses/${horseId}/access`}
-        className="inline-flex w-full items-center justify-center rounded-lg bg-stone-900 px-4 py-2 text-sm font-medium text-white"
+        className="inline-flex w-full items-center justify-center rounded-lg bg-[color:var(--accent)] px-4 py-2 text-sm font-medium text-[color:var(--accent-foreground)]"
       >
         View Shared Documents
       </Link>
@@ -90,7 +90,7 @@ export default function RequestAccessButton({
 
   if (submitted || currentStatus === "PENDING") {
     return (
-      <div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+      <div className="rounded-2xl border border-[rgba(45,84,56,0.18)] bg-[rgba(45,84,56,0.08)] px-4 py-3 text-sm text-[#2d5438]">
         Your document request is pending seller review.
       </div>
     );
@@ -99,7 +99,7 @@ export default function RequestAccessButton({
   return (
     <div className="space-y-4">
       {currentStatus === "DENIED" || currentStatus === "EXPIRED" || currentStatus === "REVOKED" ? (
-        <div className="rounded-2xl border border-stone-200 bg-stone-50 px-4 py-3 text-sm text-stone-700">
+        <div className="rounded-2xl border border-[color:var(--border)] bg-[color:var(--muted)] px-4 py-3 text-sm text-[color:var(--foreground)]">
           Your previous access state was <span className="font-medium">{currentStatus.toLowerCase()}</span>.
           You can send a new request below.
         </div>
@@ -108,19 +108,19 @@ export default function RequestAccessButton({
       <Button
         type="button"
         onClick={() => setOpen(true)}
-        className="inline-flex w-full items-center justify-center gap-2"
+        className="inline-flex w-full items-center justify-center gap-2 btn-brand-green h-10"
       >
         <ShieldCheck className="h-4 w-4" />
-        Request Document Access
+        Request Document
       </Button>
 
       {open ? (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/45 px-4 py-8">
-          <div className="w-full max-w-xl rounded-3xl border border-stone-200 bg-white p-6 shadow-2xl">
+          <div className="w-full max-w-xl rounded-3xl border border-[color:var(--border)] bg-[color:var(--card)] p-6 shadow-[var(--shadow-hover)]">
             <div className="mb-4 flex items-start justify-between gap-4">
               <div>
-                <h2 className="font-serif text-2xl text-stone-900">Request Document Access</h2>
-                <p className="mt-1 text-sm text-stone-500">
+                <h2 className="text-2xl font-extrabold text-[color:var(--foreground-strong)]">Request Document Access</h2>
+                <p className="mt-1 text-sm text-[color:var(--foreground-soft)]">
                   Tell the seller what records you want reviewed. Specific files stay private until they choose what to share.
                 </p>
               </div>
@@ -138,7 +138,7 @@ export default function RequestAccessButton({
 
             <div className="space-y-4">
               <div>
-                <p className="mb-2 text-sm font-medium text-stone-900">What records are you looking for?</p>
+                <p className="mb-2 text-sm font-medium text-[color:var(--foreground-strong)]">What records are you looking for?</p>
                 <Textarea
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
@@ -147,7 +147,7 @@ export default function RequestAccessButton({
               </div>
 
               {error ? (
-                <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+                <div className="rounded-xl border border-[color:var(--destructive)]/30 bg-[color:var(--destructive)]/10 px-4 py-3 text-sm text-[color:var(--destructive)]">
                   {error}
                 </div>
               ) : null}

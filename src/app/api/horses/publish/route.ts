@@ -2,7 +2,9 @@ import { getServerSession } from "next-auth";
 import { NextResponse } from "next/server";
 
 import prisma from "@/lib/db/prisma";
+import { getHorseWriteBlockError, getSellerWriteBlockError } from "@/lib/admin/moderation";
 import { authOptions } from "@/lib/auth/options";
+import { canPublishHorseForSeller, validateHorseForPublishing } from "@/lib/billing/entitlements";
 
 export async function POST(req: Request) {
   const session = await getServerSession(authOptions);
@@ -17,6 +19,8 @@ export async function POST(req: Request) {
     },
     select: {
       id: true,
+      adminDisabledAt: true,
+      adminDisableReason: true,
     },
   });
 
@@ -25,6 +29,12 @@ export async function POST(req: Request) {
       { error: "Seller profile not found" },
       { status: 400 }
     );
+  }
+
+  const sellerWriteBlocked = getSellerWriteBlockError(seller);
+
+  if (sellerWriteBlocked) {
+    return NextResponse.json({ error: sellerWriteBlocked }, { status: 403 });
   }
 
   const body = await req.json();
@@ -36,6 +46,24 @@ export async function POST(req: Request) {
     select: {
       id: true,
       sellerProfileId: true,
+      name: true,
+      breed: true,
+      age: true,
+      discipline: true,
+      level: true,
+      height: true,
+      gender: true,
+      location: true,
+      description: true,
+      image: true,
+      adminDisabledAt: true,
+      adminDisableReason: true,
+      sellerProfile: {
+        select: {
+          adminDisabledAt: true,
+          adminDisableReason: true,
+        },
+      },
     },
   });
 
@@ -43,12 +71,48 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }
 
+  const horseWriteBlocked = getHorseWriteBlockError(existingHorse);
+
+  if (horseWriteBlocked) {
+    return NextResponse.json({ error: horseWriteBlocked }, { status: 403 });
+  }
+
+  const nextPublishedState = Boolean(body.isPublished);
+
+  if (nextPublishedState) {
+    const publishValidation = validateHorseForPublishing(existingHorse);
+
+    if (!publishValidation.isPublishReady) {
+      return NextResponse.json(
+        {
+          error: `Complete the listing before publishing. Missing: ${publishValidation.missing.join(", ")}.`,
+        },
+        { status: 400 }
+      );
+    }
+
+    const canPublish = await canPublishHorseForSeller({
+      sellerId: seller.id,
+      excludeHorseId: existingHorse.id,
+    });
+
+    if (!canPublish) {
+      return NextResponse.json(
+        {
+          error: "Your current activation does not include another published horse slot. Buy extra horse slots or keep this horse inactive.",
+        },
+        { status: 403 }
+      );
+    }
+  }
+
   const horse = await prisma.horse.update({
     where: {
       id: body.id,
     },
     data: {
-      isPublished: Boolean(body.isPublished),
+      isPublished: nextPublishedState,
+      isActive: nextPublishedState,
     },
   });
 

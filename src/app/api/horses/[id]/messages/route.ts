@@ -4,9 +4,46 @@ import { NextResponse } from "next/server";
 import prisma from "@/lib/db/prisma";
 import { authOptions } from "@/lib/auth/options";
 import { ensureHorseConversation } from "@/lib/conversations/horse-conversation";
+import { isHorsePubliclyVisible } from "@/lib/billing/entitlements";
 
 interface RouteContext {
   params: Promise<{ id: string }>;
+}
+
+async function loadVisibleHorse(id: string) {
+  const horse = await prisma.horse.findUnique({
+    where: {
+      id,
+    },
+    select: {
+      id: true,
+      sellerProfileId: true,
+      isPublished: true,
+      deletedAt: true,
+      adminDisabledAt: true,
+      sellerProfile: {
+        select: {
+          adminDisabledAt: true,
+          plan: true,
+          billingCadence: true,
+          billingStatus: true,
+          adminPlanOverride: true,
+          adminBillingCadenceOverride: true,
+          adminBillingStatusOverride: true,
+          adminBillingOverrideReason: true,
+          adminBillingOverrideExpiresAt: true,
+          trialEndsAt: true,
+          currentPeriodEndsAt: true,
+        },
+      },
+    },
+  });
+
+  if (!horse || !isHorsePubliclyVisible(horse)) {
+    return null;
+  }
+
+  return horse;
 }
 
 export async function GET(_req: Request, { params }: RouteContext) {
@@ -17,10 +54,16 @@ export async function GET(_req: Request, { params }: RouteContext) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
+  const horse = await loadVisibleHorse(id);
+
+  if (!horse) {
+    return NextResponse.json({ error: "Horse not found" }, { status: 404 });
+  }
+
   const conversation = await prisma.horseConversation.findUnique({
     where: {
       horseId_buyerId: {
-        horseId: id,
+        horseId: horse.id,
         buyerId: session.user.id,
       },
     },
@@ -60,15 +103,7 @@ export async function POST(req: Request, { params }: RouteContext) {
     return NextResponse.json({ error: "Message is required" }, { status: 400 });
   }
 
-  const horse = await prisma.horse.findUnique({
-    where: {
-      id,
-    },
-    select: {
-      id: true,
-      sellerProfileId: true,
-    },
-  });
+  const horse = await loadVisibleHorse(id);
 
   if (!horse) {
     return NextResponse.json({ error: "Horse not found" }, { status: 404 });

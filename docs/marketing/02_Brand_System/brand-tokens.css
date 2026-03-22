@@ -1,0 +1,210 @@
+/* ============================================
+   HORSEROSTER — Brand Tokens
+   Paste into your global CSS :root
+   ============================================ */
+
+:root {
+
+  /* ── Colours ── */
+  --color-navy:       #0F2A44;   /* Primary — brand, headings, UI */
+  --color-navy-mid:   #1A3B5A;   /* Icon background (dark) */
+  --color-navy-dark:  #091C2E;   /* Page cover, deep backgrounds */
+  --color-sand:       #E9E3D8;   /* Reversed text, card backgrounds */
+  --color-sand-lt:    #F0EBE2;   /* Light card fill, EquiTag cream patch */
+  --color-green:      #2D5438;   /* Accent — CTAs, icon crossbar only */
+  --color-green-lt:   #3A6847;   /* Hover state for green elements */
+  --color-charcoal:   #2B2B2B;   /* Body copy */
+  --color-offwhite:   #F8F6F2;   /* Page background */
+  --color-white:      #FFFFFF;
+
+  /* ── Neutral / UI ── */
+  --color-mid:        #8A9099;   /* Secondary text, placeholders */
+  --color-mid-lt:     #B8BEC6;   /* Tertiary text, disabled */
+
+  /* ── Rules / borders ── */
+  --rule:             rgba(15, 42, 68, 0.10);
+  --rule-lt:          rgba(15, 42, 68, 0.055);
+
+  /* ── Typography ── */
+  --font-sans:  'DM Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  --font-mono:  'IBM Plex Mono', 'Courier New', monospace;
+
+  /* ── Font sizes ── */
+  --text-display:   clamp(40px, 6vw, 64px);  /* Hero headlines */
+  --text-h1:        clamp(28px, 4vw, 40px);
+  --text-h2:        clamp(20px, 3vw, 28px);
+  --text-h3:        18px;
+  --text-body:      15px;
+  --text-sm:        13px;
+  --text-xs:        11px;
+  --text-label:     10px;   /* Uppercase labels — use with letter-spacing */
+
+  /* ── Font weights ── */
+  --weight-light:     300;   /* "Horse" in wordmark */
+  --weight-regular:   400;
+  --weight-medium:    500;
+  --weight-semibold:  600;
+  --weight-bold:      700;
+  --weight-display:   800;   /* "Roster" in wordmark, hero headlines */
+
+  /* ── Letter spacing ── */
+  --tracking-tight:   -0.04em;  /* Display text, wordmark */
+  --tracking-normal:  -0.02em;  /* Headings */
+  --tracking-label:    0.16em;  /* Uppercase small labels */
+
+  /* ── Spacing ── */
+  --space-1:   4px;
+  --space-2:   8px;
+  --space-3:  12px;
+  --space-4:  16px;
+  --space-5:  24px;
+  --space-6:  32px;
+  --space-7:  48px;
+  --space-8:  64px;
+  --space-9:  96px;
+
+  /* ── Border radius ── */
+  --radius-sm:  4px;
+  --radius-md:  6px;
+  --radius-lg:  8px;
+  --radius-xl: 12px;
+  --radius-icon-sm: 8px;   /* Small icon containers */
+  --radius-icon-md: 12px;  /* Standard app icon corner radius */
+  --radius-icon-lg: 16px;  /* Large app icon */
+
+  /* ── Shadows ── */
+  --shadow-card:   0 2px 8px rgba(15, 42, 68, 0.08), 0 1px 2px rgba(15, 42, 68, 0.04);
+  --shadow-hover:  0 8px 24px rgba(15, 42, 68, 0.12);
+  --shadow-modal:  0 24px 64px rgba(15, 42, 68, 0.18);
+
+}
+
+
+/* ============================================
+   HORSEROSTER — Base Typography
+   ============================================ */
+
+/* Google Fonts import — add to <head> instead for performance */
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600;9..40,700;9..40,800&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
+
+body {
+  font-family: var(--font-sans);
+  font-size: var(--text-body);
+  font-weight: var(--weight-regular);
+  color: var(--color-charcoal);
+  background: var(--color-offwhite);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  line-height: 1.65;
+}
+
+/* ── Headings ── */
+h1 {
+  font-size: var(--text-h1);
+  font-weight: var(--weight-display);
+  letter-spacing: var(--tracking-tight);
+  color: var(--color-navy);
+  line-height: 1.05;
+}
+
+h2 {
+  font-size: var(--text-h2);
+  font-weight: var(--weight-bold);
+  letter-spacing: var(--tracking-normal);
+  color: var(--color-navy);
+  line-height: 1.15;
+}
+
+h3 {
+  font-size: var(--text-h3);
+  font-weight: var(--weight-semibold);
+  letter-spacing: var(--tracking-normal);
+  color: var(--color-navy);
+}
+
+/* ── Wordmark utility class ── */
+/* Usage: <span class="wm"><span class="wm-horse">Horse</span><span class="wm-roster">Roster</span></span> */
+.wm {
+  font-family: var(--font-sans);
+  letter-spacing: var(--tracking-tight);
+  line-height: 1;
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: baseline;
+}
+.wm-horse  { font-weight: var(--weight-light); }   /* 300 */
+.wm-roster { font-weight: var(--weight-display); } /* 800 */
+.wm-cream{
+  color: var(--color-sand);
+}
+/* ── Label / eyebrow text ── */
+.label-uppercase {
+  font-family: var(--font-mono);
+  font-size: var(--text-label);
+  font-weight: var(--weight-medium);
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+  color: var(--color-mid);
+}
+
+/* ── Monospace / code ── */
+code, .mono {
+  font-family: var(--font-mono);
+  font-size: 0.9em;
+  color: var(--color-green);
+}
+
+
+/* ============================================
+   HORSEROSTER — Button Styles
+   ============================================ */
+
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--color-navy);
+  color: var(--color-white);
+  font-family: var(--font-sans);
+  font-size: 13px;
+  font-weight: var(--weight-bold);
+  letter-spacing: -0.01em;
+  padding: 9px 18px;
+  border-radius: var(--radius-sm);
+  border: none;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background 0.15s ease;
+}
+.btn-primary:hover { background: var(--color-navy-mid); }
+
+.btn-ghost {
+  display: inline-flex;
+  align-items: center;
+  background: transparent;
+  color: var(--color-navy);
+  font-family: var(--font-sans);
+  font-size: 13px;
+  font-weight: var(--weight-semibold);
+  padding: 8px 16px;
+  border-radius: var(--radius-sm);
+  border: 1.5px solid var(--rule);
+  cursor: pointer;
+  text-decoration: none;
+  transition: border-color 0.15s ease;
+}
+.btn-ghost:hover { border-color: rgba(15, 42, 68, 0.25); }
+
+.btn-green {
+  background: var(--color-green);
+  color: var(--color-white);
+  font-family: var(--font-sans);
+  font-size: 13px;
+  font-weight: var(--weight-bold);
+  padding: 9px 18px;
+  border-radius: var(--radius-sm);
+  border: none;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+.btn-green:hover { background: var(--color-green-lt); }

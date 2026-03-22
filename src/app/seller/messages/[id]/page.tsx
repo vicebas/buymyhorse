@@ -29,7 +29,7 @@ export default async function SellerConversationPage({
   });
 
   if (!seller) {
-    redirect("/seller/onboard");
+    redirect("/mybarn/onboard");
   }
 
   const conversation = await prisma.horseConversation.findUnique({
@@ -72,16 +72,16 @@ export default async function SellerConversationPage({
   }
 
   return (
-    <main className="min-h-screen bg-stone-50 text-stone-900">
+    <main className="min-h-screen bg-[color:var(--background)] text-[color:var(--foreground)]">
       <AppHeader variant="seller" />
 
       <section className="mx-auto max-w-5xl px-6 py-10">
         <div className="mb-8">
-          <p className="text-sm font-medium uppercase tracking-[0.18em] text-stone-500">
+          <p className="mono text-sm font-medium uppercase tracking-[0.18em] text-[color:var(--foreground-soft)]">
             Conversation
           </p>
-          <h1 className="mt-2 font-serif text-4xl">{conversation.horse.name}</h1>
-          <p className="mt-3 text-stone-600">
+          <h1 className="mt-2 text-4xl font-extrabold">{conversation.horse.name}</h1>
+          <p className="mt-3 text-[color:var(--foreground-soft)]">
             Buyer: {conversation.buyer.name || conversation.buyer.email}
           </p>
         </div>

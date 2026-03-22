@@ -17,6 +17,60 @@ enum UserRole {
   BUYER
   SELLER
   ADMIN
+  SUPER_ADMIN
+}
+
+enum BarnPlan {
+  ACTIVATION
+}
+
+enum BillingCadence {
+  MONTHLY
+  YEARLY
+}
+
+enum BarnBillingStatus {
+  TRIALING
+  ACTIVE
+  INCOMPLETE
+  PAST_DUE
+  CANCELED
+  EXPIRED
+}
+
+enum EquiTagAttachmentType {
+  HORSE
+  BARN
+}
+
+enum HorseMediaType {
+  IMAGE
+  VIDEO
+}
+
+enum AdminActionType {
+  BARN_DISABLED
+  BARN_RESTORED
+  HORSE_DISABLED
+  HORSE_RESTORED
+  BILLING_OVERRIDE_SET
+  BILLING_OVERRIDE_CLEARED
+  BILLING_SETTINGS_UPDATED
+  HORSE_SLOT_ADJUSTED
+  USER_ROLE_CHANGED
+}
+
+enum AdminActionTargetType {
+  BARN
+  HORSE
+  BILLING
+  USER
+}
+
+enum HorseSlotLedgerSource {
+  STRIPE_PURCHASE
+  ADMIN_ADJUSTMENT
+  MIGRATION_SEED
 }
 
 model User {
@@ -37,6 +91,10 @@ model User {
   messages       HorseMessage[]
   uploadedHorseDocuments HorseDocument[]   @relation("UploadedHorseDocuments")
   vaultActivities        VaultActivityLog[] @relation("VaultActivityActor")
+  adminDisabledBarns      SellerProfile[]   @relation("BarnAdminDisabledBy")
+  adminBillingOverrides   SellerProfile[]   @relation("BarnBillingOverrideBy")
+  adminDisabledHorses     Horse[]           @relation("HorseAdminDisabledBy")
+  adminActionLogs         AdminActionLog[]  @relation("AdminActionActor")
 
   sellerProfile SellerProfile?
 
@@ -53,12 +111,37 @@ model SellerProfile {
   location    String?
   website     String?
   logo        String?
+  coverImage  String?
   headline    String?
+  plan                BarnPlan          @default(ACTIVATION)
+  billingCadence      BillingCadence    @default(MONTHLY)
+  billingStatus       BarnBillingStatus @default(TRIALING)
+  adminDisabledAt      DateTime?
+  adminDisabledByUserId String?
+  adminDisableReason   String?
+  stripeCustomerId    String?           @unique
+  stripeSubscriptionId String?          @unique
+  stripePriceId       String?
+  trialEndsAt         DateTime?
+  currentPeriodEndsAt DateTime?
+  canceledAt          DateTime?
+  adminPlanOverride              BarnPlan?
+  adminBillingCadenceOverride    BillingCadence?
+  adminBillingStatusOverride     BarnBillingStatus?
+  adminBillingOverrideReason     String?
+  adminBillingOverrideExpiresAt  DateTime?
+  adminBillingOverrideUpdatedAt  DateTime?
+  adminBillingOverrideUpdatedByUserId String?
 
   user               User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  adminDisabledByUser User?              @relation("BarnAdminDisabledBy", fields: [adminDisabledByUserId], references: [id], onDelete: SetNull)
+  adminBillingOverrideUpdatedByUser User? @relation("BarnBillingOverrideBy", fields: [adminBillingOverrideUpdatedByUserId], references: [id], onDelete: SetNull)
   horses             Horse[]
   accessGrantsGiven  AccessGrant[]
   horseConversations HorseConversation[]
+  ownedEquiTags      EquiTag[]           @relation("OwnedEquiTags")
+  attachedEquiTags   EquiTag[]           @relation("AttachedBarnEquiTags")
+  horseSlotEntries   BarnHorseSlotLedger[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -117,19 +200,131 @@ model Horse {
   price       Decimal? @db.Decimal(12,2)
   image       String?
   isPublished Boolean @default(false)
+  isBarnFeatured Boolean @default(false)
+  barnDisplayOrder Int?
   isActive    Boolean @default(true)
   deletedAt   DateTime?
+  adminDisabledAt      DateTime?
+  adminDisabledByUserId String?
+  adminDisableReason   String?
 
   sellerProfile SellerProfile @relation(fields: [sellerProfileId], references: [id], onDelete: Cascade)
+  adminDisabledByUser User?    @relation("HorseAdminDisabledBy", fields: [adminDisabledByUserId], references: [id], onDelete: SetNull)
 
-  documents       HorseDocument[]
-  accessRequests  AccessRequest[]
-  accessGrants    AccessGrant[]
-  conversations   HorseConversation[]
-  vaultActivities VaultActivityLog[]
+  documents        HorseDocument[]
+  accessRequests   AccessRequest[]
+  accessGrants     AccessGrant[]
+  conversations    HorseConversation[]
+  vaultActivities  VaultActivityLog[]
+  attachedEquiTags EquiTag[]            @relation("AttachedHorseEquiTags")
+  media            HorseMedia[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+model HorseMedia {
+  id            String        @id @default(cuid())
+  horseId        String
+  type          HorseMediaType
+  originalPath  String
+  processedPath String
+  posterPath    String?
+  mimeType      String?
+  fileName      String
+  sortOrder     Int           @default(0)
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  horse Horse @relation(fields: [horseId], references: [id], onDelete: Cascade)
+
+  @@index([horseId, sortOrder])
+}
+
+model EquiTag {
+  id                   String                  @id @default(cuid())
+  code                 String                  @unique
+  ownerSellerProfileId String
+  attachedEntityType   EquiTagAttachmentType?
+  attachedBarnId       String?
+  attachedHorseId      String?
+  svgPath              String
+  pngPath              String
+  createdAt            DateTime                @default(now())
+  updatedAt            DateTime                @updatedAt
+
+  ownerSellerProfile SellerProfile  @relation("OwnedEquiTags", fields: [ownerSellerProfileId], references: [id], onDelete: Cascade)
+  attachedBarn      SellerProfile? @relation("AttachedBarnEquiTags", fields: [attachedBarnId], references: [id], onDelete: SetNull)
+  attachedHorse     Horse?         @relation("AttachedHorseEquiTags", fields: [attachedHorseId], references: [id], onDelete: SetNull)
+  visits            EquiTagVisit[]
+
+  @@index([ownerSellerProfileId])
+  @@index([attachedEntityType])
+  @@index([attachedBarnId])
+  @@index([attachedHorseId])
+}
+
+model EquiTagVisit {
+  id                   String                  @id @default(cuid())
+  equiTagId            String
+  codeSnapshot         String
+  ownerSellerProfileId String
+  attachedEntityType   EquiTagAttachmentType?
+  attachedBarnId       String?
+  attachedHorseId      String?
+  createdAt            DateTime                @default(now())
+
+  equiTag EquiTag @relation(fields: [equiTagId], references: [id], onDelete: Cascade)
+
+  @@index([createdAt])
+  @@index([equiTagId, createdAt])
+  @@index([ownerSellerProfileId, createdAt])
+}
+
+model AdminActionLog {
+  id         String                @id @default(cuid())
+  actorUserId String
+  actionType AdminActionType
+  targetType AdminActionTargetType
+  targetId   String
+  reason     String?
+  metadata   Json?
+  createdAt  DateTime              @default(now())
+
+  actor User @relation("AdminActionActor", fields: [actorUserId], references: [id], onDelete: Cascade)
+
+  @@index([actorUserId, createdAt])
+  @@index([targetType, targetId, createdAt])
+}
+
+model BillingSettings {
+  id                       String   @id @default("default")
+  activationTrialEnabled   Boolean  @default(false)
+  activationTrialDays      Int      @default(7)
+  activationMonthlyPriceId String?
+  activationYearlyPriceId  String?
+  extraHorsePriceId        String?
+  updatedByUserId          String?
+  createdAt                DateTime @default(now())
+  updatedAt                DateTime @updatedAt
+}
+
+model BarnHorseSlotLedger {
+  id                    String                @id @default(cuid())
+  sellerProfileId       String
+  quantity              Int
+  source                HorseSlotLedgerSource
+  stripeCheckoutSessionId String?             @unique
+  stripePaymentIntentId String?
+  adminUserId           String?
+  note                  String?
+  createdAt             DateTime              @default(now())
+  updatedAt             DateTime              @updatedAt
+
+  sellerProfile SellerProfile @relation(fields: [sellerProfileId], references: [id], onDelete: Cascade)
+
+  @@index([sellerProfileId, createdAt])
+  @@index([source, createdAt])
 }
 
 model Account {

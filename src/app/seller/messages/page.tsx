@@ -26,7 +26,7 @@ export default async function SellerMessagesPage() {
   });
 
   if (!seller) {
-    redirect("/seller/onboard");
+    redirect("/mybarn/onboard");
   }
 
   const conversations = await prisma.horseConversation.findMany({
@@ -61,16 +61,16 @@ export default async function SellerMessagesPage() {
   });
 
   return (
-    <main className="min-h-screen bg-stone-50 text-stone-900">
+    <main className="min-h-screen bg-[color:var(--background)] text-[color:var(--foreground)]">
       <AppHeader variant="seller" />
 
       <section className="mx-auto max-w-6xl px-6 py-10">
         <div className="mb-8">
-          <p className="text-sm font-medium uppercase tracking-[0.18em] text-stone-500">
-            Seller Messages
+          <p className="mono text-sm font-medium uppercase tracking-[0.18em] text-[color:var(--foreground-soft)]">
+            Barn Messages
           </p>
-          <h1 className="mt-2 font-serif text-4xl">Buyer Conversations</h1>
-          <p className="mt-3 max-w-2xl text-stone-600">
+          <h1 className="mt-2 text-4xl font-extrabold">Buyer Conversations</h1>
+          <p className="mt-3 max-w-2xl text-[color:var(--foreground-soft)]">
             Keep track of buyers interested in your horses and continue conversations.
           </p>
         </div>
@@ -78,8 +78,8 @@ export default async function SellerMessagesPage() {
         {conversations.length === 0 ? (
           <Card className="rounded-3xl border-stone-200 shadow-sm">
             <CardContent className="p-10 text-center">
-              <p className="text-lg text-stone-700">No conversations yet</p>
-              <p className="mt-2 text-sm text-stone-500">
+              <p className="text-lg text-[color:var(--foreground)]">No conversations yet</p>
+              <p className="mt-2 text-sm text-[color:var(--foreground-soft)]">
                 Buyer messages will appear here after they contact you from a horse page.
               </p>
             </CardContent>
@@ -96,11 +96,11 @@ export default async function SellerMessagesPage() {
                 >
                   <CardHeader>
                     <CardTitle className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
-                      <div className="font-serif text-2xl text-stone-900">
+                      <div className="text-2xl font-extrabold text-[color:var(--foreground-strong)]">
                         {conversation.horse.name}
                       </div>
 
-                      <div className="text-sm font-normal text-stone-500">
+                      <div className="text-sm font-normal text-[color:var(--foreground-soft)]">
                         Buyer: {conversation.buyer.name || conversation.buyer.email}
                       </div>
                     </CardTitle>
@@ -108,10 +108,10 @@ export default async function SellerMessagesPage() {
 
                   <CardContent className="flex flex-col gap-5 md:flex-row md:items-center md:justify-between">
                     <div className="space-y-1">
-                      <p className="text-sm font-medium text-stone-900">
+                      <p className="text-sm font-medium text-[color:var(--foreground-strong)]">
                         {conversation.buyer.email}
                       </p>
-                      <p className="text-sm text-stone-500">
+                      <p className="text-sm text-[color:var(--foreground-soft)]">
                         {lastMessage
                           ? lastMessage.messageType === "GRANT"
                             ? "Document access granted"
@@ -119,13 +119,13 @@ export default async function SellerMessagesPage() {
                           : "No messages yet"}
                       </p>
                       {lastMessage ? (
-                        <p className="text-xs text-stone-400">
+                        <p className="text-xs text-[color:var(--muted-foreground)]">
                           {new Date(lastMessage.createdAt).toLocaleString()}
                         </p>
                       ) : null}
                     </div>
 
-                    <Link href={`/seller/messages/${conversation.id}`}>
+                    <Link href={`/mybarn/messages/${conversation.id}`}>
                       <Button>Open Conversation</Button>
                     </Link>
                   </CardContent>

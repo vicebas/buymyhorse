@@ -1,41 +1,49 @@
-import Link from "next/link"
-import { Button } from "@/components/ui/button"
-import { Home, LayoutGrid, Tag, DollarSign } from "lucide-react"
+import { getServerSession } from "next-auth";
+import Link from "next/link";
+import { DollarSign, Home, LayoutGrid } from "lucide-react";
 
-export default function MainHeader({
-  activeItem = "listings",
+import { LogoutButton } from "@/components/auth/logout-button";
+import { authOptions } from "@/lib/auth/options";
+import { BrandLogo } from "@/components/layout/brand-logo";
+import { ThemeToggle } from "@/components/layout/theme-toggle";
+import { Button } from "@/components/ui/button";
+
+export default async function MainHeader({
+  activeItem = "dashboard",
 }: {
-  activeItem?: "listings" | "marketplace" | "equitag" | "pricing"
+  activeItem?: "dashboard" | "marketplace" | "pricing";
 }) {
-  return (
-    <header className="w-full border-b border-stone-200 bg-white/95 backdrop-blur">
-      <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-3">
-        <Link href="/" className="flex items-center gap-3">
-          <div className="flex h-9 w-9 items-center justify-center bg-black text-white font-serif text-lg">
-            B
-          </div>
-          <span className="text-lg font-medium">BuyMyHorse</span>
-        </Link>
+  const session = await getServerSession(authOptions);
+  const linkClasses =
+    "flex items-center gap-2 rounded-full px-3.5 py-2 text-sm font-medium transition-colors";
+  const activeClasses = "bg-[#0f2a44] text-[#f8f6f2]";
+  const inactiveClasses =
+    "text-[#4e6172] hover:bg-[#f0ebe2] hover:text-[#0f2a44]";
 
-        <nav className="hidden items-center gap-6 md:flex">
+  return (
+    <header className="w-full border-b border-[rgba(15,42,68,0.1)] bg-[color:var(--background-elevated)] shadow-[0_1px_0_rgba(15,42,68,0.04)]">
+      <div className="mx-auto flex max-w-7xl items-center justify-between gap-6 px-6 py-3">
+        <BrandLogo href="/dashboard" priority variant="primary" />
+
+        <nav className="hidden items-center gap-2 md:flex">
           <Link
-            href="/"
-            className={`flex items-center gap-2 rounded-md px-3 py-1.5 text-sm ${
-              activeItem === "listings"
-                ? "bg-black text-white"
-                : "text-stone-600 hover:text-black"
+            href="/dashboard"
+            className={`${linkClasses} ${
+              activeItem === "dashboard"
+                ? activeClasses
+                : inactiveClasses
             }`}
           >
             <Home size={16} />
-            Listings
+            Dashboard
           </Link>
 
           <Link
             href="/marketplace"
-            className={`flex items-center gap-2 text-sm ${
+            className={`${linkClasses} ${
               activeItem === "marketplace"
-                ? "rounded-md bg-black px-3 py-1.5 text-white"
-                : "text-stone-600 hover:text-black"
+                ? activeClasses
+                : inactiveClasses
             }`}
           >
             <LayoutGrid size={16} />
@@ -43,23 +51,11 @@ export default function MainHeader({
           </Link>
 
           <Link
-            href="/equitag"
-            className={`flex items-center gap-2 text-sm ${
-              activeItem === "equitag"
-                ? "rounded-md bg-black px-3 py-1.5 text-white"
-                : "text-stone-600 hover:text-black"
-            }`}
-          >
-            <Tag size={16} />
-            EquiTag
-          </Link>
-
-          <Link
             href="/pricing"
-            className={`flex items-center gap-2 text-sm ${
+            className={`${linkClasses} ${
               activeItem === "pricing"
-                ? "rounded-md bg-black px-3 py-1.5 text-white"
-                : "text-stone-600 hover:text-black"
+                ? activeClasses
+                : inactiveClasses
             }`}
           >
             <DollarSign size={16} />
@@ -68,15 +64,31 @@ export default function MainHeader({
         </nav>
 
         <div className="flex items-center gap-3">
-          <Link href="/login">
-            <Button variant="outline">Sign In</Button>
-          </Link>
+          <ThemeToggle surface="light" />
+          {session ? (
+            <LogoutButton
+              className="border-[color:var(--border)] bg-[color:var(--background-elevated)] text-[#0f2a44] hover:bg-[#f0ebe2] hover:text-[#0f2a44]"
+            />
+          ) : (
+            <>
+              <Link href="/login">
+                <Button
+                  variant="outline"
+                  className="border-[color:var(--border)] bg-[color:var(--background-elevated)] text-[#0f2a44] hover:bg-[#f0ebe2] hover:text-[#0f2a44]"
+                >
+                  Sign In
+                </Button>
+              </Link>
 
-          <Link href="/register">
-            <Button>Get Started</Button>
-          </Link>
+              <Link href="/register">
+                <Button className="btn-brand-green border-0">
+                  Get Started
+                </Button>
+              </Link>
+            </>
+          )}
         </div>
       </div>
     </header>
-  )
+  );
 }

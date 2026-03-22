@@ -1,0 +1,62 @@
+{
+  "colors": {
+    "navy":       { "value": "#0F2A44", "description": "Primary brand color — headings, UI, wordmark" },
+    "navyMid":    { "value": "#1A3B5A", "description": "Icon background dark variant" },
+    "navyDark":   { "value": "#091C2E", "description": "Deep dark backgrounds, cover" },
+    "sand":       { "value": "#E9E3D8", "description": "Secondary — reversed text, card surfaces" },
+    "sandLight":  { "value": "#F0EBE2", "description": "Light card fill, EquiTag cream patch" },
+    "green":      { "value": "#2D5438", "description": "Accent — CTAs, icon H crossbar. Use sparingly." },
+    "greenLight": { "value": "#3A6847", "description": "Hover state for green elements" },
+    "charcoal":   { "value": "#2B2B2B", "description": "Body copy" },
+    "offwhite":   { "value": "#F8F6F2", "description": "Page background" },
+    "white":      { "value": "#FFFFFF" },
+    "mid":        { "value": "#8A9099", "description": "Secondary / placeholder text" },
+    "midLight":   { "value": "#B8BEC6", "description": "Tertiary / disabled text" }
+  },
+  "typography": {
+    "fontSans":   { "value": "'DM Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif" },
+    "fontMono":   { "value": "'IBM Plex Mono', 'Courier New', monospace" },
+    "weights": {
+      "light":    { "value": 300, "note": "Used for 'Horse' in wordmark" },
+      "regular":  { "value": 400 },
+      "medium":   { "value": 500 },
+      "semibold": { "value": 600 },
+      "bold":     { "value": 700 },
+      "display":  { "value": 800, "note": "Used for 'Roster' in wordmark and hero headlines" }
+    },
+    "sizes": {
+      "display":  { "value": "clamp(40px, 6vw, 64px)" },
+      "h1":       { "value": "clamp(28px, 4vw, 40px)" },
+      "h2":       { "value": "clamp(20px, 3vw, 28px)" },
+      "h3":       { "value": "18px" },
+      "body":     { "value": "15px" },
+      "small":    { "value": "13px" },
+      "xs":       { "value": "11px" },
+      "label":    { "value": "10px", "note": "Uppercase labels, use with letter-spacing: 0.16em" }
+    }
+  },
+  "wordmark": {
+    "note": "The wordmark splits 'Horse' (weight 300, light) and 'Roster' (weight 800, bold). Letter spacing: -0.04em on both. This is the brand's defining visual detail.",
+    "horse":  { "fontWeight": 300 },
+    "roster": { "fontWeight": 800 },
+    "letterSpacing": "-0.04em"
+  },
+  "spacing": {
+    "1": "4px",  "2": "8px",  "3": "12px", "4": "16px",
+    "5": "24px", "6": "32px", "7": "48px", "8": "64px", "9": "96px"
+  },
+  "radius": {
+    "sm":      "4px",
+    "md":      "6px",
+    "lg":      "8px",
+    "xl":      "12px",
+    "iconSm":  "8px",
+    "iconMd":  "12px",
+    "iconLg":  "16px"
+  },
+  "shadows": {
+    "card":  "0 2px 8px rgba(15,42,68,0.08), 0 1px 2px rgba(15,42,68,0.04)",
+    "hover": "0 8px 24px rgba(15,42,68,0.12)",
+    "modal": "0 24px 64px rgba(15,42,68,0.18)"
+  }
+}
