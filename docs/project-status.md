@@ -172,6 +172,8 @@ Last updated: 2026-03-22
 - Rebrand/theme cleanup across remaining buyer, barn, horse-detail, and request pages
 
 ## Recently Completed (2026-03-22)
+- Fixed a browser crash when `NEXT_PUBLIC_PUBLIC_ASSET_BASE_URL` is missing in deployment: public asset URL resolution now returns `null` for unresolved object keys so UI image fallbacks render instead of throwing in the client bundle
+- Deployment docs now require `docker compose --env-file .env.production build/up` so `NEXT_PUBLIC_PUBLIC_ASSET_BASE_URL` reaches the Docker build stage and is embedded into the Next.js client bundle
 - Removed "system" theme mode; app now defaults to light for all users (including logged-out) to prevent the OS dark preference from showing the wrong logo
 - Theme toggle simplified to a light/dark binary switch; user choice persists in localStorage under `horseroster-theme`
 - Theme init script in `layout.tsx` no longer checks `prefers-color-scheme`; defaults to `"light"` when no stored value exists

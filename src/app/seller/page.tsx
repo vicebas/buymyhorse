@@ -283,7 +283,7 @@ export default async function SellerPage() {
                     </div>
                 </div>
 
-                <div className="mt-6 rounded-3xl border border-[color:var(--border)] bg-[color:var(--card)] p-6 shadow-[var(--shadow-card)]">
+                {/* <div className="mt-6 rounded-3xl border border-[color:var(--border)] bg-[color:var(--card)] p-6 shadow-[var(--shadow-card)]">
                     <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
                         <div>
                             <p className="mono text-xs font-medium uppercase tracking-[0.18em] text-[color:var(--foreground-soft)]">
@@ -327,7 +327,7 @@ export default async function SellerPage() {
                             </Link>
                         </div>
                     </div>
-                </div>
+                </div> */}
 
                 {seller.adminDisabledAt ? (
                     <div className="mt-6">
@@ -340,26 +340,19 @@ export default async function SellerPage() {
 
                 <div className="mt-8 flex flex-wrap items-center justify-between gap-4">
                     <div className="inline-flex rounded-xl bg-[color:var(--muted)] p-1">
-                        <button className="inline-flex items-center gap-2 rounded-lg bg-[color:var(--background-elevated)] px-5 py-2 text-sm font-medium text-[color:var(--foreground-strong)] shadow-[var(--shadow-card)]">
+                        <button className="inline-flex items-center gap-2 rounded-lg bg-[color:var(--background-elevated)] px-5 py-2 text-md font-medium text-[color:var(--foreground-strong)] shadow-[var(--shadow-card)]">
                             <FolderOpen className="h-4 w-4" />
                             My Horses
                         </button>
 
                         <Link
                             href="/mybarn/requests"
-                            className="inline-flex items-center gap-2 rounded-lg px-5 py-2 text-sm font-medium text-[color:var(--foreground-soft)]"
+                            className="inline-flex items-center gap-2 rounded-lg px-5 py-2 text-md font-medium text-[color:var(--foreground-soft)]"
                         >
                             <FileText className="h-4 w-4" />
-                            EquiVault
+                            EquiVault Requests
                         </Link>
 
-                        <Link
-                            href="/mybarn/requests"
-                            className="inline-flex items-center gap-2 rounded-lg px-5 py-2 text-sm font-medium text-[color:var(--foreground-soft)]"
-                        >
-                            <FolderOpen className="h-4 w-4" />
-                            Doc Requests
-                        </Link>
                     </div>
 
                     <Link href="/mybarn/horses/new">

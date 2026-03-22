@@ -55,7 +55,11 @@ export function resolvePublicAssetUrl(pathOrKey?: string | null) {
     return pathOrKey;
   }
 
-  return `${getPublicAssetBaseUrl()}/${pathOrKey.replace(/^\/+/, "")}`;
+  if (!PUBLIC_ASSET_BASE_URL) {
+    return null;
+  }
+
+  return `${PUBLIC_ASSET_BASE_URL}/${pathOrKey.replace(/^\/+/, "")}`;
 }
 
 function isLikelyPublicObjectKey(pathOrKey: string) {

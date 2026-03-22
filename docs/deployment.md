@@ -317,15 +317,16 @@ Alternatively, run migrations from your dev machine before deploying if Node.js 
 ### 7.2 Build the Docker image
 
 ```bash
-docker compose build
+docker compose --env-file .env.production build
 ```
 
 The multi-stage `Dockerfile` compiles Next.js into a standalone output and installs FFmpeg in the runner stage. Expect 3–5 minutes on the first build.
+This `--env-file` flag matters for `NEXT_PUBLIC_PUBLIC_ASSET_BASE_URL`: Next.js reads `NEXT_PUBLIC_*` values at build time, and Docker Compose does not pull build-arg substitutions from a service `env_file`.
 
 ### 7.3 Start the services
 
 ```bash
-docker compose up -d
+docker compose --env-file .env.production up -d
 ```
 
 This starts two containers:
@@ -401,8 +402,8 @@ git pull
 export $(grep -v '^#' .env.production | xargs)
 npx prisma migrate deploy
 
-docker compose build
-docker compose up -d
+docker compose --env-file .env.production build
+docker compose --env-file .env.production up -d
 ```
 
 Compose replaces the running `app` container in place. Caddy TLS data is stored in the `caddy_data` and `caddy_config` named volumes and is preserved across every redeploy.

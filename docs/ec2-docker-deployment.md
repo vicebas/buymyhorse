@@ -58,9 +58,11 @@ Add these Compose/Caddy variables in the same shell session or `.env` file used 
 From the project root on the EC2 instance:
 
 ```bash
-docker compose build
-docker compose up -d
+docker compose --env-file .env.production build
+docker compose --env-file .env.production up -d
 ```
+
+`env_file: .env.production` only applies to the running containers. Any `NEXT_PUBLIC_*` values used by Next.js must also be available to Docker Compose itself during the image build so they can be passed as build args into the `builder` stage.
 
 ## Manual updates
 
@@ -68,8 +70,8 @@ When you ship a new version:
 
 ```bash
 git pull
-docker compose build
-docker compose up -d
+docker compose --env-file .env.production build
+docker compose --env-file .env.production up -d
 ```
 
 ## Notes

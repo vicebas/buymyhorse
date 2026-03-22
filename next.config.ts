@@ -1,6 +1,6 @@
 import type { NextConfig } from "next";
 
-const publicAssetBaseUrl = process.env.NEXT_PUBLIC_PUBLIC_ASSET_BASE_URL;
+const publicAssetBaseUrl = process.env.NEXT_PUBLIC_PUBLIC_ASSET_BASE_URL || 'https://d1349keq8cq5xc.cloudfront.net';
 const remoteUrl = publicAssetBaseUrl ? new URL(publicAssetBaseUrl) : null;
 
 const nextConfig: NextConfig = {
