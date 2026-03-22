@@ -55,8 +55,9 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     async session({ session, user }) {
       console.log("Session callback called with session:", session, "and user:", user)
       if (session.user) {
+        const sessionUser = user as { id: string; role?: string }
         session.user.id = user.id
-        session.user.role = user.role
+        session.user.role = sessionUser.role ?? "BUYER"
       }
 
       return session

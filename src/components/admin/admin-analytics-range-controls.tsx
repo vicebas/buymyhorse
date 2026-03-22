@@ -7,10 +7,30 @@ interface AdminAnalyticsRangeControlsProps {
   fromInput: string;
   toInput: string;
   label: string;
+  basePath?: string;
+  persistParams?: Record<string, string | undefined>;
 }
 
-function buildHref(range: Exclude<AdminAnalyticsRangeKey, "custom">) {
-  return `/admin?range=${range}`;
+function buildHref({
+  range,
+  basePath,
+  persistParams,
+}: {
+  range: Exclude<AdminAnalyticsRangeKey, "custom">;
+  basePath: string;
+  persistParams?: Record<string, string | undefined>;
+}) {
+  const params = new URLSearchParams();
+
+  params.set("range", range);
+
+  for (const [key, value] of Object.entries(persistParams || {})) {
+    if (value) {
+      params.set(key, value);
+    }
+  }
+
+  return `${basePath}?${params.toString()}`;
 }
 
 export default function AdminAnalyticsRangeControls({
@@ -18,6 +38,8 @@ export default function AdminAnalyticsRangeControls({
   fromInput,
   toInput,
   label,
+  basePath = "/admin",
+  persistParams,
 }: AdminAnalyticsRangeControlsProps) {
   return (
     <aside className="rounded-[2rem] border border-[color:var(--border)] bg-[color:var(--card)] p-6 shadow-[var(--shadow-card)]">
@@ -40,7 +62,11 @@ export default function AdminAnalyticsRangeControls({
           return (
             <Link
               key={value}
-              href={buildHref(value)}
+              href={buildHref({
+                range: value,
+                basePath,
+                persistParams,
+              })}
               className={`rounded-full px-3 py-2 text-sm font-semibold transition ${
                 isActive
                   ? "bg-[color:var(--accent)] text-[color:var(--accent-foreground)]"
@@ -55,6 +81,9 @@ export default function AdminAnalyticsRangeControls({
 
       <form method="get" className="mt-5 space-y-3 rounded-2xl bg-[color:var(--background-elevated)] p-4">
         <input type="hidden" name="range" value="custom" />
+        {Object.entries(persistParams || {}).map(([key, value]) =>
+          value ? <input key={key} type="hidden" name={key} value={value} /> : null
+        )}
         <div className="grid gap-3 sm:grid-cols-2">
           <label className="space-y-2 text-sm font-medium text-[color:var(--foreground)]">
             <span>From</span>

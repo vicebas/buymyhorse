@@ -6,7 +6,9 @@ import Link from "next/link";
 
 import PublicBarnContactButton from "@/components/barn/public-barn-contact-button";
 import PublicBarnFilters from "@/components/barn/public-barn-filters";
-import AppHeader from "@/components/layout/app-header";
+import { FollowBarnButton } from "@/components/barn/follow-barn-button";
+import { getBarnFollowStatus } from "@/server/follows";
+import ResolvedAppHeader from "@/components/layout/resolved-app-header";
 import { authOptions } from "@/lib/auth/options";
 import { getUserAppHeaderVariant } from "@/lib/auth/get-user-app-header-variant";
 import { isBarnPubliclyVisible } from "@/lib/billing/entitlements";
@@ -129,6 +131,11 @@ export default async function PublicSellerPage({
 
   const primaryContactHorse = featuredHorses[0] || seller.horses[0] || null;
   const isOwner = session?.user?.id === seller.user.id;
+  const isAuthenticated = !!session?.user?.id;
+  const isFollowing =
+    isAuthenticated && !isOwner
+      ? await getBarnFollowStatus(session!.user!.id, seller.id)
+      : false;
   const hasPublishedHorses = seller.horses.length > 0;
   const hasActiveFilters = Boolean(
     discipline || ageMin !== null || ageMax !== null || heightMin !== null || heightMax !== null || location || saleStatus
@@ -143,7 +150,7 @@ export default async function PublicSellerPage({
 
   return (
     <main className="min-h-screen bg-[color:var(--background)] text-[color:var(--foreground)]">
-      <AppHeader variant={headerVariant} />
+      <ResolvedAppHeader variant={headerVariant} />
 
       <section className="mx-auto max-w-7xl px-6 py-10">
         <div className="overflow-hidden rounded-[2rem] border border-[color:var(--border)] bg-[color:var(--card)] shadow-[var(--shadow-card)]">
@@ -212,6 +219,13 @@ export default async function PublicSellerPage({
                         : null
                     }
                   />
+                  {!isOwner && (
+                    <FollowBarnButton
+                      barnSlug={seller.slug}
+                      initialIsFollowing={isFollowing}
+                      isAuthenticated={isAuthenticated}
+                    />
+                  )}
                   <span className="rounded-full bg-[color:var(--muted)] px-3 py-1 text-xs font-semibold uppercase tracking-[0.12em] text-[color:var(--foreground-soft)]">
                     {seller.horses.length} published {seller.horses.length === 1 ? "listing" : "listings"}
                   </span>

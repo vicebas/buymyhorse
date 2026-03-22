@@ -4,6 +4,7 @@ import { NextResponse } from "next/server";
 import prisma from "@/lib/db/prisma";
 import { authOptions } from "@/lib/auth/options";
 import { ensureHorseConversation } from "@/lib/conversations/horse-conversation";
+import { markBuyerConversationRead } from "@/lib/notifications/seller";
 import { isHorsePubliclyVisible } from "@/lib/billing/entitlements";
 
 interface RouteContext {
@@ -69,6 +70,8 @@ export async function POST(_req: Request, { params }: RouteContext) {
     session.user.id,
     horse.sellerProfileId
   );
+
+  await markBuyerConversationRead(conversation.id, session.user.id);
 
   const messages = await prisma.horseMessage.findMany({
     where: {

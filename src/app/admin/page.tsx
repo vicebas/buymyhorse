@@ -168,6 +168,83 @@ export default async function AdminIndexPage({
         />
       </div>
 
+      <div className="rounded-[2.25rem] border border-[color:var(--border)] bg-[color:var(--card)] p-7 shadow-[var(--shadow-card)]">
+        <p className="mono text-xs font-medium uppercase tracking-[0.24em] text-[color:var(--foreground-soft)]">
+          Access & Messaging
+        </p>
+        <h2 className="mt-3 text-4xl font-extrabold text-[color:var(--foreground-strong)]">
+          Request flow, approvals, and conversation volume.
+        </h2>
+        <p className="mt-3 max-w-3xl text-base text-[color:var(--foreground-soft)]">
+          Track vault demand, approval decisions, and downstream messaging activity without leaving the overview.
+        </p>
+      </div>
+
+      <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-4">
+        <MetricCard
+          label="Active Grants"
+          value={analytics.accessMessaging.snapshot.activeGrants.toLocaleString()}
+          description="Currently valid grants across the platform."
+          href="/admin/access"
+        />
+        <MetricCard
+          label="Pending Requests"
+          value={analytics.accessMessaging.snapshot.pendingRequests.toLocaleString()}
+          description="Open buyer requests awaiting action."
+          href="/admin/access"
+        />
+        <MetricCard
+          label="Requests Created"
+          value={analytics.accessMessaging.range.requestsCreated.toLocaleString()}
+          description="Buyer vault requests created in the active range."
+          href="/admin/access"
+        />
+        <MetricCard
+          label="Approvals"
+          value={analytics.accessMessaging.range.approvals.toLocaleString()}
+          description="Approvals recorded in the vault activity log."
+          href="/admin/access"
+        />
+      </div>
+
+      <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-4">
+        <MetricCard
+          label="Denials"
+          value={analytics.accessMessaging.range.denials.toLocaleString()}
+          description="Requests denied in the active range."
+          href="/admin/access"
+        />
+        <MetricCard
+          label="Revokes"
+          value={analytics.accessMessaging.range.revokes.toLocaleString()}
+          description="Grant revocations recorded in the active range."
+          href="/admin/access"
+        />
+        <MetricCard
+          label="Conversations"
+          value={analytics.accessMessaging.range.conversationsCreated.toLocaleString()}
+          description="Horse conversations started in the active range."
+        />
+        <MetricCard
+          label="Messages Sent"
+          value={analytics.accessMessaging.range.messagesSent.toLocaleString()}
+          description="All conversation messages sent in the active range."
+        />
+      </div>
+
+      <div className="grid gap-5 md:grid-cols-2">
+        <MetricCard
+          label="Text Messages"
+          value={analytics.accessMessaging.range.textMessagesSent.toLocaleString()}
+          description="Regular chat messages sent in the active range."
+        />
+        <MetricCard
+          label="Grant Messages"
+          value={analytics.accessMessaging.range.grantMessagesSent.toLocaleString()}
+          description="Grant-share messages emitted during approvals."
+        />
+      </div>
+
       <div className="grid gap-6 xl:grid-cols-2">
         <TrendCard
           title="Accounts Created"
@@ -206,6 +283,37 @@ export default async function AdminIndexPage({
             color="#0F766E"
           />
         </div>
+      </div>
+
+      <div className="grid gap-6 xl:grid-cols-2">
+        <TrendCard
+          title="Requests Created"
+          description="Daily buyer vault requests created over the selected date range."
+          data={analytics.accessMessaging.series.requestsCreated}
+          gradientId="admin-access-requests-chart"
+          color="#1A3B5A"
+        />
+        <TrendCard
+          title="Approvals"
+          description="Daily request approvals recorded in the activity log."
+          data={analytics.accessMessaging.series.approvals}
+          gradientId="admin-access-approvals-chart"
+          color="#2D5438"
+        />
+        <TrendCard
+          title="Conversations Created"
+          description="Daily horse conversation starts across buyers and barns."
+          data={analytics.accessMessaging.series.conversationsCreated}
+          gradientId="admin-access-conversations-chart"
+          color="#8E6C3A"
+        />
+        <TrendCard
+          title="Messages Sent"
+          description="Daily message volume across horse conversations."
+          data={analytics.accessMessaging.series.messagesSent}
+          gradientId="admin-access-messages-chart"
+          color="#0F766E"
+        />
       </div>
 
       <div className="grid gap-6 xl:grid-cols-2">

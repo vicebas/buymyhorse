@@ -7,6 +7,8 @@ import { authOptions } from "@/lib/auth/options";
 import { canPublishHorseForSeller, validateHorseForPublishing } from "@/lib/billing/entitlements";
 import { createHorseEquiTag } from "@/lib/equitag/service";
 import { deletePublicAsset, uploadPublicAsset } from "@/lib/storage/public-assets";
+import { NotificationType } from "@/generated/prisma/client";
+import { dispatchHorseNotification } from "@/lib/notifications/dispatch";
 
 function safeFileName(name: string) {
   return name.replace(/[^a-zA-Z0-9._-]/g, "_");
@@ -145,6 +147,17 @@ export async function POST(req: Request) {
       },
       { status: 500 }
     );
+  }
+
+  if (horse.isPublished) {
+    dispatchHorseNotification({
+      type: NotificationType.NEW_HORSE_FROM_FOLLOWED_BARN,
+      sellerProfileId: horse.sellerProfileId,
+      horseId: horse.id,
+      horseName: horse.name,
+      barnName: seller.displayName,
+      barnSlug: seller.slug ?? "",
+    }).catch(() => {})
   }
 
   return NextResponse.json(horse);

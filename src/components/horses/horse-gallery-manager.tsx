@@ -13,7 +13,8 @@ import { cn } from "@/lib/utils";
 type ExistingMedia = {
   id: string;
   type: "IMAGE" | "VIDEO";
-  processedPath: string;
+  status: "PENDING_UPLOAD" | "PROCESSING" | "READY" | "FAILED";
+  processedPath: string | null;
   posterPath: string | null;
   fileName: string;
 };
@@ -158,10 +159,10 @@ export default function HorseGalleryManager({
                 Upload gallery photos and videos
               </p>
               <p className="mt-2 max-w-2xl text-sm text-[color:var(--foreground-soft)]">
-                Files are uploaded into HorseRoster, compressed automatically, and prepared for fast public playback.
+                Files are uploaded into HorseRoster, processed inside the app container, and prepared for fast public playback.
               </p>
               <p className="mono mt-3 text-xs uppercase tracking-[0.18em] text-[color:var(--foreground-soft)]">
-                Images and videos only • Social-style processing • Public gallery assets
+                Images and videos only • In-app processing • Public gallery assets
               </p>
             </div>
           </div>

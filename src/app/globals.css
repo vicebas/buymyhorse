@@ -164,5 +164,5 @@ html[data-theme="dark"] .brand-logo-light {
 }
 
 html[data-theme="dark"] .brand-logo-dark {
-  display: inline-flex;
+  display: inline-block;
 }

@@ -5,11 +5,13 @@ import Link from "next/link";
 import prisma from "@/lib/db/prisma";
 import { authOptions } from "@/lib/auth/options";
 import AdminBlockedNotice from "@/components/admin/admin-blocked-notice";
-import AppHeader from "@/components/layout/app-header";
+import SellerAppHeader from "@/components/layout/seller-app-header";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import UploadHorseDocumentForm from "@/components/horses/upload-horse-document-form";
+import VaultDocumentActions from "@/components/horses/vault-document-actions";
 import { getHorseWriteBlockError } from "@/lib/admin/moderation";
+import { formatDocumentCategory } from "@/lib/vault/document-categories";
 
 interface PageProps {
   params: Promise<{
@@ -87,7 +89,7 @@ export default async function SellerHorseVaultPage({ params }: PageProps) {
 
   return (
     <main className="min-h-screen bg-background text-foreground">
-      <AppHeader variant="seller" />
+      <SellerAppHeader />
 
       <section className="mx-auto max-w-5xl px-6 py-10">
         <div className="mb-8 flex items-start justify-between gap-4">
@@ -165,7 +167,7 @@ export default async function SellerHorseVaultPage({ params }: PageProps) {
                             </p>
                             <div className="mt-3 flex flex-wrap gap-2">
                               <span className="rounded-full bg-[color:var(--background-elevated)] px-3 py-1 text-[11px] font-medium uppercase tracking-[0.14em] text-[color:var(--foreground-soft)]">
-                                {doc.category.replaceAll("_", " ")}
+                                {formatDocumentCategory(doc.category)}
                               </span>
                               <span className="rounded-full bg-[color:var(--background-elevated)] px-3 py-1 text-[11px] font-medium uppercase tracking-[0.14em] text-[color:var(--foreground-soft)]">
                                 {formatBytes(doc.fileSizeBytes)}
@@ -184,9 +186,14 @@ export default async function SellerHorseVaultPage({ params }: PageProps) {
                             <span className="rounded-full bg-[rgba(45,84,56,0.14)] px-3 py-1 text-xs font-medium text-[color:var(--foreground-strong)]">
                               Private
                             </span>
-                            <span className="rounded-full bg-[color:var(--background-elevated)] px-3 py-1 text-xs font-medium text-[color:var(--foreground-soft)]">
-                              Category: {doc.category.replaceAll("_", " ")}
-                            </span>
+                            <VaultDocumentActions
+                              horseId={horse.id}
+                              document={{
+                                id: doc.id,
+                                title: doc.title,
+                                category: doc.category,
+                              }}
+                            />
                           </div>
                         </div>
                       </div>

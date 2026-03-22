@@ -100,6 +100,7 @@ export async function POST(
           data: {
             horseId: horse.id,
             type: item.type,
+            status: "READY",
             originalPath: item.originalPath,
             processedPath: item.processedPath,
             posterPath: item.posterPath,

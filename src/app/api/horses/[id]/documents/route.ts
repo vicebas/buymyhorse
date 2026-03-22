@@ -5,6 +5,7 @@ import prisma from "@/lib/db/prisma";
 import { getHorseWriteBlockError, getSellerWriteBlockError } from "@/lib/admin/moderation";
 import { authOptions } from "@/lib/auth/options";
 import { uploadPrivateAsset } from "@/lib/storage/private-assets";
+import { isDocumentCategory } from "@/lib/vault/document-categories";
 
 interface RouteProps {
   params: Promise<{
@@ -15,19 +16,6 @@ interface RouteProps {
 function safeFileName(name: string) {
   return name.replace(/[^a-zA-Z0-9._-]/g, "_");
 }
-
-const documentCategories = [
-  "XRAYS",
-  "PPE",
-  "VET_REPORTS",
-  "CONTRACTS",
-  "PASSPORT",
-  "COMPETITION_RECORDS",
-  "CARE",
-  "OTHER",
-] as const;
-
-type DocumentCategory = (typeof documentCategories)[number];
 
 export async function POST(req: Request, { params }: RouteProps) {
   try {
@@ -97,7 +85,7 @@ export async function POST(req: Request, { params }: RouteProps) {
       return NextResponse.json({ error: "Document title is required." }, { status: 400 });
     }
 
-    if (!documentCategories.includes(category as DocumentCategory)) {
+    if (!isDocumentCategory(category)) {
       return NextResponse.json({ error: "Invalid document category." }, { status: 400 });
     }
 
@@ -131,7 +119,7 @@ export async function POST(req: Request, { params }: RouteProps) {
         fileName: file.name,
         mimeType: file.type || null,
         isPrivate: true,
-        category: category as DocumentCategory,
+        category,
         fileSizeBytes: file.size,
         uploadedByUserId: session.user.id,
       },

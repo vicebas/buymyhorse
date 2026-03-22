@@ -6,7 +6,7 @@ import { Images } from "lucide-react";
 import prisma from "@/lib/db/prisma";
 import { authOptions } from "@/lib/auth/options";
 import AdminBlockedNotice from "@/components/admin/admin-blocked-notice";
-import AppHeader from "@/components/layout/app-header";
+import SellerAppHeader from "@/components/layout/seller-app-header";
 import HorseGalleryManager from "@/components/horses/horse-gallery-manager";
 import { Button } from "@/components/ui/button";
 import { getHorseWriteBlockError } from "@/lib/admin/moderation";
@@ -65,7 +65,7 @@ export default async function HorseGalleryPage({
 
   return (
     <main className="min-h-screen bg-[color:var(--background)] text-[color:var(--foreground)]">
-      <AppHeader variant="seller" />
+      <SellerAppHeader />
 
       <section className="mx-auto max-w-6xl px-6 py-10">
         <div className="mb-8 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
@@ -81,10 +81,10 @@ export default async function HorseGalleryPage({
             </p>
           </div>
 
-          <Link href={`/mybarn/horses/${horse.id}/edit`}>
+          <Link href={`/mybarn/`}>
             <Button variant="outline" className="inline-flex items-center gap-2">
               <Images className="h-4 w-4" />
-              Back to horse details
+              Back to My Barn
             </Button>
           </Link>
         </div>
@@ -101,6 +101,7 @@ export default async function HorseGalleryPage({
             existingMedia={horse.media.map((media) => ({
               id: media.id,
               type: media.type,
+              status: media.status,
               processedPath: media.processedPath,
               posterPath: media.posterPath,
               fileName: media.fileName,

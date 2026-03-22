@@ -19,6 +19,7 @@ export async function ensureHorseConversation(horseId: string, buyerId: string, 
       horseId,
       buyerId,
       sellerId,
+      buyerLastReadAt: new Date(),
     },
   });
 }

@@ -3,6 +3,7 @@
 import Image from "next/image"
 import Link from "next/link"
 import { resolvePublicAssetUrl } from "@/lib/storage/public-assets"
+import SaveHorseButton from "@/components/horses/save-horse-button"
 
 export type HorseMarketplaceCardData = {
   id: string
@@ -17,6 +18,7 @@ export type HorseMarketplaceCardData = {
   image?: string | null
   location?: string | null
   saleStatus?: string | null
+  isPlatformFeatured?: boolean
   sellerProfile: {
     displayName: string
   }
@@ -27,11 +29,15 @@ export default function HorseMarketplaceCard({
   isInteractive = true,
   onRequireAuth,
   variant = "dashboard",
+  isSaved = false,
+  isLoggedIn = false,
 }: {
   horse: HorseMarketplaceCardData
   isInteractive?: boolean
   onRequireAuth?: () => void
   variant?: "dashboard" | "marketplace"
+  isSaved?: boolean
+  isLoggedIn?: boolean
 }) {
   const saleLabel = formatSaleStatus(horse.saleStatus)
 
@@ -70,7 +76,15 @@ export default function HorseMarketplaceCard({
         <span className={`absolute left-3 top-3 rounded-[3px] px-2 py-1 text-[8px] font-bold uppercase tracking-[0.1em] ${getMarketplaceStatusClasses(horse.saleStatus)}`}>
           {saleLabel}
         </span>
+        {horse.isPlatformFeatured ? (
+          <span className="absolute right-3 top-3 rounded-[3px] bg-[rgba(15,42,68,0.9)] px-2 py-1 text-[8px] font-bold uppercase tracking-[0.1em] text-[#f8f6f2]">
+            Featured Pick
+          </span>
+        ) : null}
 
+        <div className="absolute bottom-3 right-3">
+          <SaveHorseButton horseId={horse.id} initialSaved={isSaved} isLoggedIn={isLoggedIn} size="card" />
+        </div>
       </div>
 
       <div className="p-4">
@@ -136,7 +150,15 @@ export default function HorseMarketplaceCard({
         <span className="absolute left-2.5 top-2.5 rounded-[3px] bg-[#2d5438] px-2 py-1 text-[9px] font-bold uppercase tracking-[0.12em] text-white">
           {saleLabel}
         </span>
+        {horse.isPlatformFeatured ? (
+          <span className="absolute right-2.5 top-2.5 rounded-[3px] bg-[rgba(15,42,68,0.9)] px-2 py-1 text-[9px] font-bold uppercase tracking-[0.12em] text-[#f8f6f2]">
+            Featured Pick
+          </span>
+        ) : null}
 
+        <div className="absolute bottom-2.5 right-2.5">
+          <SaveHorseButton horseId={horse.id} initialSaved={isSaved} isLoggedIn={isLoggedIn} size="card" />
+        </div>
       </div>
 
       <div className="p-4">

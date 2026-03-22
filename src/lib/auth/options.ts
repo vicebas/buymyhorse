@@ -51,7 +51,8 @@ export const authOptions: NextAuthOptions = {
     async jwt({ token, user }) {
       if (user) {
         token.id = user.id
-        token.role = user.role
+        token.role = (user as typeof user & { role?: string }).role ?? "BUYER"
+        token.emailVerified = !!(user as typeof user & { emailVerified?: Date | null }).emailVerified
       }
       return token
     },
@@ -62,11 +63,12 @@ export const authOptions: NextAuthOptions = {
         const currentUser = token.id
           ? await prisma.user.findUnique({
               where: { id: token.id as string },
-              select: { role: true },
+              select: { role: true, emailVerified: true },
             })
           : null
 
         session.user.role = currentUser?.role ?? (token.role as string) ?? "BUYER"
+        session.user.emailVerified = !!currentUser?.emailVerified
       }
       return session
     },

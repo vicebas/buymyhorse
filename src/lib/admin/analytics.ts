@@ -21,7 +21,6 @@ interface TimestampRow {
   createdAt: Date;
 }
 
-
 const RANGE_DAYS: Record<Exclude<AdminAnalyticsRangeKey, "custom">, number> = {
   "7d": 7,
   "30d": 30,
@@ -175,6 +174,8 @@ function rankByCount<T extends string>(rows: T[]) {
 }
 
 export async function getAdminDashboardAnalytics(range: AdminAnalyticsRange) {
+  const now = new Date();
+
   const [
     totalUsers,
     totalBarns,
@@ -185,6 +186,12 @@ export async function getAdminDashboardAnalytics(range: AdminAnalyticsRange) {
     horsesInRange,
     equiTagsInRange,
     equiTagVisitsInRange,
+    activeGrantsSnapshot,
+    pendingRequestsSnapshot,
+    requestsInRange,
+    vaultActivityInRange,
+    conversationsInRange,
+    messagesInRange,
   ] = await prisma.$transaction([
     prisma.user.count(),
     prisma.sellerProfile.count(),
@@ -219,10 +226,73 @@ export async function getAdminDashboardAnalytics(range: AdminAnalyticsRange) {
       },
       orderBy: { createdAt: "asc" },
     }),
+    prisma.accessGrant.count({
+      where: {
+        revokedAt: null,
+        OR: [{ expiresAt: null }, { expiresAt: { gt: now } }],
+      },
+    }),
+    prisma.accessRequest.count({
+      where: {
+        status: "PENDING",
+      },
+    }),
+    prisma.accessRequest.findMany({
+      where: {
+        createdAt: { gte: range.from, lte: range.to },
+      },
+      select: {
+        createdAt: true,
+      },
+      orderBy: { createdAt: "asc" },
+    }),
+    prisma.vaultActivityLog.findMany({
+      where: {
+        createdAt: { gte: range.from, lte: range.to },
+        activityType: {
+          in: ["ACCESS_REQUEST_APPROVED", "ACCESS_REQUEST_DENIED", "ACCESS_GRANT_REVOKED"],
+        },
+      },
+      select: {
+        createdAt: true,
+        activityType: true,
+      },
+      orderBy: { createdAt: "asc" },
+    }),
+    prisma.horseConversation.findMany({
+      where: {
+        createdAt: { gte: range.from, lte: range.to },
+      },
+      select: {
+        createdAt: true,
+      },
+      orderBy: { createdAt: "asc" },
+    }),
+    prisma.horseMessage.findMany({
+      where: {
+        createdAt: { gte: range.from, lte: range.to },
+      },
+      select: {
+        createdAt: true,
+        messageType: true,
+      },
+      orderBy: { createdAt: "asc" },
+    }),
   ]);
 
   const topTagCounts = rankByCount(equiTagVisitsInRange.map((row) => row.equiTagId)).slice(0, 5);
   const topBarnCounts = rankByCount(equiTagVisitsInRange.map((row) => row.ownerSellerProfileId)).slice(0, 5);
+  const approvalsInRange = vaultActivityInRange.filter(
+    (row) => row.activityType === "ACCESS_REQUEST_APPROVED"
+  );
+  const denialsInRange = vaultActivityInRange.filter(
+    (row) => row.activityType === "ACCESS_REQUEST_DENIED"
+  );
+  const revokesInRange = vaultActivityInRange.filter(
+    (row) => row.activityType === "ACCESS_GRANT_REVOKED"
+  );
+  const textMessagesInRange = messagesInRange.filter((row) => row.messageType === "TEXT");
+  const grantMessagesInRange = messagesInRange.filter((row) => row.messageType === "GRANT");
 
   const topTagIds = topTagCounts.map(([id]) => id);
   const topBarnIds = topBarnCounts.map(([id]) => id);
@@ -285,6 +355,28 @@ export async function getAdminDashboardAnalytics(range: AdminAnalyticsRange) {
       horses: buildSeries(horsesInRange, range.from, range.to),
       equiTags: buildSeries(equiTagsInRange, range.from, range.to),
       equiTagUses: buildSeries(equiTagVisitsInRange, range.from, range.to),
+    },
+    accessMessaging: {
+      snapshot: {
+        activeGrants: activeGrantsSnapshot,
+        pendingRequests: pendingRequestsSnapshot,
+      },
+      range: {
+        requestsCreated: requestsInRange.length,
+        approvals: approvalsInRange.length,
+        denials: denialsInRange.length,
+        revokes: revokesInRange.length,
+        conversationsCreated: conversationsInRange.length,
+        messagesSent: messagesInRange.length,
+        textMessagesSent: textMessagesInRange.length,
+        grantMessagesSent: grantMessagesInRange.length,
+      },
+      series: {
+        requestsCreated: buildSeries(requestsInRange, range.from, range.to),
+        approvals: buildSeries(approvalsInRange, range.from, range.to),
+        conversationsCreated: buildSeries(conversationsInRange, range.from, range.to),
+        messagesSent: buildSeries(messagesInRange, range.from, range.to),
+      },
     },
     topBarns: topBarnCounts.map(([id, hits]) => {
       const barn = topBarnMap.get(id);

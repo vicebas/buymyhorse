@@ -5,6 +5,8 @@ import prisma from "@/lib/db/prisma";
 import { authOptions } from "@/lib/auth/options";
 import { ensureHorseConversation } from "@/lib/conversations/horse-conversation";
 import { isHorsePubliclyVisible } from "@/lib/billing/entitlements";
+import { dispatchMessageNotification } from "@/lib/notifications/dispatch";
+import { markBuyerConversationRead } from "@/lib/notifications/seller";
 
 interface RouteContext {
   params: Promise<{ id: string }>;
@@ -85,6 +87,10 @@ export async function GET(_req: Request, { params }: RouteContext) {
     },
   });
 
+  if (conversation) {
+    await markBuyerConversationRead(conversation.id, session.user.id);
+  }
+
   return NextResponse.json(conversation?.messages || []);
 }
 
@@ -111,23 +117,75 @@ export async function POST(req: Request, { params }: RouteContext) {
 
   const conversation = await ensureHorseConversation(id, session.user.id, horse.sellerProfileId);
 
-  const message = await prisma.horseMessage.create({
-    data: {
-      conversationId: conversation.id,
-      senderUserId: session.user.id,
-      body: text,
-      messageType: "TEXT",
-    },
-    include: {
-      sender: {
-        select: {
-          id: true,
-          name: true,
-          email: true,
+  const message = await prisma.$transaction(async (tx) => {
+    const createdMessage = await tx.horseMessage.create({
+      data: {
+        conversationId: conversation.id,
+        senderUserId: session.user.id,
+        body: text,
+        messageType: "TEXT",
+      },
+      include: {
+        sender: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+          },
         },
       },
-    },
+    });
+
+    await tx.horseConversation.update({
+      where: {
+        id: conversation.id,
+      },
+      data: {
+        buyerLastReadAt: new Date(),
+      },
+    });
+
+    return createdMessage;
   });
+
+  // Fire-and-forget: notify the other party
+  ;(async () => {
+    try {
+      const fullConversation = await prisma.horseConversation.findUnique({
+        where: { id: conversation.id },
+        select: {
+          id: true,
+          horse: { select: { id: true, name: true, sellerProfile: { select: { userId: true, displayName: true, user: { select: { id: true, email: true, name: true } } } } } },
+          buyer: { select: { id: true, email: true, name: true } },
+        },
+      })
+      if (!fullConversation) return
+
+      const senderUserId = session.user.id
+      const isSenderBuyer = senderUserId === fullConversation.buyer.id
+
+      const recipient = isSenderBuyer
+        ? { id: fullConversation.horse.sellerProfile.user.id, email: fullConversation.horse.sellerProfile.user.email, name: fullConversation.horse.sellerProfile.displayName }
+        : { id: fullConversation.buyer.id, email: fullConversation.buyer.email, name: fullConversation.buyer.name }
+
+      const senderName = isSenderBuyer
+        ? (fullConversation.buyer.name ?? "A buyer")
+        : fullConversation.horse.sellerProfile.displayName
+
+      await dispatchMessageNotification({
+        conversationId: fullConversation.id,
+        recipientUserId: recipient.id,
+        recipientEmail: recipient.email,
+        recipientName: recipient.name,
+        senderName,
+        horseName: fullConversation.horse.name,
+        horseId: fullConversation.horse.id,
+        isSellerRecipient: isSenderBuyer,
+      })
+    } catch {
+      // swallow errors
+    }
+  })()
 
   return NextResponse.json(message);
 }

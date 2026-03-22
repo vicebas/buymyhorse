@@ -7,21 +7,11 @@ import { Loader2, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { DOCUMENT_CATEGORY_OPTIONS } from "@/lib/vault/document-categories";
 
 interface UploadHorseDocumentFormProps {
   horseId: string;
 }
-
-const documentCategories = [
-  { value: "XRAYS", label: "X-Rays" },
-  { value: "PPE", label: "PPE" },
-  { value: "VET_REPORTS", label: "Vet Reports" },
-  { value: "CONTRACTS", label: "Contracts" },
-  { value: "PASSPORT", label: "Passport" },
-  { value: "COMPETITION_RECORDS", label: "Competition Records" },
-  { value: "CARE", label: "Care" },
-  { value: "OTHER", label: "Other" },
-];
 
 export default function UploadHorseDocumentForm({
   horseId,
@@ -98,7 +88,7 @@ export default function UploadHorseDocumentForm({
           onChange={(e) => setCategory(e.target.value)}
           className="flex h-10 w-full rounded-lg border border-input bg-[color:var(--background-elevated)] px-3 py-2 text-sm text-foreground outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
         >
-          {documentCategories.map((option) => (
+          {DOCUMENT_CATEGORY_OPTIONS.map((option) => (
             <option key={option.value} value={option.value}>
               {option.label}
             </option>

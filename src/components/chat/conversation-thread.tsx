@@ -1,24 +1,18 @@
 "use client";
 
 import { useState } from "react";
+import { useFloatingMessage } from "@/components/ui/floating-message";
 
 import HorseMessageItem from "@/components/horses/horse-message-item";
 import { Button } from "@/components/ui/button";
+import { useLivePoll } from "@/hooks/use-live-poll";
 
 export type ConversationMessage = {
   id: string;
   body: string | null;
   messageType: "TEXT" | "GRANT";
-  metadata?: {
-    note?: string | null;
-    expiresAt?: string | null;
-    files?: Array<{
-      id: string;
-      title: string;
-      fileName: string;
-      category: string;
-    }>;
-  } | null;
+  accessGrantId?: string | null;
+  metadata?: unknown;
   createdAt: string | Date;
   sender: {
     id: string;
@@ -33,16 +27,45 @@ export default function ConversationThread({
   initialMessages,
   emptyState = "No messages yet.",
   placeholder = "Write a message...",
+  onMessageSent,
 }: {
   conversationId: string;
   currentUserId: string;
   initialMessages: ConversationMessage[];
   emptyState?: string;
   placeholder?: string;
+  onMessageSent?: (message: ConversationMessage) => void;
 }) {
   const [messages, setMessages] = useState(initialMessages);
   const [text, setText] = useState("");
   const [sending, setSending] = useState(false);
+  // attempt to get floating message API; provider may be absent in some contexts
+  let floatingMsgApi: { showMessage: (s: string, l?: "info" | "error") => void } | null = null;
+  try {
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    floatingMsgApi = useFloatingMessage();
+  } catch (err) {
+    floatingMsgApi = null;
+  }
+
+  const { refreshNow } = useLivePoll({
+    enabled: true,
+    intervalMs: 5000,
+    onPoll: async () => {
+      const response = await fetch(`/api/conversations/${conversationId}/messages`, {
+        cache: "no-store",
+      });
+
+      if (!response.ok) {
+        return;
+      }
+
+      const data = (await response.json()) as { messages: ConversationMessage[] };
+      setMessages((currentMessages) =>
+        areMessagesEqual(currentMessages, data.messages) ? currentMessages : data.messages
+      );
+    },
+  });
 
   async function sendMessage() {
     if (!text.trim()) return;
@@ -59,11 +82,28 @@ export default function ConversationThread({
 
     setSending(false);
 
-    if (!res.ok) return;
+    if (!res.ok) {
+      if (res.status === 403) {
+        if (floatingMsgApi) {
+          floatingMsgApi.showMessage("You are blocked from sending messages to this participant.", "error");
+        } else {
+          // eslint-disable-next-line no-alert
+          alert("You are blocked from sending messages to this participant.");
+        }
+      }
+
+      return;
+    }
 
     const message = (await res.json()) as ConversationMessage;
-    setMessages((prev) => [...prev, message]);
+    setMessages((prev) =>
+      prev.some((existingMessage) => existingMessage.id === message.id)
+        ? prev
+        : [...prev, message]
+    );
     setText("");
+    onMessageSent?.(message);
+    refreshNow();
   }
 
   return (
@@ -82,7 +122,7 @@ export default function ConversationThread({
         )}
       </div>
 
-      <div className="mt-6 flex gap-3 border-t border-[color:var(--border)] pt-4">
+      <div className="mt-6 flex flex-col gap-3 border-t border-[color:var(--border)] pt-4 sm:flex-row">
         <input
           value={text}
           onChange={(e) => setText(e.target.value)}
@@ -90,10 +130,21 @@ export default function ConversationThread({
           placeholder={placeholder}
         />
 
-        <Button type="button" onClick={sendMessage} disabled={sending}>
+        <Button type="button" onClick={sendMessage} disabled={sending} className="w-full sm:w-auto">
           {sending ? "Sending..." : "Send"}
         </Button>
       </div>
     </div>
   );
+}
+
+function areMessagesEqual(
+  currentMessages: ConversationMessage[],
+  nextMessages: ConversationMessage[]
+) {
+  if (currentMessages.length !== nextMessages.length) {
+    return false;
+  }
+
+  return currentMessages.every((message, index) => message.id === nextMessages[index]?.id);
 }

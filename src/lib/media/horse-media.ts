@@ -1,15 +1,15 @@
 import { mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
+import { execFile } from "node:child_process";
 import path from "node:path";
 import os from "node:os";
-import { execFile } from "node:child_process";
 import { promisify } from "node:util";
-
 import ffmpegPath from "ffmpeg-static";
 import sharp from "sharp";
 
 import { deletePublicAsset, uploadPublicAsset } from "@/lib/storage/public-assets";
 
 const execFileAsync = promisify(execFile);
+const resolvedFfmpegPath = process.env.FFMPEG_PATH || ffmpegPath || "ffmpeg";
 
 type ProcessedHorseMedia = {
   type: "IMAGE" | "VIDEO";
@@ -27,6 +27,10 @@ export async function processHorseMediaUpload({
   horseId: string;
   file: File;
 }): Promise<ProcessedHorseMedia> {
+  if (!file.type.startsWith("image/") && !file.type.startsWith("video/")) {
+    throw new Error("Only image and video uploads are supported.");
+  }
+
   const bytes = Buffer.from(await file.arrayBuffer());
   const mediaDir = await mkdtemp(path.join(os.tmpdir(), `horseroster-media-${horseId}-`));
   const originalsDir = path.join(mediaDir, "originals");
@@ -36,7 +40,7 @@ export async function processHorseMediaUpload({
   const processedStoragePrefix = `horses/media/${horseId}/processed`;
   const posterStoragePrefix = `horses/media/${horseId}/posters`;
 
-  const baseName = `${Date.now()}-${safeFileName(file.name.replace(/\.[^/.]+$/, ""))}`;
+  const baseName = buildHorseMediaBaseName(file.name);
   const originalExtension = path.extname(file.name) || getExtensionFromMimeType(file.type);
   const originalFileName = `${baseName}${originalExtension}`;
   const originalFsPath = path.join(originalsDir, originalFileName);
@@ -99,14 +103,6 @@ export async function processHorseMediaUpload({
       };
     }
 
-    if (!file.type.startsWith("video/")) {
-      throw new Error("Only image and video uploads are supported.");
-    }
-
-    if (!ffmpegPath) {
-      throw new Error("Video processing is not available.");
-    }
-
     const processedFileName = `${baseName}.mp4`;
     const posterFileName = `${baseName}-poster.jpg`;
     const processedFsPath = path.join(processedDir, processedFileName);
@@ -115,7 +111,7 @@ export async function processHorseMediaUpload({
     const processedKey = `${processedStoragePrefix}/${processedFileName}`;
     const posterKey = `${posterStoragePrefix}/${posterFileName}`;
 
-    await execFileAsync(ffmpegPath, [
+    await execFileAsync(resolvedFfmpegPath, [
       "-y",
       "-i",
       originalFsPath,
@@ -138,18 +134,31 @@ export async function processHorseMediaUpload({
       processedFsPath,
     ]);
 
-    await execFileAsync(ffmpegPath, [
-      "-y",
-      "-ss",
-      "00:00:01",
-      "-i",
-      processedFsPath,
-      "-frames:v",
-      "1",
-      "-vf",
-      "scale=960:-2",
-      posterFsPath,
-    ]);
+    try {
+      await execFileAsync(resolvedFfmpegPath, [
+        "-y",
+        "-ss",
+        "00:00:01",
+        "-i",
+        processedFsPath,
+        "-frames:v",
+        "1",
+        "-vf",
+        "scale=960:-2",
+        posterFsPath,
+      ]);
+    } catch {
+      await execFileAsync(resolvedFfmpegPath, [
+        "-y",
+        "-i",
+        processedFsPath,
+        "-frames:v",
+        "1",
+        "-vf",
+        "scale=960:-2",
+        posterFsPath,
+      ]);
+    }
 
     await Promise.all([
       uploadPublicAsset({
@@ -183,8 +192,8 @@ export async function processHorseMediaUpload({
 }
 
 export async function removeHorseMediaFiles(media: {
-  originalPath: string;
-  processedPath: string;
+  originalPath: string | null;
+  processedPath: string | null;
   posterPath: string | null;
 }) {
   await Promise.all(
@@ -194,14 +203,20 @@ export async function removeHorseMediaFiles(media: {
   );
 }
 
-function safeFileName(name: string) {
+export function safeFileName(name: string) {
   return name.replace(/[^a-zA-Z0-9._-]/g, "_");
 }
 
-function getExtensionFromMimeType(mimeType: string) {
+export function getExtensionFromMimeType(mimeType: string) {
   if (mimeType.includes("png")) return ".png";
+  if (mimeType.includes("jpeg") || mimeType.includes("jpg")) return ".jpg";
   if (mimeType.includes("webp")) return ".webp";
   if (mimeType.includes("mp4")) return ".mp4";
   if (mimeType.includes("quicktime")) return ".mov";
+  if (mimeType.includes("webm")) return ".webm";
   return ".bin";
+}
+
+export function buildHorseMediaBaseName(fileName: string) {
+  return `${Date.now()}-${safeFileName(fileName.replace(/\.[^/.]+$/, ""))}`;
 }

@@ -2,7 +2,7 @@
 
 ## 1. Product Overview
 
-HorseRoster is a sport horse marketplace and barn management platform. It supports public browsing, buyer-to-barn messaging, controlled access to private horse documents, detached EquiTag inventory, and owner-side listing management inside MyBarn.
+HorseRoster is a sport horse marketplace and barn management platform. It supports public browsing, buyer-to-barn messaging, controlled access to private horse documents, EquiTag QR routing, and owner-side listing management inside MyBarn.
 
 Current user roles in the data model:
 - `BUYER`
@@ -12,8 +12,9 @@ Current user roles in the data model:
 Current product reality:
 - Logged-out users land on `/dashboard`
 - Buyers browse listings, message barns, and request vault access
-- Barn owners manage horses, requests, conversations, documents, profile settings, and EquiTag inventory under `/mybarn` and `/equitag`
-- EquiTag now exists as barn-owned inventory with direct barn/horse destination routing and attachable barn/horse targets
+- Barn owners manage horses, requests, conversations, documents, profile settings, and billing under `/mybarn`
+- EquiTag can resolve directly to either a horse or a barn destination
+- The older PDF requirement that scans must always open the barn roster is no longer the active product rule
 
 ## 2. Technology Stack
 
@@ -32,8 +33,9 @@ Backend:
 - PostgreSQL
 
 Storage:
-- Local filesystem and local paths in current MVP-style flows
-- No production object-storage integration is wired as the source of truth in this repo
+- Public horse/barn/EquiTag media uses S3-style public asset storage in app code
+- Private vault documents use S3-style private asset storage with signed-download redirects
+- Real deployment still depends on correct env, bucket, and CDN wiring
 
 ## 3. Current Product Areas
 
@@ -47,7 +49,6 @@ Storage:
 - `/barn/[slug]` is the public barn frontpage
 - `/eq/[code]` resolves directly to the attached horse or barn destination
 - `/scan/[code]` is a compatibility redirect to the EquiTag entry route
-- `/equitag` is the authenticated EquiTag manager
 
 ### Buyer messaging and access
 - `/messages` and `/messages/[id]` are buyer conversation views
@@ -136,7 +137,7 @@ Implemented route handlers include:
 
 Admin note:
 - the `ADMIN` role exists, and root routing redirects admins to `/admin`
-- a complete admin route surface is not present in the current repo tree
+- admin route surfaces currently exist for overview, barns, horses, billing, and users
 
 ## 6. UI and Brand Direction
 
@@ -165,12 +166,21 @@ Implemented well enough to treat as active product areas:
 - buyer/barn conversation surfaces
 - barn access-request review flow
 - horse document and vault concepts in schema and route handlers
-- detached EquiTag inventory and attachment flows
+- EquiTag routing and horse-attached QR behavior
 
 Known partial areas:
 - some pages still use older fixed light-mode styling
 - barn analytics are not fully production-grade; for example, the MyBarn dashboard still contains placeholder view metrics
 - some lower-traffic UI and API copy still uses seller-oriented internal wording for compatibility
+- access requests are still free-text only; buyer-side category/file selection is not implemented
+- buyer access is still horse-scoped; grant share-link flows are not implemented
+- `aiHighlights` exists in schema but is not surfaced as an editable/displayed horse-profile feature
+- seller phone and primary notification email are still missing from the barn profile surface
+- website should remain optional; it is not intended to become a required field
+- buyer favorites, seller mute/block controls, email notifications, email verification, password reset, vault file-management operations, seller soft-delete horse flow, admin access-log tooling, and admin active-grant revoke tooling are still missing
+- community features are not implemented; any future community interaction scope needs explicit client clarification first
+- older PDF assumptions for default QR-to-roster routing and multi-tier billing are superseded by client-approved product changes
+- basic public-endpoint rate limiting is not part of the current agreed scope
 
 ## 8. Definition of Done for Changes
 

@@ -21,8 +21,7 @@ const themeInitScript = `
   const storageKey = "horseroster-theme";
   const root = document.documentElement;
   const stored = window.localStorage.getItem(storageKey);
-  const systemDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-  const theme = stored === "light" || stored === "dark" ? stored : systemDark ? "dark" : "light";
+  const theme = stored === "light" || stored === "dark" ? stored : "light";
   root.dataset.theme = theme;
   root.style.colorScheme = theme;
 })();

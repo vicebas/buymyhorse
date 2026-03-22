@@ -1,13 +1,14 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { Suspense, useMemo, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { Globe, Loader2, MapPin, Store, Text, ArrowLeft, BadgeDollarSign } from "lucide-react";
+import { AlertTriangle, Globe, Loader2, MapPin, Store, Text, ArrowLeft, BadgeDollarSign } from "lucide-react";
+import { useSession } from "next-auth/react";
 
 import AICopyGenerator from "@/components/ai/ai-copy-generator";
 
 import BarnPlanSelector, { type BillingCadence } from "@/components/billing/barn-plan-selector";
-import AppHeader from "@/components/layout/app-header";
+import LiveAppHeader from "@/components/layout/live-app-header";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -22,10 +23,12 @@ function getStep(searchValue: string | null) {
   return searchValue === "details" ? "details" : "plan";
 }
 
-export default function SellerOnboardPage() {
+function SellerOnboardPageContent() {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const { data: session } = useSession();
+  const emailVerified = !session || session.user.emailVerified !== false;
 
   const selectedCadence = getCadence(searchParams.get("cadence"));
   const step = getStep(searchParams.get("step"));
@@ -106,7 +109,7 @@ export default function SellerOnboardPage() {
 
   return (
     <main className="min-h-screen bg-[color:var(--background)] text-[color:var(--foreground)]">
-      <AppHeader variant="buyer" />
+      <LiveAppHeader variant="buyer" />
 
       <div className="mx-auto max-w-6xl px-6 py-10">
         <div className="mb-8">
@@ -120,6 +123,16 @@ export default function SellerOnboardPage() {
             Choose your activation cadence first, then complete your barn profile. If a trial is currently enabled by admin, it starts after you submit. Otherwise you continue straight to checkout.
           </p>
         </div>
+
+        {!emailVerified ? (
+          <div className="mb-6 flex items-center gap-3 rounded-2xl border border-amber-200 bg-amber-50 px-5 py-4 text-sm text-amber-800">
+            <AlertTriangle className="h-5 w-5 shrink-0 text-amber-500" />
+            <span>
+              You need to verify your email before creating a barn. Check your inbox or{" "}
+              <ResendVerificationButton />
+            </span>
+          </div>
+        ) : null}
 
         {step === "plan" ? (
           <div className="space-y-6">
@@ -139,6 +152,7 @@ export default function SellerOnboardPage() {
                   onCadenceChange={(cadence) => updateQuery({ cadence })}
                   actionLabel="Continue to barn details"
                   onAction={() => updateQuery({ step: "details" })}
+                  disabled={!emailVerified}
                 />
               </CardContent>
             </Card>
@@ -256,7 +270,7 @@ export default function SellerOnboardPage() {
                       Back to activation
                     </Button>
 
-                    <Button type="submit" className="btn-brand-green border-0" disabled={submitting}>
+                    <Button type="submit" className="btn-brand-green border-0" disabled={submitting || !emailVerified}>
                       {submitting ? (
                         <>
                           <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -299,5 +313,34 @@ export default function SellerOnboardPage() {
         )}
       </div>
     </main>
+  );
+}
+
+function ResendVerificationButton() {
+  const [sent, setSent] = useState(false);
+
+  async function resend() {
+    await fetch("/api/auth/send-verification", { method: "POST" });
+    setSent(true);
+  }
+
+  return sent ? (
+    <span className="font-semibold">verification email sent — check your inbox.</span>
+  ) : (
+    <button
+      type="button"
+      onClick={resend}
+      className="font-semibold underline underline-offset-2 hover:text-amber-700"
+    >
+      resend the verification email
+    </button>
+  );
+}
+
+export default function SellerOnboardPage() {
+  return (
+    <Suspense fallback={<main className="min-h-screen bg-[color:var(--background)]" />}>
+      <SellerOnboardPageContent />
+    </Suspense>
   );
 }

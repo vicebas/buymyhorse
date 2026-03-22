@@ -48,16 +48,26 @@ enum HorseMediaType {
   VIDEO
 }
 
+enum HorseMediaProcessingStatus {
+  PENDING_UPLOAD
+  PROCESSING
+  READY
+  FAILED
+}
+
 enum AdminActionType {
   BARN_DISABLED
   BARN_RESTORED
   HORSE_DISABLED
   HORSE_RESTORED
+  HORSE_PLATFORM_FEATURED
+  HORSE_PLATFORM_UNFEATURED
   BILLING_OVERRIDE_SET
   BILLING_OVERRIDE_CLEARED
   BILLING_SETTINGS_UPDATED
   HORSE_SLOT_ADJUSTED
   USER_ROLE_CHANGED
+  ADMIN_GRANT_REVOKED
 }
 
 enum AdminActionTargetType {
@@ -65,6 +75,7 @@ enum AdminActionTargetType {
   HORSE
   BILLING
   USER
+  ACCESS_GRANT
 }
 
 enum HorseSlotLedgerSource {
@@ -79,8 +90,9 @@ model User {
   email String? @unique
   image String?
 
-  password String?
-  role     UserRole @default(BUYER)
+  password      String?
+  role          UserRole  @default(BUYER)
+  emailVerified DateTime?
 
   accounts Account[]
   sessions Session[]
@@ -98,6 +110,13 @@ model User {
 
   sellerProfile SellerProfile?
 
+  sellerContactTargets SellerContactControl[] @relation("SellerContactTargets")
+  savedHorses           SavedHorse[]
+  barnFollows             BarnFollow[]
+  notifications           Notification[]
+  notificationPreferences NotificationPreferences?
+  passwordResetTokens   PasswordResetToken[]
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
@@ -113,6 +132,8 @@ model SellerProfile {
   logo        String?
   coverImage  String?
   headline    String?
+  phone       String?
+  primaryNotificationEmail String?
   plan                BarnPlan          @default(ACTIVATION)
   billingCadence      BillingCadence    @default(MONTHLY)
   billingStatus       BarnBillingStatus @default(TRIALING)
@@ -137,14 +158,33 @@ model SellerProfile {
   adminDisabledByUser User?              @relation("BarnAdminDisabledBy", fields: [adminDisabledByUserId], references: [id], onDelete: SetNull)
   adminBillingOverrideUpdatedByUser User? @relation("BarnBillingOverrideBy", fields: [adminBillingOverrideUpdatedByUserId], references: [id], onDelete: SetNull)
   horses             Horse[]
+  followers          BarnFollow[]
   accessGrantsGiven  AccessGrant[]
   horseConversations HorseConversation[]
   ownedEquiTags      EquiTag[]           @relation("OwnedEquiTags")
   attachedEquiTags   EquiTag[]           @relation("AttachedBarnEquiTags")
   horseSlotEntries   BarnHorseSlotLedger[]
+  sellerContactControls SellerContactControl[] @relation("SellerProfileContactControls")
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+model SellerContactControl {
+  id               String   @id @default(cuid())
+  sellerProfileId  String
+  targetUserId     String
+  isMuted          Boolean  @default(false)
+  isBlocked        Boolean  @default(false)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  sellerProfile SellerProfile @relation("SellerProfileContactControls", fields: [sellerProfileId], references: [id], onDelete: Cascade)
+  targetUser     User          @relation("SellerContactTargets", fields: [targetUserId], references: [id], onDelete: Cascade)
+
+  @@unique([sellerProfileId, targetUserId])
+  @@index([sellerProfileId])
+  @@index([targetUserId])
 }
 
 enum HorseSaleStatus {
@@ -201,6 +241,8 @@ model Horse {
   image       String?
   isPublished Boolean @default(false)
   isBarnFeatured Boolean @default(false)
+  isPlatformFeatured Boolean @default(false)
+  platformFeaturedAt DateTime?
   barnDisplayOrder Int?
   isActive    Boolean @default(true)
   deletedAt   DateTime?
@@ -218,17 +260,21 @@ model Horse {
   vaultActivities  VaultActivityLog[]
   attachedEquiTags EquiTag[]            @relation("AttachedHorseEquiTags")
   media            HorseMedia[]
+  savedByUsers     SavedHorse[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@index([isPlatformFeatured, platformFeaturedAt])
 }
 
 model HorseMedia {
   id            String        @id @default(cuid())
   horseId        String
   type          HorseMediaType
+  status        HorseMediaProcessingStatus @default(READY)
   originalPath  String
-  processedPath String
+  processedPath String?
   posterPath    String?
   mimeType      String?
   fileName      String
@@ -327,6 +373,33 @@ model BarnHorseSlotLedger {
   @@index([source, createdAt])
 }
 
+model SavedHorse {
+  id        String   @id @default(cuid())
+  userId    String
+  horseId   String
+  createdAt DateTime @default(now())
+
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  horse Horse @relation(fields: [horseId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, horseId])
+  @@index([userId])
+  @@index([horseId])
+}
+
+model PasswordResetToken {
+  id        String    @id @default(cuid())
+  userId    String
+  token     String    @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
 model Account {
   id                String  @id @default(cuid())
   userId            String
@@ -399,6 +472,7 @@ model AccessRequest {
   id           String              @id @default(cuid())
   horseId      String
   buyerId      String
+  intendedUse  String?
   message      String?
   status       AccessRequestStatus @default(PENDING)
   decisionNote String?
@@ -408,10 +482,23 @@ model AccessRequest {
   horse Horse @relation(fields: [horseId], references: [id], onDelete: Cascade)
   buyer User  @relation("BuyerAccessRequests", fields: [buyerId], references: [id], onDelete: Cascade)
 
+  requestedCategories AccessRequestCategory[]
   vaultActivities     VaultActivityLog[]
 
   @@index([horseId, buyerId])
   @@index([status])
+}
+
+model AccessRequestCategory {
+  id              String           @id @default(cuid())
+  accessRequestId String
+  category        DocumentCategory
+  createdAt       DateTime         @default(now())
+
+  accessRequest AccessRequest @relation(fields: [accessRequestId], references: [id], onDelete: Cascade)
+
+  @@unique([accessRequestId, category])
+  @@index([category])
 }
 
 model AccessGrant {
@@ -476,11 +563,13 @@ model VaultActivityLog {
 }
 
 model HorseConversation {
-  id        String   @id @default(cuid())
-  horseId   String
-  buyerId   String
-  sellerId  String
-  createdAt DateTime @default(now())
+  id               String    @id @default(cuid())
+  horseId          String
+  buyerId          String
+  sellerId         String
+  sellerLastReadAt DateTime?
+  buyerLastReadAt  DateTime?
+  createdAt        DateTime  @default(now())
 
   horse         Horse         @relation(fields: [horseId], references: [id], onDelete: Cascade)
   buyer         User          @relation("HorseConversationBuyer", fields: [buyerId], references: [id], onDelete: Cascade)
@@ -504,4 +593,58 @@ model HorseMessage {
   conversation HorseConversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
   sender       User              @relation(fields: [senderUserId], references: [id])
   accessGrant  AccessGrant?      @relation(fields: [accessGrantId], references: [id], onDelete: SetNull)
+}
+
+enum NotificationType {
+  NEW_HORSE_FROM_FOLLOWED_BARN
+  HORSE_UPDATED_FROM_FOLLOWED_BARN
+  NEW_MESSAGE
+}
+
+model BarnFollow {
+  id              String   @id @default(cuid())
+  userId          String
+  sellerProfileId String
+  createdAt       DateTime @default(now())
+
+  user          User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  sellerProfile SellerProfile @relation(fields: [sellerProfileId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, sellerProfileId])
+  @@index([userId])
+  @@index([sellerProfileId])
+}
+
+model Notification {
+  id        String           @id @default(cuid())
+  userId    String
+  type      NotificationType
+  title     String
+  body      String?
+  metadata  Json?
+  isRead    Boolean          @default(false)
+  createdAt DateTime         @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, isRead])
+  @@index([userId, createdAt])
+}
+
+model NotificationPreferences {
+  id     String @id @default(cuid())
+  userId String @unique
+
+  systemNewHorseFromFollowedBarn      Boolean @default(true)
+  systemHorseUpdatedFromFollowedBarn  Boolean @default(true)
+  systemNewMessage                    Boolean @default(true)
+
+  emailNewHorseFromFollowedBarn       Boolean @default(true)
+  emailHorseUpdatedFromFollowedBarn   Boolean @default(false)
+  emailNewMessage                     Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }

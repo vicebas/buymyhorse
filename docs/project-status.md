@@ -1,14 +1,31 @@
 # HorseRoster Project Status
 
-Last updated: 2026-03-20
+Last updated: 2026-03-22
 
 ## Overall Summary
 - Project branding is in transition from BuyMyHorse to HorseRoster.
 - The public dashboard, marketplace, horse pages, barn pages, MyBarn, messaging, vault access, EquiTag QR flow, and admin dashboard all exist in app code.
+- The admin console now includes overview analytics, barns, horses, billing, users, and a dedicated access console for grants, request history, and vault activity.
 - Light/dark theme support exists at the token and shell level, but full page-by-page migration is still in progress.
 - Billing is now modeled in app code around a single HorseRoster activation product, monthly/yearly cadence, one-time extra horse slot purchases, admin-controlled trial settings, and admin-managed Stripe price IDs while Stripe secrets remain env-only.
+- Email verification, forgot/reset password, and base SendGrid mail delivery are now in app code.
 - Barn onboarding/settings and horse create/edit forms now support explicit AI-assisted English copy generation for barn stories and horse descriptions through a shared Anthropic-backed preview flow.
+- Seller header notifications now exist in app code: unread message badge on `Messages`, pending document-request badge on `MyBarn`, and conversation read-tracking at the `HorseConversation` level.
+- Message UIs now support near-live client polling in app code: open threads refresh automatically, buyer/seller inbox lists refresh and reorder automatically, and buyer/seller header unread message badges update without navigation.
 - File storage is now moving to AWS S3 in app code: public horse/barn/EquiTag media uses a CDN-backed public bucket path model and EquiVault downloads redirect to short-lived signed URLs from a private bucket.
+- Client-approved scope changes supersede parts of the older BuyMyHorse PDF: EquiTag scans may resolve to a barn or a horse, billing is the activation-plus-extra-slots model, and public-endpoint rate limiting is not currently planned.
+
+## Completed (most recent first)
+- **Follow + Notification System**: Full end-to-end follow-barn and notification pipeline implemented and building clean.
+  - **Schema**: Added `NotificationType` enum (`NEW_HORSE_FROM_FOLLOWED_BARN`, `HORSE_UPDATED_FROM_FOLLOWED_BARN`, `NEW_MESSAGE`), `BarnFollow`, `Notification`, and `NotificationPreferences` models. Migration `20260322124508_add_follow_notification_system` applied.
+  - **Server repos**: `src/server/follows.ts` (toggleBarnFollow, getBarnFollowers), `src/server/notifications.ts` (createNotification, listUserNotifications, markAllRead, 30-min cooldown query), `src/server/notification-preferences.ts` (getOrCreatePreferences, updatePreferences).
+  - **Email templates**: 3 new HTML templates in `src/lib/email/templates.ts` — new horse from barn, horse updated, new message. Corresponding send functions added to `src/lib/email/mailer.ts`.
+  - **Dispatch service**: `src/lib/notifications/dispatch.ts` — `dispatchHorseNotification` fans out to all barn followers in parallel (respects per-user system + email prefs). `dispatchMessageNotification` checks prefs + 30-min email cooldown per conversation (creates system notification first, then conditionally emails).
+  - **Route hooks**: Fire-and-forget dispatch added to horse create (on publish), horse publish (toggle to true), horse update (only on significant field changes: price, saleStatus, description, keyDetails, name, breed, discipline, level, location — only on published horses), and message send (notifies the other party).
+  - **API routes**: `GET/POST /api/barns/[slug]/follow` (status + toggle), `GET /api/notifications` (list + unread count), `POST /api/notifications/mark-read` (specific IDs or all), `GET/PATCH /api/settings/notifications` (prefs read/write).
+  - **Follow button**: `src/components/barn/follow-barn-button.tsx` — client component with optimistic toggle, loading state, unauthenticated redirect to `/login`. Integrated into `src/app/sellers/[slug]/page.tsx` hero (server-side initial follow status, hidden for barn owners).
+  - **Notification bell**: `src/components/layout/notification-bell.tsx` — 60s polling, unread badge capped at "9+", dropdown panel with relative timestamps + per-type routing, marks all read on open. Integrated into `app-header.tsx` for both buyer and seller desktop nav.
+  - **Settings UI**: Shared `src/components/settings/notification-preferences-form.tsx` (6 toggle switches, save-on-change). New `src/app/buyer/settings/page.tsx` (auth-guarded). Notification preferences section added to `src/components/seller/seller-settings-form.tsx`.
 
 ## Active Workstreams
 - HorseRoster rebrand rollout across app shell, metadata, logos, and docs
@@ -16,8 +33,60 @@ Last updated: 2026-03-20
 - Theme migration from fixed light surfaces to semantic theme tokens
 - Dedicated horse media upload/gallery flow and compression pipeline
 - Documentation refresh so agent instructions and project spec match the current repo
+- Container deployment rollout for single-instance EC2 hosting with Docker Compose and Caddy
 
 ## Completed
+- Dark-theme logo now uses the proper `horseroster-logo-primary-dark.svg` asset instead of the hand-built icon+text fallback; `brand-logo.tsx` adaptive variant renders an `<Image>` for both light and dark, toggled by existing `.brand-logo-light`/`.brand-logo-dark` CSS
+- Dashboard/homepage hero copy updated to match the approved HorseRoster Homepage Copy v2: headline "Find your next horse.", subheadline "The modern horse marketplace.", updated supporting copy referencing EquiVault and EquiTag, CTAs changed to "Browse Horses" / "Join as a Trainer or Barn", and hardcoded `#0f2a44` colors replaced with semantic theme tokens for dark-theme support
+- New `homepage-marketing-sections.tsx` component renders Sections 2–7 and a final CTA from the approved homepage copy for logged-out visitors: value proposition, "Built for modern horse sales" feature grid, "Designed for two sides of the market", "Why HorseRoster works", buyer/trainer bullet lists, and bottom CTA
+- HorseRoster now has a container-first production deployment path in repo: `Dockerfile`, `docker-compose.yml`, `Caddyfile`, and `docs/ec2-docker-deployment.md` support a single EC2-hosted app container with in-image FFmpeg plus Caddy-managed HTTPS
+- Horse gallery uploads now use the in-app media route for both images and videos again, so the main app container processes video uploads directly with FFmpeg instead of relying on the async presigned-S3 Lambda flow
+- Email Epic is now implemented in app code:
+  - `User.emailVerified` added to Prisma schema; existing users auto-verified by data migration
+  - `PasswordResetToken` model added to Prisma schema with 1-hour expiry and single-use enforcement
+  - `@sendgrid/mail` installed; `src/lib/email/` provides SendGrid client init, HTML/text email templates, and fire-and-forget `sendVerificationEmail` / `sendPasswordResetEmail` helpers
+  - `src/lib/auth/tokens.ts` provides `createEmailVerificationToken`, `consumeEmailVerificationToken`, `createPasswordResetToken`, and `consumePasswordResetToken` using the existing `VerificationToken` and new `PasswordResetToken` tables
+  - `POST /api/auth/send-verification` — session-authenticated, 60-second rate-limited resend
+  - `POST /api/auth/verify-email` — token-based email confirmation (no auth required)
+  - `POST /api/auth/forgot-password` — always-200 to prevent email enumeration
+  - `POST /api/auth/reset-password` — token + new password, marks token used
+  - `/forgot-password` and `/reset-password` pages wired to the API routes
+  - `/verify-email` page auto-calls the verify API on mount using the URL token
+  - Email verification banner renders below the header for logged-in buyer users whose `emailVerified` is false
+  - `sendVerificationEmail` fires (fire-and-forget) from `POST /api/register` after account creation
+  - Login page now shows a "Forgot password?" link and a success banner when `?reset=1` is set
+  - `Session.user.emailVerified` added to the NextAuth session type and populated from DB on every session refresh
+  - `.env.example` updated with `SENDGRID_API_KEY` and `SENDGRID_FROM_EMAIL` keys
+  - Verification approach is soft: unverified users can log in; a dismissible banner prompts them to verify
+- Horse gallery videos now use an async S3 + processor pipeline in app code: seller video uploads are presigned direct-to-S3, `HorseMedia` now tracks `PENDING_UPLOAD` / `PROCESSING` / `READY` / `FAILED`, MyBarn shows seller-only pending/failed states, and the public horse gallery renders ready media only
+- `docs/aws-horse-video-processing.md` now documents the required S3 prefix layout, Lambda trigger/IAM contract, FFmpeg profile, and the authenticated processor callback payload for the new horse video pipeline
+- `scripts/aws/horse-video-processor-lambda.mjs` now provides a concrete Lambda processor implementation that reads original horse videos from S3, runs FFmpeg in `/tmp`, uploads the processed MP4/poster assets, and calls the internal media-processing callback
+- `scripts/aws/Dockerfile.ffmpeg-layer` and `scripts/aws/build-ffmpeg-layer.sh` now build a Docker-packaged FFmpeg Lambda layer zip with the expected `/opt/bin/ffmpeg` layout for the horse video processor
+- `/mybarn/messages` now uses a responsive mobile list/detail inbox flow with a back-to-list state on small screens, while keeping the split-view layout on desktop
+- `/horses/[id]` now keeps inline document-request and contact actions inside the horse listing card on desktop, uses a floating expandable action launcher on smaller screens, and the shared floating chat overlay switches to a mobile-safe full-screen sheet layout on small screens
+- Public and authenticated headers now support small-screen navigation with hamburger menus, use a reduced mobile logo scale, and the seller header now uses an account dropdown for `List Horse`, `MyBarn`, and `Log Out` while removing the duplicated standalone seller action buttons
+- `/mybarn/requests` now uses a split-view vault-request manager with buyer and horse filters on the left and the active request details/actions on the right, so barns can review and act on requests without scrolling through a long stacked feed
+- `docs/next-steps.md` now marks the Vault Epic and Admin Epic as completed so the planning backlog reflects the current repo state
+- Seller grant approval on `/mybarn/requests` now uses a date-only expiration picker, and request-page expiration summaries render as dates only while approvals normalize the stored expiry to `00:00:00` for the selected day
+- The seller request-action panel on `/mybarn/requests` now uses semantic theme tokens instead of fixed stone/light colors, so the “Share files from the requested categories” approval surface respects the active theme
+- Vault Epic 1 is now implemented in app code:
+  - buyer vault requests are category-based and require intended use while keeping an optional buyer note
+  - the horse request modal now shows the full standard EquiVault category list
+  - server-side duplicate pending-request prevention now exists per horse and buyer
+  - seller request review now shows requested categories and intended use and limits approvals to matching-category files
+  - buyer document access now has a canonical authenticated grant page under `/access/grants/[id]`
+  - `/horses/[id]/access` now acts as a compatibility entry that redirects to the active grant page when access exists
+  - vault GRANT chat messages now link buyers directly to the shared-document grant page
+  - seller horse vault pages now support document rename, category move, and soft-delete operations with audit-log coverage
+  - Prisma schema/migration files now include `AccessRequest.intendedUse` plus per-request category rows
+- Admin Epic is now implemented in app code:
+  - `/admin/access` provides summary cards plus searchable, range-filtered active grants, request history, and vault access-log views
+  - admins can revoke active grants through `/api/admin/grants/[id]/revoke`, with matching vault activity and admin audit-log coverage
+  - `/admin/horses` now includes platform featured-pick controls separate from the barn-owned frontpage featured roster
+  - `/dashboard` now renders an admin-curated featured horses section, and `/marketplace` orders featured horses first without bypassing normal visibility checks
+  - `/admin` overview analytics now include request, approval, revoke, conversation, and message KPIs plus daily trend charts
+- `docs/next-steps.md` now groups the remaining backlog into AI-friendly epics with goals, dependencies, acceptance focus, and copy-paste kickoff prompts
+- `/mybarn/messages` now uses a split-view barn inbox with the thread list on the left and the active conversation on the right, while still merging seller-side leads and buyer-side sent inquiries with latest-activity sorting, role-aware labels, and direct horse-page links from the thread titles
 - Root branding updated to HorseRoster in layout metadata and brand assets
 - Theme initialization and user theme switching added at the app shell level
 - Public `/dashboard` flow established as the logged-out landing experience
@@ -52,6 +121,16 @@ Last updated: 2026-03-20
   - admin accounts can still browse the main app in buyer mode
 - Public horse, barn, marketplace, EquiTag, and barn-side write surfaces now respect admin-disabled barn/horse state in app code
 - AI copy generation now exists in app code for long-form profile text:
+- Seller header notifications now exist in app code:
+  - seller header shows unread message count on `Messages` and pending access-request count on `MyBarn`
+  - `HorseConversation` now tracks seller/buyer last-read timestamps for unread message computation
+  - seller conversation pages mark conversations as read when opened
+  - buyer and seller message-send paths update the appropriate read timestamp automatically
+  - seller notification badges now render anywhere seller header chrome appears, including shared dashboard, marketplace, horse, barn, and message pages
+  - message UIs now use a shared client polling loop:
+  - `GET /api/messages/summary` powers live buyer/seller unread message badges
+  - `GET /api/messages/inbox` powers live buyer and seller inbox list updates
+  - open conversation threads, split inbox threads, and floating chat refresh automatically every few seconds while the tab is visible
   - `POST /api/ai/copy/generate` provides authenticated, user-triggered draft generation
   - barn onboarding and barn settings can generate/refine the `bio` field from the current form state
   - horse create/edit can generate/refine the `description` field from the current form state
@@ -79,9 +158,24 @@ Last updated: 2026-03-20
   - `AGENTS.md`
   - `docs/project-status.md`
   - `docs/horseroster-spec.md`
+- Buyer Tools Epic is now implemented in app code:
+  - `SavedHorse` Prisma model with `userId / horseId` unique index, cascading deletes on both sides
+  - `POST /api/horses/[id]/save` toggles save/unsave for authenticated users; returns `{ saved: boolean }`; verifies horse is published and not disabled before creating
+  - `SaveHorseButton` client component renders a heart icon button with optimistic toggle, redirects to `/login` for unauthenticated users, and supports a `card` (icon-only) and `detail` (icon + label) size variant
+  - `HorseMarketplaceCard` now accepts `isSaved` and `isLoggedIn` props and renders `SaveHorseButton` overlaid on the card image
+  - Marketplace page fetches the logged-in buyer's saved horse ID set in one query and passes `isSaved` per card without extra round trips
+  - Horse detail page (`/horses/[id]`) fetches the buyer's saved state for the viewed horse and renders a `SaveHorseButton` in the aside below the price
+  - `/buyer/saved` is a new authenticated buyer page that lists all saved horses in the same card grid used by the marketplace; inaccessible horses (unpublished, deleted, admin-disabled) are silently filtered out; empty state links to marketplace
+  - Buyer app header now includes a "Saved" nav item (Heart icon) pointing to `/buyer/saved`
 
 ## In Progress
 - Rebrand/theme cleanup across remaining buyer, barn, horse-detail, and request pages
+
+## Recently Completed (2026-03-22)
+- Removed "system" theme mode; app now defaults to light for all users (including logged-out) to prevent the OS dark preference from showing the wrong logo
+- Theme toggle simplified to a light/dark binary switch; user choice persists in localStorage under `horseroster-theme`
+- Theme init script in `layout.tsx` no longer checks `prefers-color-scheme`; defaults to `"light"` when no stored value exists
+- Fixed hardcoded `#0f2a44` colors in `buyer-dashboard-hero.tsx` — replaced with `var(--foreground-strong)` for proper dark-mode support
 - Replacement of legacy BuyMyHorse language and stale documentation assumptions
 - Converting older fixed-light UI components to semantic tokens
 - Refining marketplace card parity with the brand package while keeping dark-theme behavior token-driven
@@ -95,22 +189,36 @@ Last updated: 2026-03-20
 - Barn dashboard analytics are only partially real; view metrics are still placeholder content
 - `README.md` remains the default Next.js boilerplate and is not a reliable project guide
 - Prisma migration execution and Prisma client generation for the latest schema changes are intentionally left manual in the local environment
+- Seller header notifications depend on the new `HorseConversation` read-tracking fields being added to the database through your manual Prisma migration flow
 - Stripe billing still depends on real local env secrets, saved admin price IDs, and webhook wiring before checkout flows can run end to end outside test setup
 - Admin auth depends on `session.user.role`; sessions may need re-login after role changes or auth callback changes
 - S3-backed media now depends on real AWS bucket/CDN env wiring and object access policies before uploads and rendering will work outside local code validation
+- Async horse video processing now depends on the external S3 event trigger and Lambda callback wiring described in `docs/aws-horse-video-processing.md`
+- Vault share links are still intentionally deferred; access remains authenticated and grant-scoped for logged-in buyers only
+- Seller phone and primary notification email fields are still missing from the barn profile model/UI, while website should remain optional
+- Seller mute/block controls, email notifications, email verification, password reset, and seller soft-delete horse flow are still missing
+- Community features are not implemented yet; any future "community interaction" work needs explicit client direction first
+- The new vault schema migration file exists in repo, but applying Prisma migrations to the live/local database still follows the manual environment workflow
 
 ## Next Recommended Tasks
-- Finish the dedicated horse gallery upload/compression flow and move horse gallery management to its own operational page
+- Add auth and notification infrastructure: email verification, password reset, and real email delivery for requests, decisions, messages, and billing/system events
+- Finish the remaining vault/access gap: authenticated grant share-link strategy if client scope changes, plus any later file-specific request selection if requested
+- Add seller mute/block controls for messaging (Seller Tools Epic)
+- Add seller phone and primary notification email fields while keeping website optional (Seller Tools Epic)
+- Add seller soft-delete horse flow (Seller Tools Epic)
 - Finish end-to-end AWS S3 verification, including CDN image rendering and private vault signed downloads
-- Add optional AI prompt expansion beyond barn bio / horse description only if the current form-based preview flow proves useful in real usage
-- Upgrade buyer document requests from free-text asks to file/category-specific requests
 - Continue theme and barn-language cleanup across remaining secondary pages and lower-traffic copy
-- Finish end-to-end verification of the activation billing model with your own Prisma/client sync and Stripe test flows
 
 ## Decisions / Assumptions In Force
 - `docs/project-status.md` is the live status ledger and must be updated for every meaningful repo change
 - `AGENTS.md` is the agent-facing operating guide
 - `docs/horseroster-spec.md` replaces the older BuyMyHorse spec as the active project reference
+- `docs/next-steps.md` is the planning document for AI-assisted epic execution
 - Marketing docs under `docs/marketing` are visual/product references, not proof that all described features are already implemented
 - Internal schema/code names remain seller-based for compatibility even though the product language is now barn/MyBarn
 - Prisma migrations and Prisma commands are handled manually by the user in this environment
+- The older BuyMyHorse PDF is not authoritative where client-approved scope changes differ from it
+- EquiTag routing may resolve to either a barn or a horse destination
+- Billing scope is the activation-plus-extra-slots model, not the older multi-tier subscription framing
+- Basic public-endpoint rate limiting is not currently part of the agreed build scope
+- Community features are not in the current product; if introduced later, they require fresh client direction

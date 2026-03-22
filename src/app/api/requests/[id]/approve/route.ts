@@ -21,6 +21,24 @@ function uniqueStrings(values: string[]) {
   return [...new Set(values.map((value) => value.trim()).filter(Boolean))];
 }
 
+function parseExpirationDate(value: string | null | undefined) {
+  if (!value) {
+    return null;
+  }
+
+  const trimmedValue = value.trim();
+
+  if (!trimmedValue) {
+    return null;
+  }
+
+  if (/^\d{4}-\d{2}-\d{2}$/.test(trimmedValue)) {
+    return new Date(`${trimmedValue}T00:00:00`);
+  }
+
+  return new Date(trimmedValue);
+}
+
 export async function POST(req: Request, { params }: RouteContext) {
   try {
     const { id } = await params;
@@ -46,7 +64,7 @@ export async function POST(req: Request, { params }: RouteContext) {
     const body = (await req.json()) as ApproveBody;
     const approvedFileIds = uniqueStrings(body.fileIds ?? []);
     const note = body.note?.trim() || null;
-    const expiresAt = body.expiresAt ? new Date(body.expiresAt) : null;
+    const expiresAt = parseExpirationDate(body.expiresAt);
 
     if (approvedFileIds.length === 0) {
       return NextResponse.json(
@@ -68,6 +86,11 @@ export async function POST(req: Request, { params }: RouteContext) {
           select: {
             id: true,
             sellerProfileId: true,
+          },
+        },
+        requestedCategories: {
+          select: {
+            category: true,
           },
         },
       },
@@ -107,6 +130,20 @@ export async function POST(req: Request, { params }: RouteContext) {
     if (files.length !== approvedFileIds.length) {
       return NextResponse.json(
         { error: "One or more approved files are invalid." },
+        { status: 400 }
+      );
+    }
+
+    const requestedCategorySet = new Set(
+      accessRequest.requestedCategories.map((entry) => entry.category)
+    );
+
+    if (
+      requestedCategorySet.size > 0 &&
+      files.some((file) => !requestedCategorySet.has(file.category))
+    ) {
+      return NextResponse.json(
+        { error: "Approved files must belong to the requested categories." },
         { status: 400 }
       );
     }
@@ -181,7 +218,17 @@ export async function POST(req: Request, { params }: RouteContext) {
             note,
             expiresAt: expiresAt?.toISOString() ?? null,
             files,
+            accessGrantId: grant.id,
           },
+        },
+      });
+
+      await tx.horseConversation.update({
+        where: {
+          id: conversation.id,
+        },
+        data: {
+          sellerLastReadAt: new Date(),
         },
       });
 
@@ -194,6 +241,7 @@ export async function POST(req: Request, { params }: RouteContext) {
           activityType: "ACCESS_REQUEST_APPROVED",
           metadata: {
             fileIds: files.map((file) => file.id),
+            categories: requestedCategorySet.size > 0 ? [...requestedCategorySet] : null,
             expiresAt: expiresAt?.toISOString() ?? null,
             note,
           },

@@ -1,6 +1,7 @@
 import {
   DeleteObjectCommand,
   GetObjectCommand,
+  HeadObjectCommand,
   PutObjectCommand,
   S3Client,
 } from "@aws-sdk/client-s3";
@@ -117,6 +118,48 @@ export async function uploadPublicAsset({
   );
 
   return key;
+}
+
+export async function createPublicUploadUrl({
+  key,
+  contentType,
+  expiresInSeconds = 60,
+}: {
+  key: string;
+  contentType?: string;
+  expiresInSeconds?: number;
+}) {
+  const client = getS3Client();
+  const command = new PutObjectCommand({
+    Bucket: getPublicBucketName(),
+    Key: key,
+    ContentType: contentType,
+  });
+
+  return getSignedUrl(client, command, { expiresIn: expiresInSeconds });
+}
+
+export async function readPublicAssetHead(pathOrKey: string) {
+  const key = extractPublicObjectKey(pathOrKey);
+
+  if (!key) {
+    throw new Error("Invalid public asset key.");
+  }
+
+  const client = getS3Client();
+  const response = await client.send(
+    new HeadObjectCommand({
+      Bucket: getPublicBucketName(),
+      Key: key,
+    })
+  );
+
+  return {
+    key,
+    contentLength: typeof response.ContentLength === "number" ? response.ContentLength : null,
+    contentType: response.ContentType || null,
+    eTag: response.ETag || null,
+  };
 }
 
 export async function deletePublicAsset(pathOrKey?: string | null) {

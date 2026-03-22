@@ -3,6 +3,8 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 
 import prisma from "@/lib/db/prisma";
+import { createEmailVerificationToken } from "@/lib/auth/tokens";
+import { sendVerificationEmail } from "@/lib/email/mailer";
 
 const registerSchema = z.object({
   name: z.string().trim().min(2, "Name is required."),
@@ -50,6 +52,13 @@ export async function POST(req: Request) {
         email: true,
       },
     });
+
+    // Fire-and-forget verification email — don't block the response
+    createEmailVerificationToken(email)
+      .then((token) =>
+        sendVerificationEmail({ toName: name, toEmail: email, token })
+      )
+      .catch((err) => console.error("[register] verification email error:", err));
 
     return NextResponse.json(user, { status: 201 });
   } catch {

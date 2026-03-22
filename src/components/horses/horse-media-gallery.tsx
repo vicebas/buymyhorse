@@ -10,7 +10,7 @@ import { cn } from "@/lib/utils";
 type HorseMediaItem = {
   id: string;
   type: "IMAGE" | "VIDEO";
-  processedPath: string;
+  processedPath: string | null;
   posterPath: string | null;
   fileName: string;
 };

@@ -1,23 +1,16 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 import HorseMessageItem from "@/components/horses/horse-message-item";
+import { useLivePoll } from "@/hooks/use-live-poll";
 
 type Message = {
   id: string;
   body: string | null;
   messageType: "TEXT" | "GRANT";
-  metadata?: {
-    note?: string | null;
-    expiresAt?: string | null;
-    files?: Array<{
-      id: string;
-      title: string;
-      fileName: string;
-      category: string;
-    }>;
-  } | null;
+  accessGrantId?: string | null;
+  metadata?: unknown;
   createdAt: string | Date;
   sender: {
     id: string;
@@ -36,21 +29,24 @@ export default function HorseChat({
   const [messages, setMessages] = useState<Message[]>([]);
   const [text, setText] = useState("");
   const [loading, setLoading] = useState(false);
-
-  useEffect(() => {
-    async function loadMessages() {
-      const res = await fetch(`/api/horses/${horseId}/messages`);
+  const { refreshNow } = useLivePoll({
+    enabled: true,
+    intervalMs: 5000,
+    onPoll: async () => {
+      const res = await fetch(`/api/horses/${horseId}/messages`, {
+        cache: "no-store",
+      });
 
       if (!res.ok) {
         return;
       }
 
       const data = (await res.json()) as Message[];
-      setMessages(data);
-    }
-
-    void loadMessages();
-  }, [horseId]);
+      setMessages((currentMessages) =>
+        areHorseMessagesEqual(currentMessages, data) ? currentMessages : data
+      );
+    },
+  });
 
   async function sendMessage() {
     if (!text.trim()) return;
@@ -74,8 +70,13 @@ export default function HorseChat({
     }
 
     const message = (await res.json()) as Message;
-    setMessages((prev) => [...prev, message]);
+    setMessages((prev) =>
+      prev.some((existingMessage) => existingMessage.id === message.id)
+        ? prev
+        : [...prev, message]
+    );
     setText("");
+    refreshNow();
   }
 
   return (
@@ -108,4 +109,12 @@ export default function HorseChat({
       </div>
     </div>
   );
+}
+
+function areHorseMessagesEqual(currentMessages: Message[], nextMessages: Message[]) {
+  if (currentMessages.length !== nextMessages.length) {
+    return false;
+  }
+
+  return currentMessages.every((message, index) => message.id === nextMessages[index]?.id);
 }

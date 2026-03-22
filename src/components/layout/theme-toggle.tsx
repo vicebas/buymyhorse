@@ -1,21 +1,13 @@
 "use client";
 
-import { Monitor, Moon, Sun } from "lucide-react";
+import { Moon, Sun } from "lucide-react";
 import { useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 
 const STORAGE_KEY = "horseroster-theme";
 
-type ThemeMode = "light" | "dark" | "system";
-
-function resolveTheme(mode: ThemeMode) {
-  if (mode === "system") {
-    return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
-  }
-
-  return mode;
-}
+type ThemeMode = "light" | "dark";
 
 export function ThemeToggle({
   surface = "dark",
@@ -24,43 +16,26 @@ export function ThemeToggle({
 }) {
   const [mode, setMode] = useState<ThemeMode>(() => {
     if (typeof window === "undefined") {
-      return "system";
+      return "light";
     }
 
     const stored = window.localStorage.getItem(STORAGE_KEY);
-    return stored === "light" || stored === "dark" || stored === "system" ? stored : "system";
+    return stored === "dark" ? "dark" : "light";
   });
 
   useEffect(() => {
-    const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
-
-    const applyTheme = () => {
-      const theme = resolveTheme(mode);
-      document.documentElement.dataset.theme = theme;
-      document.documentElement.style.colorScheme = theme;
-    };
-
-    applyTheme();
-
-    const onChange = () => {
-      if (mode === "system") {
-        applyTheme();
-      }
-    };
-
-    mediaQuery.addEventListener("change", onChange);
-
-    return () => mediaQuery.removeEventListener("change", onChange);
+    document.documentElement.dataset.theme = mode;
+    document.documentElement.style.colorScheme = mode;
   }, [mode]);
 
-  function cycleTheme() {
-    const nextMode = mode === "system" ? "light" : mode === "light" ? "dark" : "system";
+  function toggleTheme() {
+    const nextMode = mode === "light" ? "dark" : "light";
     setMode(nextMode);
     window.localStorage.setItem(STORAGE_KEY, nextMode);
   }
 
-  const label = mode === "system" ? "Theme: System" : mode === "light" ? "Theme: Light" : "Theme: Dark";
-  const Icon = mode === "system" ? Monitor : mode === "light" ? Sun : Moon;
+  const label = mode === "light" ? "Theme: Light" : "Theme: Dark";
+  const Icon = mode === "light" ? Sun : Moon;
 
   return (
     <Button
@@ -69,7 +44,7 @@ export function ThemeToggle({
       size="icon"
       aria-label={label}
       title={label}
-      onClick={cycleTheme}
+      onClick={toggleTheme}
       className={
         surface === "light"
           ? "border-[color:var(--border)] bg-[color:var(--background-elevated)] text-[color:var(--foreground-strong)] hover:bg-[color:var(--muted)]"

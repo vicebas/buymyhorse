@@ -5,7 +5,7 @@ import { AlertTriangle, CreditCard, Rocket, Repeat, ShoppingBag } from "lucide-r
 
 import BillingPlanManager from "@/components/billing/billing-plan-manager";
 import ManageBillingButton from "@/components/billing/manage-billing-button";
-import AppHeader from "@/components/layout/app-header";
+import SellerAppHeader from "@/components/layout/seller-app-header";
 import { Button } from "@/components/ui/button";
 import { authOptions } from "@/lib/auth/options";
 import { getBarnEntitlements } from "@/lib/billing/entitlements";
@@ -66,7 +66,7 @@ export default async function SellerBillingPage() {
 
   return (
     <main className="min-h-screen bg-[color:var(--background)] text-[color:var(--foreground)]">
-      <AppHeader variant="seller" />
+      <SellerAppHeader />
 
       <section className="border-b border-[color:var(--border)]">
         <div className="mx-auto max-w-7xl px-6 py-10">

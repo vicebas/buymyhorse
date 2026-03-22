@@ -1,0 +1,12 @@
+ALTER TYPE "AdminActionType" ADD VALUE IF NOT EXISTS 'HORSE_PLATFORM_FEATURED';
+ALTER TYPE "AdminActionType" ADD VALUE IF NOT EXISTS 'HORSE_PLATFORM_UNFEATURED';
+ALTER TYPE "AdminActionType" ADD VALUE IF NOT EXISTS 'ADMIN_GRANT_REVOKED';
+
+ALTER TYPE "AdminActionTargetType" ADD VALUE IF NOT EXISTS 'ACCESS_GRANT';
+
+ALTER TABLE "Horse"
+ADD COLUMN "isPlatformFeatured" BOOLEAN NOT NULL DEFAULT false,
+ADD COLUMN "platformFeaturedAt" TIMESTAMP(3);
+
+CREATE INDEX "Horse_isPlatformFeatured_platformFeaturedAt_idx"
+ON "Horse"("isPlatformFeatured", "platformFeaturedAt");

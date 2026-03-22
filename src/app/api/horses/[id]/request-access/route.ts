@@ -4,6 +4,7 @@ import { NextResponse } from "next/server";
 import prisma from "@/lib/db/prisma";
 import { authOptions } from "@/lib/auth/options";
 import { isHorsePubliclyVisible } from "@/lib/billing/entitlements";
+import { isDocumentCategory } from "@/lib/vault/document-categories";
 
 interface RouteContext {
   params: Promise<{
@@ -12,7 +13,9 @@ interface RouteContext {
 }
 
 type RequestBody = {
-  description?: string;
+  categories?: string[];
+  intendedUse?: string;
+  message?: string;
 };
 
 export async function POST(req: Request, { params }: RouteContext) {
@@ -25,11 +28,24 @@ export async function POST(req: Request, { params }: RouteContext) {
     }
 
     const body = (await req.json()) as RequestBody;
-    const description = body.description?.trim() || "";
+    const selectedCategories = [...new Set((body.categories ?? []).map((value) => String(value).trim().toUpperCase()).filter(Boolean))];
+    const intendedUse = body.intendedUse?.trim() || "";
+    const message = body.message?.trim() || null;
 
-    if (!description) {
+    if (selectedCategories.length === 0) {
       return NextResponse.json(
-        { error: "Please describe the records you want to review." },
+        { error: "Select at least one document category." },
+        { status: 400 }
+      );
+    }
+
+    if (!selectedCategories.every(isDocumentCategory)) {
+      return NextResponse.json({ error: "One or more categories are invalid." }, { status: 400 });
+    }
+
+    if (!intendedUse) {
+      return NextResponse.json(
+        { error: "Tell the seller how you plan to use these records." },
         { status: 400 }
       );
     }
@@ -90,17 +106,47 @@ export async function POST(req: Request, { params }: RouteContext) {
       );
     }
 
+    const existingPendingRequest = await prisma.accessRequest.findFirst({
+      where: {
+        horseId: horse.id,
+        buyerId: session.user.id,
+        status: "PENDING",
+      },
+      select: {
+        id: true,
+      },
+    });
+
+    if (existingPendingRequest) {
+      return NextResponse.json(
+        { error: "You already have a pending access request for this horse." },
+        { status: 409 }
+      );
+    }
+
     const accessRequest = await prisma.accessRequest.create({
       data: {
         horseId: horse.id,
         buyerId: session.user.id,
-        message: description,
+        intendedUse,
+        message,
+        requestedCategories: {
+          create: selectedCategories.map((category) => ({
+            category,
+          })),
+        },
       },
       select: {
         id: true,
         status: true,
+        intendedUse: true,
         message: true,
         createdAt: true,
+        requestedCategories: {
+          select: {
+            category: true,
+          },
+        },
       },
     });
 
@@ -111,7 +157,9 @@ export async function POST(req: Request, { params }: RouteContext) {
         actorUserId: session.user.id,
         activityType: "ACCESS_REQUEST_CREATED",
         metadata: {
-          description,
+          categories: selectedCategories,
+          intendedUse,
+          message,
         },
       },
     });

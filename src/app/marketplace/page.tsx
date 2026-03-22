@@ -1,7 +1,7 @@
 import { getServerSession } from "next-auth";
 
 import prisma from "@/lib/db/prisma";
-import AppHeader from "@/components/layout/app-header";
+import ResolvedAppHeader from "@/components/layout/resolved-app-header";
 import MainHeader from "@/components/layout/main-header";
 import { authOptions } from "@/lib/auth/options";
 import MarketplaceFilters from "@/components/marketplace/marketplace-filters";
@@ -34,6 +34,15 @@ export default async function MarketplacePage({
         },
       })
     : null;
+
+  const savedHorseIds: Set<string> = session?.user?.id
+    ? new Set(
+        (await prisma.savedHorse.findMany({
+          where: { userId: session.user.id },
+          select: { horseId: true },
+        })).map((s) => s.horseId)
+      )
+    : new Set();
 
   const horses = await prisma.horse.findMany({
     where: {
@@ -86,9 +95,11 @@ export default async function MarketplacePage({
         },
       },
     },
-    orderBy: {
-      createdAt: "desc",
-    },
+    orderBy: [
+      { isPlatformFeatured: "desc" },
+      { platformFeaturedAt: "desc" },
+      { createdAt: "desc" },
+    ],
   });
 
   const visibleHorses = horses.filter((horse) => isHorsePubliclyVisible(horse));
@@ -106,15 +117,17 @@ export default async function MarketplacePage({
     image: horse.image,
     location: horse.location,
     saleStatus: horse.saleStatus,
+    isPlatformFeatured: horse.isPlatformFeatured,
     sellerProfile: {
       displayName: horse.sellerProfile.displayName,
     },
+    isSaved: savedHorseIds.has(horse.id),
   }));
 
   return (
     <main className="min-h-screen bg-[color:var(--background)] text-[color:var(--foreground)]">
       {session?.user?.id ? (
-        <AppHeader variant={sellerProfile ? "seller" : "buyer"} />
+        <ResolvedAppHeader variant={sellerProfile ? "seller" : "buyer"} />
       ) : (
         <MainHeader activeItem="marketplace" />
       )}
@@ -156,6 +169,8 @@ export default async function MarketplacePage({
                 key={horse.id}
                 horse={horse}
                 variant="marketplace"
+                isSaved={horse.isSaved}
+                isLoggedIn={Boolean(session?.user?.id)}
               />
             ))}
           </div>

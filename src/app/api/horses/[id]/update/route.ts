@@ -1,10 +1,12 @@
 import { getServerSession } from "next-auth";
 import { NextResponse } from "next/server";
 
+import { NotificationType } from "@/generated/prisma/client";
 import prisma from "@/lib/db/prisma";
 import { getHorseWriteBlockError, getSellerWriteBlockError } from "@/lib/admin/moderation";
 import { authOptions } from "@/lib/auth/options";
 import { canPublishHorseForSeller, validateHorseForPublishing } from "@/lib/billing/entitlements";
+import { dispatchHorseNotification } from "@/lib/notifications/dispatch";
 import { deletePublicAsset, uploadPublicAsset } from "@/lib/storage/public-assets";
 
 function safeFileName(name: string) {
@@ -168,6 +170,25 @@ export async function POST(
 
   if (file && file.size > 0 && existingHorse.image && existingHorse.image !== imagePath) {
     await deletePublicAsset(existingHorse.image).catch(() => null);
+  }
+
+  const significantFields = ['price', 'saleStatus', 'description', 'keyDetails', 'name', 'breed', 'discipline', 'level', 'location'] as const
+  const changedFields = significantFields.filter(field => {
+    const before = (existingHorse as Record<string, unknown>)[field]
+    const after = (horse as Record<string, unknown>)[field]
+    return String(before ?? '') !== String(after ?? '')
+  })
+
+  if (horse.isPublished && changedFields.length > 0) {
+    dispatchHorseNotification({
+      type: NotificationType.HORSE_UPDATED_FROM_FOLLOWED_BARN,
+      sellerProfileId: horse.sellerProfileId,
+      horseId: horse.id,
+      horseName: horse.name,
+      barnName: seller.displayName,
+      barnSlug: seller.slug,
+      changedFields: [...changedFields],
+    }).catch(() => {})
   }
 
   return NextResponse.json(horse);

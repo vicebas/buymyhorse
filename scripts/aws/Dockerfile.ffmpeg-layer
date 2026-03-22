@@ -1,0 +1,25 @@
+FROM public.ecr.aws/amazonlinux/amazonlinux:2023
+
+RUN dnf update -y \
+  && dnf install -y \
+    tar \
+    xz \
+    zip \
+    findutils \
+  && dnf clean all
+
+WORKDIR /work
+
+ARG FFMPEG_URL="https://johnvansickle.com/ffmpeg/releases/ffmpeg-release-amd64-static.tar.xz"
+
+RUN curl -L "$FFMPEG_URL" -o ffmpeg.tar.xz \
+  && tar -xf ffmpeg.tar.xz \
+  && FFMPEG_DIR="$(find . -maxdepth 1 -type d -name 'ffmpeg-*static' | head -n 1)" \
+  && test -n "$FFMPEG_DIR" \
+  && mkdir -p layer/bin \
+  && cp "$FFMPEG_DIR/ffmpeg" layer/bin/ffmpeg \
+  && chmod +x layer/bin/ffmpeg \
+  && cd layer \
+  && zip -r /work/ffmpeg-layer.zip bin
+
+CMD ["sh", "-lc", "cp /work/ffmpeg-layer.zip /out/ffmpeg-layer.zip && ls -lh /out/ffmpeg-layer.zip"]

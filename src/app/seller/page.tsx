@@ -23,7 +23,7 @@ import { authOptions } from "@/lib/auth/options";
 import AdminBlockedNotice from "@/components/admin/admin-blocked-notice";
 import { getBarnEntitlements } from "@/lib/billing/entitlements";
 import { getBarnModerationMessage } from "@/lib/admin/moderation";
-import AppHeader from "@/components/layout/app-header";
+import SellerAppHeader from "@/components/layout/seller-app-header";
 import PublishToggleButton from "@/components/horses/publish-toggle-button";
 import HorseEquiTagModal from "@/components/equitag/horse-equitag-modal";
 import { Button } from "@/components/ui/button";
@@ -175,7 +175,7 @@ export default async function SellerPage() {
 
     return (
         <main className="min-h-screen bg-[color:var(--background)] text-[color:var(--foreground)]">
-            <AppHeader variant="seller" />
+            <SellerAppHeader />
 
             <section className="border-b border-[color:var(--border)]">
                 <div className="mx-auto max-w-7xl px-6 py-10">

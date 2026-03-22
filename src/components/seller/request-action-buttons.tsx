@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import { formatDocumentCategory } from "@/lib/vault/document-categories";
 
 type DocumentOption = {
   id: string;
@@ -15,11 +16,13 @@ type DocumentOption = {
 interface RequestActionButtonsProps {
   requestId: string;
   availableDocuments: DocumentOption[];
+  requestedCategories: string[];
 }
 
 export default function RequestActionButtons({
   requestId,
   availableDocuments,
+  requestedCategories,
 }: RequestActionButtonsProps) {
   const router = useRouter();
   const [loading, setLoading] = useState<"approve" | "deny" | null>(null);
@@ -27,6 +30,10 @@ export default function RequestActionButtons({
   const [note, setNote] = useState("");
   const [expiresAt, setExpiresAt] = useState("");
   const [selectedFiles, setSelectedFiles] = useState<string[]>([]);
+  const eligibleDocuments =
+    requestedCategories.length === 0
+      ? availableDocuments
+      : availableDocuments.filter((document) => requestedCategories.includes(document.category));
 
   function toggleSelection(
     value: string,
@@ -101,26 +108,33 @@ export default function RequestActionButtons({
   }
 
   return (
-    <div className="space-y-5 rounded-2xl border border-stone-200 bg-stone-50 p-4">
+    <div className="space-y-5 rounded-2xl border border-[color:var(--border)] bg-[color:var(--background-elevated)] p-4">
       <div>
-        <p className="text-sm font-medium text-stone-900">Share files</p>
+        <p className="text-sm font-medium text-[color:var(--foreground-strong)]">
+          Share files from the requested categories
+        </p>
         <div className="mt-3 space-y-2">
-          {availableDocuments.length === 0 ? (
-            <p className="text-sm text-stone-500">This horse has no vault files yet.</p>
+          {eligibleDocuments.length === 0 ? (
+            <p className="text-sm text-[color:var(--foreground-soft)]">
+              No vault files match the requested categories yet.
+            </p>
           ) : (
-            availableDocuments.map((document) => {
+            eligibleDocuments.map((document) => {
               return (
-                <label key={document.id} className="flex items-start gap-3 text-sm text-stone-700">
+                <label
+                  key={document.id}
+                  className="flex items-start gap-3 rounded-xl border border-[color:var(--border)] bg-[color:var(--card)] px-3 py-2 text-sm text-[color:var(--foreground)]"
+                >
                   <input
                     type="checkbox"
                     checked={selectedFiles.includes(document.id)}
                     onChange={() => toggleSelection(document.id, selectedFiles, setSelectedFiles)}
-                    className="mt-1"
+                    className="mt-1 accent-[color:var(--accent)]"
                   />
                   <span>
                     {document.title}
-                    <span className="ml-2 text-stone-400">
-                      {document.category.replaceAll("_", " ")}
+                    <span className="ml-2 text-[color:var(--foreground-soft)]">
+                      {formatDocumentCategory(document.category)}
                     </span>
                   </span>
                 </label>
@@ -131,17 +145,17 @@ export default function RequestActionButtons({
       </div>
 
       <div>
-        <p className="mb-2 text-sm font-medium text-stone-900">Expiration</p>
+        <p className="mb-2 text-sm font-medium text-[color:var(--foreground-strong)]">Expiration</p>
         <input
-          type="datetime-local"
+          type="date"
           value={expiresAt}
           onChange={(e) => setExpiresAt(e.target.value)}
-          className="flex h-10 w-full rounded-lg border border-stone-300 bg-white px-3 py-2 text-sm"
+          className="flex h-10 w-full rounded-lg border border-input bg-[color:var(--background)] px-3 py-2 text-sm text-[color:var(--foreground)] outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
         />
       </div>
 
       <div>
-        <p className="mb-2 text-sm font-medium text-stone-900">Barn note</p>
+        <p className="mb-2 text-sm font-medium text-[color:var(--foreground-strong)]">Barn note</p>
         <Textarea
           value={note}
           onChange={(e) => setNote(e.target.value)}
@@ -150,7 +164,7 @@ export default function RequestActionButtons({
       </div>
 
       {error ? (
-        <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+        <div className="rounded-xl border border-destructive/20 bg-destructive/10 px-4 py-3 text-sm text-destructive">
           {error}
         </div>
       ) : null}

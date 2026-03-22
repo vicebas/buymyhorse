@@ -4,8 +4,9 @@ import { redirect, notFound } from "next/navigation";
 import prisma from "@/lib/db/prisma";
 import { authOptions } from "@/lib/auth/options";
 import { getUserAppHeaderVariant } from "@/lib/auth/get-user-app-header-variant";
-import AppHeader from "@/components/layout/app-header";
+import ResolvedAppHeader from "@/components/layout/resolved-app-header";
 import SellerConversationPanel from "@/components/seller/seller-conversation-panel";
+import { markBuyerConversationRead } from "@/lib/notifications/seller";
 
 export default async function BuyerConversationPage({
   params,
@@ -59,9 +60,11 @@ export default async function BuyerConversationPage({
     notFound();
   }
 
+  await markBuyerConversationRead(conversation.id, session.user.id);
+
   return (
     <main className="min-h-screen bg-[color:var(--background)] text-[color:var(--foreground)]">
-      <AppHeader variant={headerVariant} />
+      <ResolvedAppHeader variant={headerVariant} />
 
       <section className="mx-auto max-w-5xl px-6 py-10">
         <div className="mb-8">

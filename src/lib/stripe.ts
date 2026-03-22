@@ -14,7 +14,7 @@ export function getStripe() {
   }
 
   stripeInstance = new Stripe(apiKey, {
-    apiVersion: "2025-02-24.acacia",
+    apiVersion: "2026-02-25.clover",
   });
 
   return stripeInstance;

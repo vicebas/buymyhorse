@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 
 import AdminBlockedNotice from "@/components/admin/admin-blocked-notice";
 import HorseForm from "@/components/horses/horse-form";
-import AppHeader from "@/components/layout/app-header";
+import SellerAppHeader from "@/components/layout/seller-app-header";
 import { authOptions } from "@/lib/auth/options";
 import prisma from "@/lib/db/prisma";
 import { getBarnModerationMessage } from "@/lib/admin/moderation";
@@ -32,7 +32,7 @@ export default async function NewHorsePage() {
 
   return (
     <main className="min-h-screen bg-background text-foreground">
-      <AppHeader variant="seller" />
+      <SellerAppHeader />
 
       <section className="mx-auto max-w-5xl px-6 py-10">
         <div className="mb-8">

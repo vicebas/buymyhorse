@@ -11,6 +11,7 @@ interface LogoutButtonProps {
   variant?: "default" | "outline" | "ghost";
   size?: "default" | "sm" | "lg" | "icon";
   label?: string;
+  onClick?: () => void;
 }
 
 export function LogoutButton({
@@ -19,6 +20,7 @@ export function LogoutButton({
   variant = "outline",
   size = "default",
   label = "Log Out",
+  onClick,
 }: LogoutButtonProps) {
   return (
     <Button
@@ -26,7 +28,10 @@ export function LogoutButton({
       variant={variant}
       size={size}
       className={className}
-      onClick={() => signOut({ callbackUrl })}
+      onClick={() => {
+        onClick?.();
+        signOut({ callbackUrl });
+      }}
     >
       <LogOut size={16} />
       {size !== "icon" ? <span>{label}</span> : null}

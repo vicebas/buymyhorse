@@ -5,6 +5,8 @@ import prisma from "@/lib/db/prisma";
 import { getHorseWriteBlockError, getSellerWriteBlockError } from "@/lib/admin/moderation";
 import { authOptions } from "@/lib/auth/options";
 import { canPublishHorseForSeller, validateHorseForPublishing } from "@/lib/billing/entitlements";
+import { NotificationType } from "@/generated/prisma/client";
+import { dispatchHorseNotification } from "@/lib/notifications/dispatch";
 
 export async function POST(req: Request) {
   const session = await getServerSession(authOptions);
@@ -19,6 +21,8 @@ export async function POST(req: Request) {
     },
     select: {
       id: true,
+      displayName: true,
+      slug: true,
       adminDisabledAt: true,
       adminDisableReason: true,
     },
@@ -115,6 +119,17 @@ export async function POST(req: Request) {
       isActive: nextPublishedState,
     },
   });
+
+  if (nextPublishedState === true) {
+    dispatchHorseNotification({
+      type: NotificationType.NEW_HORSE_FROM_FOLLOWED_BARN,
+      sellerProfileId: horse.sellerProfileId,
+      horseId: horse.id,
+      horseName: horse.name,
+      barnName: seller.displayName,
+      barnSlug: seller.slug ?? "",
+    }).catch(() => {})
+  }
 
   return NextResponse.json(horse);
 }

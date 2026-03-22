@@ -25,13 +25,16 @@ export default function BuyerDashboardHero({
           <div className="relative grid gap-8 lg:grid-cols-[1.25fr_0.75fr] lg:items-end">
             <div className="max-w-2xl">
               <p className="mono text-[11px] uppercase tracking-[0.24em] text-[color:var(--foreground-soft)]">
-                HorseRoster Dashboard
+                HorseRoster
               </p>
-              <h1 className="mt-4 text-5xl font-extrabold leading-[0.94] text-[#0f2a44] md:text-6xl">
-                Find your next horse in a cleaner, curated roster.
+              <h1 className="mt-4 text-5xl font-extrabold leading-[0.94] text-[color:var(--foreground-strong)] md:text-6xl">
+                Find your next horse.
               </h1>
+              <p className="mt-3 text-2xl font-semibold text-[color:var(--foreground-soft)] md:text-3xl">
+                The modern horse marketplace.
+              </p>
               <p className="mt-5 max-w-xl text-base leading-7 text-[color:var(--foreground-soft)] md:text-lg">
-                Explore professional listings, compare details faster, and move from first look to first conversation without the clutter.
+                Browse quality horses, explore barn and trainer rosters, manage horse documents in your EquiVault, and share your horse through the EquiTag system.
               </p>
 
               <div className="mt-8 flex flex-wrap gap-3">
@@ -41,7 +44,7 @@ export default function BuyerDashboardHero({
                       href="/marketplace"
                       className="btn-brand-green"
                     >
-                      Browse Marketplace
+                      Browse Horses
                     </Link>
                     <Link
                       href={messageHref}
@@ -57,15 +60,14 @@ export default function BuyerDashboardHero({
                       onClick={onRequireAuth}
                       className="btn-brand-green"
                     >
-                      Browse Marketplace
+                      Browse Horses
                     </button>
-                    <button
-                      type="button"
-                      onClick={onRequireAuth}
-                      className="inline-flex items-center rounded-full border border-[color:var(--border)] bg-[color:var(--background-elevated)] px-5 py-3 text-sm font-semibold text-[#0f2a44] transition hover:bg-[#f0ebe2]"
+                    <Link
+                      href="/register"
+                      className="inline-flex items-center rounded-full border border-[color:var(--border)] bg-[color:var(--background-elevated)] px-5 py-3 text-sm font-semibold text-[color:var(--foreground)] transition hover:bg-[color:var(--muted)]"
                     >
-                      View Messages
-                    </button>
+                      Join as a Trainer or Barn
+                    </Link>
                   </>
                 )}
               </div>
@@ -76,14 +78,14 @@ export default function BuyerDashboardHero({
                 <p className="mono text-[10px] uppercase tracking-[0.18em] text-[color:var(--foreground-soft)]">
                   Live Listings
                 </p>
-                <p className="mt-3 text-4xl font-extrabold text-[#0f2a44]">{listingCount}</p>
+                <p className="mt-3 text-4xl font-extrabold text-[color:var(--foreground-strong)]">{listingCount}</p>
                 <p className="mt-2 text-sm text-[color:var(--foreground-soft)]">
                   Hand-picked sport horse presentations ready to review.
                 </p>
               </div>
 
               <div className="rounded-[1.5rem] border border-[color:var(--border)] bg-[color:var(--background)] p-5">
-                <div className="flex items-center gap-2 text-sm font-semibold text-[#0f2a44]">
+                <div className="flex items-center gap-2 text-sm font-semibold text-[color:var(--foreground-strong)]">
                   <Sparkles className="h-4 w-4 text-[#2d5438]" />
                   HorseRoster Standard
                 </div>
@@ -94,39 +96,7 @@ export default function BuyerDashboardHero({
             </div>
           </div>
 
-          <div className="relative mt-8 rounded-[1.75rem] border border-[color:var(--border)] bg-[color:var(--background)] p-4 text-[color:var(--foreground)] shadow-[var(--shadow-card)] md:p-5">
-            <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-              <div className="flex flex-1 items-center gap-3 rounded-2xl border border-[color:var(--border)] bg-[color:var(--background-elevated)] px-4 py-3">
-                <Search className="h-4 w-4 text-[color:var(--foreground-soft)]" />
-                <input
-                  placeholder="Search by horse name, discipline, or location..."
-                  readOnly={!isLoggedIn}
-                  onFocus={!isLoggedIn ? onRequireAuth : undefined}
-                  onClick={!isLoggedIn ? onRequireAuth : undefined}
-                  className="w-full bg-transparent text-sm text-[color:var(--foreground)] outline-none placeholder:text-[color:var(--foreground)]"
-                />
-              </div>
 
-              <div className="flex flex-wrap items-center gap-2">
-                {["Show Jumping", "Dressage", "Hunters"].map((tag) => (
-                  <span
-                    key={tag}
-                    className="inline-flex rounded-full bg-[color:var(--muted)] px-3 py-2 text-xs font-semibold uppercase tracking-[0.12em] text-[color:var(--foreground)]"
-                  >
-                    {tag}
-                  </span>
-                ))}
-                <button
-                  type="button"
-                  onClick={!isLoggedIn ? onRequireAuth : undefined}
-                  className="inline-flex items-center gap-2 rounded-full border border-[color:var(--border)] px-3 py-2 text-xs font-semibold uppercase tracking-[0.12em] text-[color:var(--foreground)] hover:bg-[color:var(--muted)] hover:text-[color:var(--foreground-strong)] transition-colors"
-                >
-                  <SlidersHorizontal className="h-3.5 w-3.5" />
-                  Filters
-                </button>
-              </div>
-            </div>
-          </div>
         </div>
       </div>
     </section>

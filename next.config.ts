@@ -5,6 +5,7 @@ const remoteUrl = publicAssetBaseUrl ? new URL(publicAssetBaseUrl) : null;
 
 const nextConfig: NextConfig = {
   reactCompiler: true,
+  output: "standalone",
   images: remoteUrl
     ? {
         remotePatterns: [

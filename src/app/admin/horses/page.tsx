@@ -1,5 +1,6 @@
 import Link from "next/link";
 
+import AdminHorseFeatureToggleForm from "@/components/admin/admin-horse-feature-toggle-form";
 import AdminStatusToggleForm from "@/components/admin/admin-status-toggle-form";
 import prisma from "@/lib/db/prisma";
 
@@ -10,7 +11,14 @@ export default async function AdminHorsesPage({
 }) {
   const params = await searchParams;
   const q = params.q?.trim() || "";
-  const status = params.status === "disabled" ? "disabled" : params.status === "published" ? "published" : "all";
+  const status =
+    params.status === "disabled"
+      ? "disabled"
+      : params.status === "published"
+        ? "published"
+        : params.status === "featured"
+          ? "featured"
+          : "all";
 
   const horses = await prisma.horse.findMany({
     where: {
@@ -27,13 +35,22 @@ export default async function AdminHorsesPage({
         ? { adminDisabledAt: { not: null } }
         : status === "published"
           ? { isPublished: true }
+          : status === "featured"
+            ? { isPlatformFeatured: true }
           : {}),
     },
-    orderBy: [{ adminDisabledAt: "desc" }, { createdAt: "desc" }],
+    orderBy: [
+      { isPlatformFeatured: "desc" },
+      { platformFeaturedAt: "desc" },
+      { adminDisabledAt: "desc" },
+      { createdAt: "desc" },
+    ],
     select: {
       id: true,
       name: true,
       isPublished: true,
+      isPlatformFeatured: true,
+      platformFeaturedAt: true,
       adminDisabledAt: true,
       adminDisableReason: true,
       sellerProfile: {
@@ -65,6 +82,7 @@ export default async function AdminHorsesPage({
           >
             <option value="all">All horses</option>
             <option value="published">Published only</option>
+            <option value="featured">Featured only</option>
             <option value="disabled">Disabled only</option>
           </select>
           <button className="rounded-lg bg-[color:var(--accent)] px-4 py-2 text-sm font-semibold text-[color:var(--accent-foreground)]">
@@ -96,6 +114,11 @@ export default async function AdminHorsesPage({
                   >
                     {horse.adminDisabledAt ? "Disabled" : horse.isPublished ? "Published" : "Inactive"}
                   </span>
+                  {horse.isPlatformFeatured ? (
+                    <span className="rounded-full bg-[rgba(15,42,68,0.1)] px-3 py-1 text-xs font-semibold uppercase tracking-[0.12em] text-[#0f2a44]">
+                      Featured Pick
+                    </span>
+                  ) : null}
                   {horse.sellerProfile.adminDisabledAt ? (
                     <span className="rounded-full bg-[color:var(--destructive)]/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.12em] text-[color:var(--destructive)]">
                       Barn Disabled
@@ -106,6 +129,11 @@ export default async function AdminHorsesPage({
                 <p className="mt-2 text-sm text-[color:var(--foreground-soft)]">
                   Barn: {horse.sellerProfile.displayName}
                 </p>
+                {horse.isPlatformFeatured ? (
+                  <p className="mt-2 text-sm text-[color:var(--foreground)]">
+                    Featured at: {horse.platformFeaturedAt ? new Date(horse.platformFeaturedAt).toLocaleString() : "Recently"}
+                  </p>
+                ) : null}
 
                 {horse.adminDisableReason ? (
                   <p className="mt-4 text-sm text-[color:var(--foreground)]">
@@ -129,13 +157,20 @@ export default async function AdminHorsesPage({
                 </div>
               </div>
 
-              <AdminStatusToggleForm
-                endpoint={`/api/admin/horses/${horse.id}/status`}
-                isDisabled={Boolean(horse.adminDisabledAt)}
-                reason={horse.adminDisableReason}
-                disableLabel="Disable Horse"
-                restoreLabel="Restore Horse"
-              />
+              <div className="space-y-4">
+                <AdminHorseFeatureToggleForm
+                  horseId={horse.id}
+                  isFeatured={horse.isPlatformFeatured}
+                />
+
+                <AdminStatusToggleForm
+                  endpoint={`/api/admin/horses/${horse.id}/status`}
+                  isDisabled={Boolean(horse.adminDisabledAt)}
+                  reason={horse.adminDisableReason}
+                  disableLabel="Disable Horse"
+                  restoreLabel="Restore Horse"
+                />
+              </div>
             </div>
           </article>
         ))}

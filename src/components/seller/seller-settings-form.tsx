@@ -12,12 +12,15 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import NotificationPreferencesForm from "@/components/settings/notification-preferences-form";
 
 interface SellerProfileFormData {
   id: string;
   displayName: string;
   slug: string;
   bio: string | null;
+  phone: string | null;
+  primaryNotificationEmail: string | null;
   location: string | null;
   website: string | null;
   logo: string | null;
@@ -46,6 +49,8 @@ export default function SellerSettingsForm({
     location: seller.location || "",
     website: seller.website || "",
     bio: seller.bio || "",
+    phone: seller.phone || "",
+    primaryNotificationEmail: seller.primaryNotificationEmail || "",
   });
 
   const [logoFile, setLogoFile] = useState<File | null>(null);
@@ -105,6 +110,9 @@ export default function SellerSettingsForm({
       )
     );
 
+    formData.append("phone", form.phone);
+    formData.append("primaryNotificationEmail", form.primaryNotificationEmail);
+
     if (logoFile) {
       formData.append("logo", logoFile);
     }
@@ -130,7 +138,8 @@ export default function SellerSettingsForm({
   }
 
   return (
-    <Card className="rounded-3xl border-[color:var(--border)] shadow-[var(--shadow-card)]">
+    <>
+      <Card className="rounded-3xl border-[color:var(--border)] shadow-[var(--shadow-card)]">
       <CardHeader>
         <CardTitle className="text-2xl font-extrabold text-[color:var(--foreground-strong)]">
           Barn Frontpage
@@ -228,6 +237,31 @@ export default function SellerSettingsForm({
                     value={form.website}
                     onChange={(e) =>
                       setForm((prev) => ({ ...prev, website: e.target.value }))
+                    }
+                  />
+                </div>
+              </div>
+
+              <div className="grid gap-5 md:grid-cols-2">
+                <div className="space-y-2">
+                  <Label htmlFor="phone">Phone</Label>
+                  <Input
+                    id="phone"
+                    value={form.phone}
+                    onChange={(e) =>
+                      setForm((prev) => ({ ...prev, phone: e.target.value }))
+                    }
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="primaryNotificationEmail">Primary notification email</Label>
+                  <Input
+                    id="primaryNotificationEmail"
+                    type="email"
+                    value={form.primaryNotificationEmail}
+                    onChange={(e) =>
+                      setForm((prev) => ({ ...prev, primaryNotificationEmail: e.target.value }))
                     }
                   />
                 </div>
@@ -392,5 +426,20 @@ export default function SellerSettingsForm({
         </form>
       </CardContent>
     </Card>
+
+    <Card className="rounded-3xl border-[color:var(--border)] shadow-[var(--shadow-card)]">
+      <CardHeader>
+        <CardTitle className="text-2xl font-extrabold text-[color:var(--foreground-strong)]">
+          Notification Preferences
+        </CardTitle>
+        <CardDescription>
+          Choose which events trigger in-app and email notifications.
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        <NotificationPreferencesForm />
+      </CardContent>
+    </Card>
+    </>
   );
 }

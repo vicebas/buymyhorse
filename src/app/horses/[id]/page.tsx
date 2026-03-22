@@ -1,10 +1,11 @@
 import prisma from "@/lib/db/prisma";
 import { getServerSession } from "next-auth";
 import { notFound } from "next/navigation";
-import AppHeader from "@/components/layout/app-header";
+import ResolvedAppHeader from "@/components/layout/resolved-app-header";
 import HorseMediaGallery from "@/components/horses/horse-media-gallery";
 import HorsePrimaryActions from "@/components/horses/horse-primary-actions";
 import HorseEquiTagModal from "@/components/equitag/horse-equitag-modal";
+import SaveHorseButton from "@/components/horses/save-horse-button";
 import { authOptions } from "@/lib/auth/options";
 import { getUserAppHeaderVariant } from "@/lib/auth/get-user-app-header-variant";
 import { getBuyerHorseAccess } from "@/lib/vault/access";
@@ -22,6 +23,9 @@ export default async function HorsePage({
     where: { id },
     include: {
       media: {
+        where: {
+          status: "READY",
+        },
         orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }],
       },
       sellerProfile: true,
@@ -62,9 +66,18 @@ export default async function HorsePage({
     : null;
 
   const currentAccessStatus =
-    access?.status === "ACTIVE"
-      ? "ACTIVE"
-      : latestRequest?.status || access?.status || "NONE";
+    access?.status && access.status !== "NONE"
+      ? access.status
+      : latestRequest?.status || "NONE";
+
+  const isSaved = session?.user?.id
+    ? Boolean(
+        await prisma.savedHorse.findUnique({
+          where: { userId_horseId: { userId: session.user.id, horseId: horse.id } },
+          select: { id: true },
+        })
+      )
+    : false;
   const headerVariant = await getUserAppHeaderVariant(session?.user?.id);
   const keyDetailItems = horse.keyDetails
     ? horse.keyDetails.split("\n").map((item) => item.trim()).filter(Boolean)
@@ -92,9 +105,9 @@ export default async function HorsePage({
 
   return (
     <main className="min-h-screen bg-[color:var(--background)] text-[color:var(--foreground)]">
-      <AppHeader variant={headerVariant} />
+      <ResolvedAppHeader variant={headerVariant} />
 
-      <section className="mx-auto max-w-6xl px-6 py-10">
+      <section className="mx-auto max-w-6xl px-6 py-10 pb-28 sm:pb-32 lg:pb-10">
         <div className="grid gap-10 lg:grid-cols-[1.25fr_0.9fr] lg:items-start">
           <div>
             <HorseMediaGallery
@@ -183,6 +196,15 @@ export default async function HorsePage({
               </p>
             </div>
 
+            <div className="mt-4">
+              <SaveHorseButton
+                horseId={horse.id}
+                initialSaved={isSaved}
+                isLoggedIn={Boolean(session?.user?.id)}
+                size="detail"
+              />
+            </div>
+
             <div className="mt-8 rounded-2xl bg-[color:var(--muted)] p-5">
               <p className="mono text-xs font-medium uppercase tracking-[0.18em] text-[color:var(--foreground-soft)]">
                 Key Info
@@ -224,20 +246,33 @@ export default async function HorsePage({
               </p>
             </div>
 
-            <div className="mt-6">
+            <div className="mt-6 hidden lg:block">
               <HorsePrimaryActions
                 horseId={horse.id}
                 horseName={horse.name}
                 sellerName={horse.sellerProfile.displayName}
                 isLoggedIn={Boolean(session?.user?.id)}
+                emailVerified={Boolean(session?.user?.emailVerified)}
                 currentAccessStatus={currentAccessStatus}
+                accessHref={access?.grant?.id ? `/access/grants/${access.grant.id}` : undefined}
+                layout="inline"
               />
             </div>
+
           </aside>
         </div>
-
-
       </section>
+
+      <HorsePrimaryActions
+        horseId={horse.id}
+        horseName={horse.name}
+        sellerName={horse.sellerProfile.displayName}
+        isLoggedIn={Boolean(session?.user?.id)}
+        emailVerified={Boolean(session?.user?.emailVerified)}
+        currentAccessStatus={currentAccessStatus}
+        accessHref={access?.grant?.id ? `/access/grants/${access.grant.id}` : undefined}
+        layout="floating"
+      />
     </main>
   );
 }

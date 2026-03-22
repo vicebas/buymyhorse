@@ -1,6 +1,8 @@
 export {
+  createPublicUploadUrl,
   deletePublicAsset,
   getPublicAssetBaseUrl,
+  readPublicAssetHead,
   readPublicAsset,
   resolvePublicAssetUrl,
   uploadPublicAsset,

@@ -86,6 +86,8 @@ export async function POST(req: Request) {
     const location = String(formData.get("location") || "").trim();
     const website = String(formData.get("website") || "").trim();
     const bio = String(formData.get("bio") || "").trim();
+    const phone = String(formData.get("phone") || "").trim();
+    const primaryNotificationEmail = String(formData.get("primaryNotificationEmail") || "").trim();
     const logo = formData.get("logo");
     const coverImage = formData.get("coverImage");
     const featuredHorses = parseFeaturedHorsePayload(formData.get("featuredHorses"));
@@ -135,6 +137,8 @@ export async function POST(req: Request) {
           location: location || null,
           website: website || null,
           bio: bio || null,
+          phone: phone || null,
+          primaryNotificationEmail: primaryNotificationEmail || null,
           logo: logoPath || null,
           coverImage: coverImagePath || null,
         },
