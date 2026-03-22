@@ -36,6 +36,7 @@ function getPrivateBucketName() {
 
 export function getPublicAssetBaseUrl() {
   if (!PUBLIC_ASSET_BASE_URL) {
+    console.log('process.env', process.env);
     throw new Error("Missing NEXT_PUBLIC_PUBLIC_ASSET_BASE_URL.");
   }
 
