@@ -81,7 +81,7 @@ export async function POST(req: Request) {
     },
   });
 
-  const origin = new URL(req.url).origin;
+  const origin = process.env.NEXT_PUBLIC_APP_URL ;
 
   const checkoutSession = await createEquiTagCheckoutSession({
     sellerId: seller.id,
