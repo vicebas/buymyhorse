@@ -19,11 +19,18 @@ export async function POST(req: Request) {
     activationMonthlyPriceId?: string;
     activationYearlyPriceId?: string;
     extraHorsePriceId?: string;
+    equitagPhysicalPriceId?: string;
+    equitagMaxBatchQuantity?: number;
   } | null;
 
   const activationMonthlyPriceId = body?.activationMonthlyPriceId?.trim() || "";
   const activationYearlyPriceId = body?.activationYearlyPriceId?.trim() || "";
   const extraHorsePriceId = body?.extraHorsePriceId?.trim() || "";
+  const equitagPhysicalPriceId = body?.equitagPhysicalPriceId?.trim() || "";
+  const equitagMaxBatchQuantity = body?.equitagMaxBatchQuantity;
+  const hasValidBatchQty =
+    equitagMaxBatchQuantity === undefined ||
+    (Number.isInteger(equitagMaxBatchQuantity) && equitagMaxBatchQuantity >= 1 && equitagMaxBatchQuantity <= 100);
   const activationTrialDays = body?.activationTrialDays;
   const hasValidTrialDays =
     Number.isInteger(activationTrialDays) &&
@@ -34,6 +41,7 @@ export async function POST(req: Request) {
   if (
     typeof body?.activationTrialEnabled !== "boolean" ||
     !hasValidTrialDays ||
+    !hasValidBatchQty ||
     !activationMonthlyPriceId ||
     !activationYearlyPriceId ||
     !extraHorsePriceId
@@ -42,6 +50,7 @@ export async function POST(req: Request) {
   }
 
   const safeActivationTrialDays = activationTrialDays as number;
+  const safeBatchQty = equitagMaxBatchQuantity ?? 10;
 
   await prisma.billingSettings.upsert({
     where: { id: "default" },
@@ -51,6 +60,8 @@ export async function POST(req: Request) {
       activationMonthlyPriceId,
       activationYearlyPriceId,
       extraHorsePriceId,
+      equitagPhysicalPriceId,
+      equitagMaxBatchQuantity: safeBatchQty,
       updatedByUserId: session.user.id,
     },
     create: {
@@ -60,6 +71,8 @@ export async function POST(req: Request) {
       activationMonthlyPriceId,
       activationYearlyPriceId,
       extraHorsePriceId,
+      equitagPhysicalPriceId,
+      equitagMaxBatchQuantity: safeBatchQty,
       updatedByUserId: session.user.id,
     },
   });
@@ -76,6 +89,8 @@ export async function POST(req: Request) {
       activationMonthlyPriceId,
       activationYearlyPriceId,
       extraHorsePriceId,
+      equitagPhysicalPriceId,
+      equitagMaxBatchQuantity: safeBatchQty,
     },
   });
 

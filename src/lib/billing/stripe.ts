@@ -1,5 +1,6 @@
 import prisma from "@/lib/db/prisma";
 import { getActivationPriceId, getExtraHorsePriceId, type BillingCadenceKey } from "@/lib/billing/plans";
+import { getBillingSettings } from "@/lib/billing/settings";
 import { getStripe } from "@/lib/stripe";
 
 export async function ensureSellerStripeCustomer({
@@ -127,6 +128,56 @@ export async function createExtraHorseCheckoutSession({
     metadata: {
       sellerProfileId: sellerId,
       billingKind: "EXTRA_HORSE",
+      quantity: String(quantity),
+    },
+  });
+}
+
+export async function createEquiTagCheckoutSession({
+  sellerId,
+  userId,
+  displayName,
+  equiTagId,
+  equiTagOrderId,
+  quantity,
+  origin,
+}: {
+  sellerId: string;
+  userId: string;
+  displayName: string;
+  equiTagId: string;
+  equiTagOrderId: string;
+  quantity: number;
+  origin: string;
+}) {
+  const stripe = getStripe();
+  const customerId = await ensureSellerStripeCustomer({
+    sellerId,
+    userId,
+    displayName,
+  });
+
+  const settings = await getBillingSettings();
+  const priceId = settings.equitagPhysicalPriceId;
+
+  if (!priceId) {
+    throw new Error("Missing Stripe price ID for physical EquiTag in admin billing settings.");
+  }
+
+  return stripe.checkout.sessions.create({
+    mode: "payment",
+    customer: customerId,
+    success_url: `${origin}/mybarn/equitag-orders?checkout=success`,
+    cancel_url: `${origin}/mybarn/equitag-orders?checkout=cancelled`,
+    line_items: [{ price: priceId, quantity }],
+    shipping_address_collection: {
+      allowed_countries: ["US", "CA", "GB", "AU", "DE", "FR", "NL", "BE", "IE", "NZ", "BR"],
+    },
+    metadata: {
+      sellerProfileId: sellerId,
+      billingKind: "EQUITAG_PHYSICAL",
+      equiTagId,
+      equiTagOrderId,
       quantity: String(quantity),
     },
   });

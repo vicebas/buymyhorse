@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { BarChart3, Building2, CreditCard, KeyRound, Users, VenetianMask } from "lucide-react";
+import { BarChart3, Building2, CreditCard, KeyRound, QrCode, Users, VenetianMask } from "lucide-react";
 import { usePathname } from "next/navigation";
 
 import { LogoutButton } from "@/components/auth/logout-button";
@@ -14,6 +14,7 @@ const links = [
   { href: "/admin/barns", label: "Barns", icon: Building2 },
   { href: "/admin/horses", label: "Horses", icon: VenetianMask },
   { href: "/admin/billing", label: "Billing", icon: CreditCard },
+  { href: "/admin/equitags", label: "EquiTags", icon: QrCode },
   { href: "/admin/users", label: "Users", icon: Users },
 ];
 

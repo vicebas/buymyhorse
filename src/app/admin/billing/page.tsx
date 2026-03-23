@@ -64,6 +64,8 @@ export default async function AdminBillingPage({
         activationMonthlyPriceId={settings.activationMonthlyPriceId}
         activationYearlyPriceId={settings.activationYearlyPriceId}
         extraHorsePriceId={settings.extraHorsePriceId}
+        equitagPhysicalPriceId={settings.equitagPhysicalPriceId}
+        equitagMaxBatchQuantity={settings.equitagMaxBatchQuantity}
         stripeSecretKeyConfigured={settings.stripeSecretKeyConfigured}
         stripeWebhookSecretConfigured={settings.stripeWebhookSecretConfigured}
       />

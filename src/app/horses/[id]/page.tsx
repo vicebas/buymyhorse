@@ -142,7 +142,7 @@ export default async function HorsePage({
               Rich Listing Assets
             </h2>
 
-            <div className="mt-5 grid gap-4 sm:grid-cols-3">
+            <div className="mt-5 grid gap-4 sm:grid-cols-3" >
               <div className="rounded-2xl bg-[color:var(--muted)] p-4">
                 <p className="text-[11px] font-medium uppercase tracking-[0.12em] text-[color:var(--foreground-soft)]">
                   Photos
@@ -166,6 +166,9 @@ export default async function HorsePage({
                 <p className="mt-2 text-sm font-semibold text-[color:var(--foreground-strong)]">
                   {horse.sellerProfile.displayName}
                 </p>
+                <a href={`/barn/${horse.sellerProfile.slug}`} className="btn btn-primary mt-2 text-sm font-semibold text-[color:var(--foreground-strong)] underline">
+                  View Barn
+                </a>
               </div>
             </div>
           </div>
@@ -244,6 +247,9 @@ export default async function HorsePage({
               <p className="mt-1 text-base font-medium text-[color:var(--foreground-strong)]">
                 {horse.sellerProfile.displayName}
               </p>
+              <a href={`/barn/${horse.sellerProfile.slug}`} className=" mt-1 text-sm font-medium text-[color:var(--foreground-strong)] underline">
+                View Barn
+              </a>
             </div>
 
             <div className="mt-6 hidden lg:block">

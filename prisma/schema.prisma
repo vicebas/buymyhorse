@@ -84,6 +84,15 @@ enum HorseSlotLedgerSource {
   MIGRATION_SEED
 }
 
+enum EquiTagOrderStatus {
+  PENDING_PAYMENT
+  CONFIRMED
+  PRINTING
+  SHIPPED
+  DELIVERED
+  CANCELLED
+}
+
 model User {
   id    String  @id @default(cuid())
   name  String?
@@ -165,6 +174,7 @@ model SellerProfile {
   attachedEquiTags   EquiTag[]           @relation("AttachedBarnEquiTags")
   horseSlotEntries   BarnHorseSlotLedger[]
   sellerContactControls SellerContactControl[] @relation("SellerProfileContactControls")
+  equiTagOrders      EquiTagOrder[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -303,6 +313,7 @@ model EquiTag {
   attachedBarn      SellerProfile? @relation("AttachedBarnEquiTags", fields: [attachedBarnId], references: [id], onDelete: SetNull)
   attachedHorse     Horse?         @relation("AttachedHorseEquiTags", fields: [attachedHorseId], references: [id], onDelete: SetNull)
   visits            EquiTagVisit[]
+  orders            EquiTagOrder[]
 
   @@index([ownerSellerProfileId])
   @@index([attachedEntityType])
@@ -350,6 +361,8 @@ model BillingSettings {
   activationMonthlyPriceId String?
   activationYearlyPriceId  String?
   extraHorsePriceId        String?
+  equitagPhysicalPriceId   String?
+  equitagMaxBatchQuantity  Int      @default(10)
   updatedByUserId          String?
   createdAt                DateTime @default(now())
   updatedAt                DateTime @updatedAt
@@ -371,6 +384,34 @@ model BarnHorseSlotLedger {
 
   @@index([sellerProfileId, createdAt])
   @@index([source, createdAt])
+}
+
+model EquiTagOrder {
+  id                      String             @id @default(cuid())
+  sellerProfileId         String
+  equiTagId               String
+  quantity                Int                @default(1)
+  status                  EquiTagOrderStatus @default(PENDING_PAYMENT)
+  stripeCheckoutSessionId String?            @unique
+  stripePaymentIntentId   String?
+  deliveryCompany         String?
+  trackingCode            String?
+  estimatedDeliveryDate   DateTime?
+  shippingName            String?
+  shippingAddressLine1    String?
+  shippingAddressLine2    String?
+  shippingCity            String?
+  shippingState           String?
+  shippingPostalCode      String?
+  shippingCountry         String?
+  createdAt               DateTime           @default(now())
+  updatedAt               DateTime           @updatedAt
+
+  sellerProfile SellerProfile @relation(fields: [sellerProfileId], references: [id], onDelete: Cascade)
+  equiTag       EquiTag       @relation(fields: [equiTagId], references: [id], onDelete: Cascade)
+
+  @@index([sellerProfileId, createdAt])
+  @@index([status, createdAt])
 }
 
 model SavedHorse {

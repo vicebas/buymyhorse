@@ -16,6 +16,7 @@ import {
     Clock3,
     Trash2,
     CreditCard,
+    Package,
 } from "lucide-react";
 
 import prisma from "@/lib/db/prisma";
@@ -29,6 +30,7 @@ import HorseEquiTagModal from "@/components/equitag/horse-equitag-modal";
 import { Button } from "@/components/ui/button";
 import { ensureHorseHasEquiTag } from "@/lib/equitag/service";
 import { resolvePublicAssetUrl } from "@/lib/storage/public-assets";
+import { getBillingSettings } from "@/lib/billing/settings";
 
 export default async function SellerPage() {
     const session = await getServerSession(authOptions);
@@ -55,6 +57,16 @@ export default async function SellerPage() {
                             id: true,
                             code: true,
                             svgPath: true,
+                            orders: {
+                                where: {
+                                    status: {
+                                        notIn: ["DELIVERED", "CANCELLED"],
+                                    },
+                                },
+                                select: { equiTagId: true, status: true },
+                                take: 1,
+                                orderBy: { createdAt: "desc" },
+                            },
                         },
                     },
                 },
@@ -95,7 +107,10 @@ export default async function SellerPage() {
         })
     );
 
-    const entitlements = await getBarnEntitlements(seller.id);
+    const [entitlements, billingSettings] = await Promise.all([
+        getBarnEntitlements(seller.id),
+        getBillingSettings(),
+    ]);
 
     const totalHorses = horses.length;
     const publishedHorses = horses.filter((horse) => horse.isPublished).length;
@@ -353,6 +368,14 @@ export default async function SellerPage() {
                             EquiVault Requests
                         </Link>
 
+                        <Link
+                            href="/mybarn/equitag-orders"
+                            className="inline-flex items-center gap-2 rounded-lg px-5 py-2 text-md font-medium text-[color:var(--foreground-soft)]"
+                        >
+                            <Package className="h-4 w-4" />
+                            EquiTag Orders
+                        </Link>
+
                     </div>
 
                     <Link href="/mybarn/horses/new">
@@ -392,13 +415,12 @@ export default async function SellerPage() {
                             >
                                 <div className="flex flex-col gap-5 xl:flex-row xl:items-center xl:justify-between">
                                     <div className="flex gap-4">
-                                        <div className="overflow-hidden rounded-2xl border border-[color:var(--border)] bg-[color:var(--muted)]">
+                                        <div className="relative shrink-0 w-100 overflow-hidden rounded-2xl border border-[color:var(--border)] bg-[color:var(--muted)]">
                                             <Image
                                                 src={resolvePublicAssetUrl(horse.image) || "/img/default-horse.png"}
                                                 alt={horse.name}
-                                                width={220}
-                                                height={160}
-                                                className="h-28 w-36 object-cover"
+                                                fill
+                                                className="object-cover"
                                             />
                                         </div>
 
@@ -452,8 +474,7 @@ export default async function SellerPage() {
                                         </div>
                                     </div>
 
-                                    <div className="flex flex-wrap items-center gap-3 xl:justify-end">
-                                        <Button variant="outline" disabled={Boolean(seller.adminDisabledAt || horse.adminDisabledAt)}>Feature</Button>
+                                    <div className="flex flex-wrap w-64 items-center gap-3 xl:justify-space-between">
 
                                         <PublishToggleButton
                                             horseId={horse.id}
@@ -461,7 +482,16 @@ export default async function SellerPage() {
                                             disabled={Boolean(seller.adminDisabledAt || horse.adminDisabledAt)}
                                         />
 
-                                        <HorseEquiTagModal equiTags={horse.attachedEquiTags} />
+                                        <HorseEquiTagModal
+                            equiTags={horse.attachedEquiTags}
+                            sellerProfileId={seller.id}
+                            maxBatchQuantity={billingSettings.equitagMaxBatchQuantity}
+                            activeOrders={horse.attachedEquiTags.flatMap((t) =>
+                                "orders" in t
+                                    ? (t.orders as { equiTagId: string; status: string }[]).map((o) => ({ equiTagId: o.equiTagId, status: o.status }))
+                                    : []
+                            )}
+                        />
 
                                         <Link href={`/horses/${horse.id}`}>
                                             <Button variant="outline" className="inline-flex items-center gap-2">

@@ -12,7 +12,7 @@ export async function POST(req: Request) {
   const body = await req.text();
   const signature = (await headers()).get("stripe-signature");
   const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
-
+  console.log("Received Stripe webhook with signature:", signature);
   if (!signature || !webhookSecret) {
     return NextResponse.json({ error: "Missing Stripe webhook configuration." }, { status: 400 });
   }
@@ -48,7 +48,12 @@ export async function POST(req: Request) {
 
 async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session) {
   if (session.mode === "payment") {
-    await syncExtraHorsePurchase(session);
+    const billingKind = session.metadata?.billingKind;
+    if (billingKind === "EQUITAG_PHYSICAL") {
+      await syncEquiTagOrderPayment(session);
+    } else {
+      await syncExtraHorsePurchase(session);
+    }
     return;
   }
 
@@ -167,4 +172,34 @@ function mapStripeStatus(status: Stripe.Subscription.Status) {
     default:
       return "INCOMPLETE";
   }
+}
+
+async function syncEquiTagOrderPayment(session: Stripe.Checkout.Session) {
+  if (session.payment_status !== "paid") {
+    return;
+  }
+
+  const equiTagOrderId = session.metadata?.equiTagOrderId;
+
+  if (!equiTagOrderId) {
+    return;
+  }
+
+  const shipping = session.collected_information?.shipping_details;
+
+  await prisma.equiTagOrder.update({
+    where: { id: equiTagOrderId },
+    data: {
+      status: "CONFIRMED",
+      stripePaymentIntentId:
+        typeof session.payment_intent === "string" ? session.payment_intent : null,
+      shippingName: shipping?.name || null,
+      shippingAddressLine1: shipping?.address?.line1 || null,
+      shippingAddressLine2: shipping?.address?.line2 || null,
+      shippingCity: shipping?.address?.city || null,
+      shippingState: shipping?.address?.state || null,
+      shippingPostalCode: shipping?.address?.postal_code || null,
+      shippingCountry: shipping?.address?.country || null,
+    },
+  });
 }

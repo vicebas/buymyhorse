@@ -12,6 +12,8 @@ export default function AdminBillingSettingsForm({
   activationMonthlyPriceId,
   activationYearlyPriceId,
   extraHorsePriceId,
+  equitagPhysicalPriceId,
+  equitagMaxBatchQuantity,
   stripeSecretKeyConfigured,
   stripeWebhookSecretConfigured,
 }: {
@@ -20,6 +22,8 @@ export default function AdminBillingSettingsForm({
   activationMonthlyPriceId: string;
   activationYearlyPriceId: string;
   extraHorsePriceId: string;
+  equitagPhysicalPriceId: string;
+  equitagMaxBatchQuantity: number;
   stripeSecretKeyConfigured: boolean;
   stripeWebhookSecretConfigured: boolean;
 }) {
@@ -29,6 +33,8 @@ export default function AdminBillingSettingsForm({
   const [monthlyPriceId, setMonthlyPriceId] = useState(activationMonthlyPriceId);
   const [yearlyPriceId, setYearlyPriceId] = useState(activationYearlyPriceId);
   const [extraPriceId, setExtraPriceId] = useState(extraHorsePriceId);
+  const [eqPhysicalPriceId, setEqPhysicalPriceId] = useState(equitagPhysicalPriceId);
+  const [eqMaxBatch, setEqMaxBatch] = useState(String(equitagMaxBatchQuantity));
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -47,6 +53,8 @@ export default function AdminBillingSettingsForm({
         activationMonthlyPriceId: monthlyPriceId.trim(),
         activationYearlyPriceId: yearlyPriceId.trim(),
         extraHorsePriceId: extraPriceId.trim(),
+        equitagPhysicalPriceId: eqPhysicalPriceId.trim(),
+        equitagMaxBatchQuantity: Number(eqMaxBatch),
       }),
     });
 
@@ -137,8 +145,34 @@ export default function AdminBillingSettingsForm({
               onChange={(event) => setExtraPriceId(event.target.value)}
               placeholder="price_... extra horse"
             />
+            <Input
+              value={eqPhysicalPriceId}
+              onChange={(event) => setEqPhysicalPriceId(event.target.value)}
+              placeholder="price_... physical EquiTag"
+            />
           </div>
         </div>
+
+        <div className="space-y-4 rounded-[1.5rem] border border-[color:var(--border)] bg-[color:var(--background-elevated)] p-5">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[color:var(--foreground-soft)]">
+              EquiTag settings
+            </p>
+            <p className="mt-2 text-sm leading-6 text-[color:var(--foreground-soft)]">
+              Maximum batch quantity sellers can order at once.
+            </p>
+          </div>
+
+          <div className="max-w-xs space-y-2">
+            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[color:var(--foreground-soft)]">
+              Max batch qty
+            </p>
+            <Input type="number" min="1" max="100" value={eqMaxBatch} onChange={(event) => setEqMaxBatch(event.target.value)} />
+          </div>
+        </div>
+      </div>
+
+      <div className="grid gap-4 xl:grid-cols-[1.1fr_0.9fr]">
 
         <div className="space-y-4 rounded-[1.5rem] border border-[color:var(--border)] bg-[color:var(--background-elevated)] p-5">
           <div>
