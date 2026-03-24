@@ -13,7 +13,7 @@ Use this together with:
 
 ## Current Assumptions
 
-- Client-approved scope changes override the older BuyMyHorse PDF where they conflict.
+- Client-approved scope changes override the older legacy project PDF where they conflict.
 - EquiTag routing may resolve to either a barn or a horse destination.
 - Billing scope is the activation-plus-extra-slots model.
 - Website remains optional on the seller profile.
@@ -265,6 +265,6 @@ Completed already:
 ## Notes For AI Use
 
 - Always ask the AI to inspect the existing implementation first.
-- Always include the current docs in the prompt so it does not follow stale BuyMyHorse assumptions.
+- Always include the current docs in the prompt so it does not follow stale legacy-brand assumptions.
 - Keep epic work scoped. Do not mix multiple epics in one implementation pass unless you explicitly want a larger refactor.
 - After each meaningful implementation, update `docs/project-status.md`.

@@ -70,13 +70,13 @@ Expected:
 Expected:
 - activation cadence and billing status are visible
 - published horse usage is visible against total capacity
-- purchased/admin extra horse slots are visible
+- purchased/admin additional horse profiles are visible
 - `Manage Billing` opens Stripe portal once a Stripe customer exists
 
-6. Buy one or more additional horse slots from MyBarn billing.
+6. Buy one or more additional horse profiles from MyBarn billing.
 Expected:
 - Stripe Checkout opens
-- successful webhook delivery records the purchased slots
+- successful webhook delivery records the purchased horse profiles
 - total horse capacity increases
 
 7. Try publishing horses beyond available capacity or without the required listing fields/image.

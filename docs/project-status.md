@@ -3,17 +3,17 @@
 Last updated: 2026-03-24
 
 ## Overall Summary
-- Project branding is in transition from BuyMyHorse to HorseRoster.
+- Project branding is in transition from the legacy brand to HorseRoster.
 - The public dashboard, marketplace, horse pages, barn pages, MyBarn, messaging, vault access, EquiTag QR flow, and admin dashboard all exist in app code.
 - The admin console now includes overview analytics, barns, horses, billing, users, and a dedicated access console for grants, request history, and vault activity.
 - Light/dark theme support exists at the token and shell level, but full page-by-page migration is still in progress.
-- Billing is now modeled in app code around a single HorseRoster activation product, monthly/yearly cadence, one-time extra horse slot purchases, admin-controlled trial settings, and admin-managed Stripe price IDs while Stripe secrets remain env-only.
+- Billing is now modeled in app code around a single HorseRoster activation product, monthly/yearly cadence, one-time additional horse profile purchases, admin-controlled trial settings, and admin-managed Stripe price IDs while Stripe secrets remain env-only.
 - Email verification, forgot/reset password, and base SendGrid mail delivery are now in app code.
 - Barn onboarding/settings and horse create/edit forms now support explicit AI-assisted English copy generation for barn stories and horse descriptions through a shared Anthropic-backed preview flow.
 - Seller header notifications now exist in app code: unread message badge on `Messages`, pending document-request badge on `MyBarn`, and conversation read-tracking at the `HorseConversation` level.
 - Message UIs now support near-live client polling in app code: open threads refresh automatically, buyer/seller inbox lists refresh and reorder automatically, and buyer/seller header unread message badges update without navigation.
 - File storage is now moving to AWS S3 in app code: public horse/barn/EquiTag media uses a CDN-backed public bucket path model and EquiVault downloads redirect to short-lived signed URLs from a private bucket.
-- Client-approved scope changes supersede parts of the older BuyMyHorse PDF: EquiTag scans may resolve to a barn or a horse, billing is the activation-plus-extra-slots model, and public-endpoint rate limiting is not currently planned.
+- Client-approved scope changes supersede parts of the older legacy project PDF: EquiTag scans may resolve to a barn or a horse, billing is the activation-plus-extra-profiles model, and public-endpoint rate limiting is not currently planned.
 
 ## Completed (most recent first)
 - Marketplace/dashboard horse cards now use split navigation: clicking the card opens the horse profile, while clicking the barn name opens the barn profile route.
@@ -22,6 +22,9 @@ Last updated: 2026-03-24
   - **Pending-payment only**: Seller retry/cancel is restricted to `PENDING_PAYMENT` orders only. If payment failed or checkout was abandoned, the seller can reopen Stripe checkout or cancel the order; no non-pending order can be cancelled by the seller through this flow.
   - **Visibility rules**: Seller-cancelled orders are hidden from the seller order list by filtering `canceledBySellerAt`, while admin-cancelled orders remain visible to the seller with a cancelled state message.
   - **Payment/admin sync**: `EquiTagOrder` now tracks `canceledBySellerAt` and `canceledByAdminAt` in Prisma, admin cancellation updates the admin marker, and successful Stripe payment confirmation clears any cancellation markers before moving the order back to `CONFIRMED`.
+- **Final copy/label cleanup pass completed for remaining live surfaces and setup docs.**
+  - **App copy**: MyBarn dashboard copy now says `marketplace listings` instead of the stray `favorites-ready listings` wording.
+  - **Docs wording**: Remaining setup/status references to `horse slots` were updated to `additional horse profiles`, and legacy brand references were rewritten to `legacy` wording where they were only describing outdated history.
 - **Featured horses are now Phase 1 merit-based, with admin overrides.**
   - **Engagement model**: Added `HorseFeatureMetrics` in `prisma/schema.prisma` plus a shared featured-ranking service in `src/lib/horses/featured.ts`. Featured horses now rank by the agreed weighted score across profile views, favorites, click-throughs, and recent activity.
   - **Tracking**: Public horse pages now increment profile views, marketplace/dashboard horse-card clicks now post click-through tracking, and favorites continue to contribute through the existing saved-horse relation counts.
@@ -170,14 +173,14 @@ Last updated: 2026-03-24
   - `.env.example` now includes AWS region, bucket, public asset base URL, and signed-download expiry configuration
 - Barn billing has been redesigned in app code around a single activation product:
   - monthly/yearly activation cadence
-  - one-time extra horse slot purchases
+  - one-time additional horse profile purchases
   - activation checkout route
   - extra horse checkout route
   - Stripe portal route
   - Stripe webhook sync for activation subscriptions and extra horse purchases
   - MyBarn billing dashboard showing activation state, published horse usage, purchased/admin slot totals, and total capacity
   - onboarding now starts with activation cadence selection instead of multi-tier plan selection
-  - pricing now explains one activation product plus add-on horse slots
+  - pricing now explains one activation product plus add-on horse profiles
   - admin billing shows activation state, slot totals, global trial controls, and editable Stripe price IDs
   - Stripe secret/webhook keys remain env-only while non-secret Stripe price IDs are managed from admin billing settings
   - `.env.example` and `docs/stripe-billing-setup.md` now document the env-only Stripe secrets plus admin-managed billing price configuration and local webhook flow
@@ -193,7 +196,7 @@ Last updated: 2026-03-24
   - Marketplace page fetches the logged-in buyer's saved horse ID set in one query and passes `isSaved` per card without extra round trips
   - Horse detail page (`/horses/[id]`) fetches the buyer's saved state for the viewed horse and renders a `SaveHorseButton` in the aside below the price
   - `/buyer/saved` is a new authenticated buyer page that lists all saved horses in the same card grid used by the marketplace; inaccessible horses (unpublished, deleted, admin-disabled) are silently filtered out; empty state links to marketplace
-  - Buyer app header now includes a "Saved" nav item (Heart icon) pointing to `/buyer/saved`
+  - Buyer app header now includes a `Favorites` nav item (Heart icon) pointing to `/buyer/saved`
 
 ## In Progress
 - Rebrand/theme cleanup across remaining buyer, barn, horse-detail, and request pages
@@ -205,7 +208,7 @@ Last updated: 2026-03-24
 - Theme toggle simplified to a light/dark binary switch; user choice persists in localStorage under `horseroster-theme`
 - Theme init script in `layout.tsx` no longer checks `prefers-color-scheme`; defaults to `"light"` when no stored value exists
 - Fixed hardcoded `#0f2a44` colors in `buyer-dashboard-hero.tsx` — replaced with `var(--foreground-strong)` for proper dark-mode support
-- Replacement of legacy BuyMyHorse language and stale documentation assumptions
+- Replacement of legacy-brand language and stale documentation assumptions
 - Converting older fixed-light UI components to semantic tokens
 - Refining marketplace card parity with the brand package while keeping dark-theme behavior token-driven
 - Converting remaining full-page messaging and request surfaces to match the newer token-based styling direction
@@ -243,12 +246,12 @@ Last updated: 2026-03-24
 ## Decisions / Assumptions In Force
 - `docs/project-status.md` is the live status ledger and must be updated for every meaningful repo change
 - `AGENTS.md` is the agent-facing operating guide
-- `docs/horseroster-spec.md` replaces the older BuyMyHorse spec as the active project reference
+- `docs/horseroster-spec.md` replaces the older legacy-brand spec as the active project reference
 - `docs/next-steps.md` is the planning document for AI-assisted epic execution
 - Marketing docs under `docs/marketing` are visual/product references, not proof that all described features are already implemented
 - Internal schema/code names remain seller-based for compatibility even though the product language is now barn/MyBarn
 - Prisma migrations and Prisma commands are handled manually by the user in this environment
-- The older BuyMyHorse PDF is not authoritative where client-approved scope changes differ from it
+- The older legacy project PDF is not authoritative where client-approved scope changes differ from it
 - EquiTag routing may resolve to either a barn or a horse destination
 - Billing scope is the activation-plus-extra-slots model, not the older multi-tier subscription framing
 - Basic public-endpoint rate limiting is not currently part of the agreed build scope

@@ -201,7 +201,7 @@ export default async function SellerPage() {
                     </p>
                     <h1 className="mt-3 text-5xl font-extrabold">MyBarn</h1>
                     <p className="mt-3 max-w-2xl text-lg text-[color:var(--foreground-soft)]">
-                        Manage your horse profiles, EquiVault documents, favorites-ready listings, and buyer inquiries.
+                        Manage your horse profiles, EquiVault documents, marketplace listings, and buyer inquiries.
                     </p>
                 </div>
             </section>
