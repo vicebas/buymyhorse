@@ -7,6 +7,8 @@ import AdminBlockedNotice from "@/components/admin/admin-blocked-notice";
 import SellerAppHeader from "@/components/layout/seller-app-header";
 import HorseForm from "@/components/horses/horse-form";
 import { getHorseWriteBlockError } from "@/lib/admin/moderation";
+import { HorseDivisionContext } from "@/generated/prisma/enums";
+import { getActiveListingOptions } from "@/lib/horses/listing-options";
 
 export default async function EditHorsePage({
   params,
@@ -46,6 +48,17 @@ export default async function EditHorsePage({
           adminDisableReason: true,
         },
       },
+      breedOption: true,
+      sexOption: true,
+      primaryDiscipline: true,
+      pricingVisibilityOption: true,
+      saleTypeOption: true,
+      colorOption: true,
+      importStatusOption: true,
+      secondaryDisciplines: true,
+      divisionTags: true,
+      idealRiders: true,
+      horseTypes: true,
     },
   });
 
@@ -54,6 +67,7 @@ export default async function EditHorsePage({
   }
 
   const horseWriteBlocked = getHorseWriteBlockError(horse);
+  const options = await getActiveListingOptions();
 
   return (
     <main className="min-h-screen bg-background text-foreground">
@@ -81,21 +95,43 @@ export default async function EditHorsePage({
           <HorseForm
             mode="edit"
             horseId={horse.id}
+            options={options}
             initialValues={{
               name: horse.name ?? "",
-              breed: horse.breed ?? "",
               age: horse.age ? String(horse.age) : "",
-              price: horse.price ? String(horse.price) : "",
               description: horse.description ?? "",
-              discipline: horse.discipline ?? "",
-              level: horse.level ?? "",
               height: horse.height ?? "",
-              gender: horse.gender ?? "",
               location: horse.location ?? "",
               saleStatus: horse.saleStatus,
               isPublished: horse.isPublished,
               image: horse.image ?? null,
               keyDetails: horse.keyDetails ?? "",
+              breedOptionId: horse.breedOptionId ?? "",
+              sexOptionId: horse.sexOptionId ?? "",
+              primaryDisciplineId: horse.primaryDisciplineId ?? "",
+              pricingVisibilityOptionId: horse.pricingVisibilityOptionId ?? "",
+              saleTypeOptionId: horse.saleTypeOptionId ?? "",
+              colorOptionId: horse.colorOptionId ?? "",
+              importStatusOptionId: horse.importStatusOptionId ?? "",
+              secondaryDisciplineIds: horse.secondaryDisciplines.map((item) => item.disciplineId),
+              bestSuitedForIds: horse.divisionTags
+                .filter((item) => item.context === HorseDivisionContext.BEST_SUITED_FOR)
+                .map((item) => item.divisionOptionId),
+              currentlyCompetingInIds: horse.divisionTags
+                .filter((item) => item.context === HorseDivisionContext.CURRENTLY_COMPETING_IN)
+                .map((item) => item.divisionOptionId),
+              experiencedThroughIds: horse.divisionTags
+                .filter((item) => item.context === HorseDivisionContext.EXPERIENCED_THROUGH)
+                .map((item) => item.divisionOptionId),
+              schoolingThroughIds: horse.divisionTags
+                .filter((item) => item.context === HorseDivisionContext.SCHOOLING_THROUGH)
+                .map((item) => item.divisionOptionId),
+              idealRiderIds: horse.idealRiders.map((item) => item.idealRiderOptionId),
+              horseTypeIds: horse.horseTypes.map((item) => item.horseTypeOptionId),
+              feiPassport: horse.feiPassport,
+              equiVaultAvailable: horse.equiVaultAvailable,
+              registrationStatus: horse.registrationStatus ?? "",
+              showHighlights: horse.showHighlights ?? "",
             }}
           />
         )}

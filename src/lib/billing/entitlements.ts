@@ -255,28 +255,34 @@ export async function canPublishHorseForSeller({
 
 export function validateHorseForPublishing(horse: {
   name?: string | null;
-  breed?: string | null;
   age?: number | null;
-  discipline?: string | null;
-  level?: string | null;
   height?: string | null;
-  gender?: string | null;
   location?: string | null;
   description?: string | null;
   image?: string | null;
+  breedOptionId?: string | null;
+  sexOptionId?: string | null;
+  primaryDisciplineId?: string | null;
+  pricingVisibilityOptionId?: string | null;
+  bestSuitedForIds?: string[] | null;
+  idealRiderIds?: string[] | null;
+  horseTypeIds?: string[] | null;
 }) {
   const missing: string[] = [];
 
   if (!horse.name?.trim()) missing.push("name");
-  if (!horse.breed?.trim()) missing.push("breed");
   if (!horse.age) missing.push("age");
-  if (!horse.discipline?.trim()) missing.push("discipline");
-  if (!horse.level?.trim()) missing.push("level");
   if (!horse.height?.trim()) missing.push("height");
-  if (!horse.gender?.trim()) missing.push("sex");
   if (!horse.location?.trim()) missing.push("location");
   if (!horse.description?.trim()) missing.push("description");
   if (!horse.image?.trim()) missing.push("main image");
+  if (!horse.breedOptionId) missing.push("breed");
+  if (!horse.sexOptionId) missing.push("sex");
+  if (!horse.primaryDisciplineId) missing.push("primary discipline");
+  if (!horse.pricingVisibilityOptionId) missing.push("pricing visibility");
+  if (!horse.bestSuitedForIds?.length) missing.push("best suited for");
+  if (!horse.idealRiderIds?.length) missing.push("ideal rider");
+  if (!horse.horseTypeIds?.length) missing.push("horse type / intended use");
 
   return {
     isPublishReady: missing.length === 0,

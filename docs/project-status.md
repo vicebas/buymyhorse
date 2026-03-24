@@ -1,6 +1,6 @@
 # HorseRoster Project Status
 
-Last updated: 2026-03-22
+Last updated: 2026-03-24
 
 ## Overall Summary
 - Project branding is in transition from BuyMyHorse to HorseRoster.
@@ -16,6 +16,12 @@ Last updated: 2026-03-22
 - Client-approved scope changes supersede parts of the older BuyMyHorse PDF: EquiTag scans may resolve to a barn or a horse, billing is the activation-plus-extra-slots model, and public-endpoint rate limiting is not currently planned.
 
 ## Completed (most recent first)
+- **Admin-managed listing taxonomies**: Horse listing dropdown fields are now modeled as DB-backed option tables instead of hardcoded form/filter values.
+  - **Schema/app model**: Added normalized horse-listing taxonomy models in `prisma/schema.prisma` for disciplines, discipline-scoped divisions, ideal riders, horse types/intended use, pricing visibility, sale type, breed, sex, color, and import status, plus horse join tables for secondary disciplines, division contexts, ideal riders, and intended uses.
+  - **Admin UI/API**: Added `/admin/listing-options`, `src/components/admin/admin-listing-options-manager.tsx`, and `POST /api/admin/listing-options` so admins can add, rename, reorder, and hide listing dropdown options, including division options nested under disciplines. Admin navigation now links to the new surface and changes are audit-logged.
+  - **Seller listing flow**: `src/components/horses/horse-form.tsx` now uses DB-backed dropdowns and multi-selects for marketplace metadata, removes exact horse price from the seller listing flow, adds pricing visibility as the pricing field, and captures the new structured division/rider/type selections required for publishing.
+  - **Marketplace/public consumption**: Marketplace filters now use admin-managed option IDs instead of free-text breed/max-price filtering; cards, saved horses, dashboard featured cards, MyBarn horse cards, public horse detail pages, and public barn listing cards now render pricing visibility labels instead of dollar prices and read normalized listing labels.
+  - **Seeding/backfill**: `prisma/seed.ts` now seeds the listing option tables, and `scripts/backfill-horse-listing-options.ts` can randomize taxonomy assignments for the current test horses after the manual Prisma migration flow is applied.
 - **Follow + Notification System**: Full end-to-end follow-barn and notification pipeline implemented and building clean.
   - **Schema**: Added `NotificationType` enum (`NEW_HORSE_FROM_FOLLOWED_BARN`, `HORSE_UPDATED_FROM_FOLLOWED_BARN`, `NEW_MESSAGE`), `BarnFollow`, `Notification`, and `NotificationPreferences` models. Migration `20260322124508_add_follow_notification_system` applied.
   - **Server repos**: `src/server/follows.ts` (toggleBarnFollow, getBarnFollowers), `src/server/notifications.ts` (createNotification, listUserNotifications, markAllRead, 30-min cooldown query), `src/server/notification-preferences.ts` (getOrCreatePreferences, updatePreferences).
@@ -191,6 +197,7 @@ Last updated: 2026-03-22
 - Barn dashboard analytics are only partially real; view metrics are still placeholder content
 - `README.md` remains the default Next.js boilerplate and is not a reliable project guide
 - Prisma migration execution and Prisma client generation for the latest schema changes are intentionally left manual in the local environment
+- The new listing-taxonomy schema changes are implemented in code, but the SQL migration file still needs to be produced/applied through the repo's manual Prisma migration workflow before the new admin form/filter surfaces can run against a real database
 - Seller header notifications depend on the new `HorseConversation` read-tracking fields being added to the database through your manual Prisma migration flow
 - Stripe billing still depends on real local env secrets, saved admin price IDs, and webhook wiring before checkout flows can run end to end outside test setup
 - Admin auth depends on `session.user.role`; sessions may need re-login after role changes or auth callback changes

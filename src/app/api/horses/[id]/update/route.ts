@@ -6,6 +6,8 @@ import prisma from "@/lib/db/prisma";
 import { getHorseWriteBlockError, getSellerWriteBlockError } from "@/lib/admin/moderation";
 import { authOptions } from "@/lib/auth/options";
 import { canPublishHorseForSeller, validateHorseForPublishing } from "@/lib/billing/entitlements";
+import { buildHorseListingMutation, buildHorseListingRelationWrites } from "@/lib/horses/upsert-horse-listing";
+import { parseStringList } from "@/lib/horses/listing-options";
 import { dispatchHorseNotification } from "@/lib/notifications/dispatch";
 import { deletePublicAsset, uploadPublicAsset } from "@/lib/storage/public-assets";
 
@@ -67,18 +69,31 @@ export async function POST(
   const formData = await req.formData();
 
   const name = String(formData.get("name") || "").trim();
-  const breed = String(formData.get("breed") || "").trim();
   const age = String(formData.get("age") || "").trim();
-  const price = String(formData.get("price") || "").trim();
   const description = String(formData.get("description") || "").trim();
-  const discipline = String(formData.get("discipline") || "").trim();
-  const level = String(formData.get("level") || "").trim();
   const height = String(formData.get("height") || "").trim();
-  const gender = String(formData.get("gender") || "").trim();
   const location = String(formData.get("location") || "").trim();
   const keyDetails = String(formData.get("keyDetails") || "").trim();
   const saleStatus = String(formData.get("saleStatus") || "FOR_SALE").trim();
   const publishToMarketplace = formData.get("isPublished") === "on";
+  const breedOptionId = String(formData.get("breedOptionId") || "").trim() || null;
+  const sexOptionId = String(formData.get("sexOptionId") || "").trim() || null;
+  const primaryDisciplineId = String(formData.get("primaryDisciplineId") || "").trim() || null;
+  const pricingVisibilityOptionId = String(formData.get("pricingVisibilityOptionId") || "").trim() || null;
+  const saleTypeOptionId = String(formData.get("saleTypeOptionId") || "").trim() || null;
+  const colorOptionId = String(formData.get("colorOptionId") || "").trim() || null;
+  const importStatusOptionId = String(formData.get("importStatusOptionId") || "").trim() || null;
+  const secondaryDisciplineIds = parseStringList(formData.getAll("secondaryDisciplineIds"));
+  const bestSuitedForIds = parseStringList(formData.getAll("bestSuitedForIds"));
+  const currentlyCompetingInIds = parseStringList(formData.getAll("currentlyCompetingInIds"));
+  const experiencedThroughIds = parseStringList(formData.getAll("experiencedThroughIds"));
+  const schoolingThroughIds = parseStringList(formData.getAll("schoolingThroughIds"));
+  const idealRiderIds = parseStringList(formData.getAll("idealRiderIds"));
+  const horseTypeIds = parseStringList(formData.getAll("horseTypeIds"));
+  const feiPassport = formData.get("feiPassport") === "on";
+  const equiVaultAvailable = formData.get("equiVaultAvailable") === "on";
+  const registrationStatus = String(formData.get("registrationStatus") || "").trim();
+  const showHighlights = String(formData.get("showHighlights") || "").trim();
 
   if (!name) {
     return NextResponse.json({ error: "Name is required" }, { status: 400 });
@@ -105,15 +120,18 @@ export async function POST(
   if (publishToMarketplace) {
     const publishValidation = validateHorseForPublishing({
       name,
-      breed,
       age: age ? Number(age) : null,
-      discipline,
-      level,
       height,
-      gender,
       location,
       description,
       image: imagePath,
+      breedOptionId,
+      sexOptionId,
+      primaryDisciplineId,
+      pricingVisibilityOptionId,
+      bestSuitedForIds,
+      idealRiderIds,
+      horseTypeIds,
     });
 
     if (!publishValidation.isPublishReady) {
@@ -145,26 +163,64 @@ export async function POST(
       id: existingHorse.id,
     },
     data: {
-      name,
-      breed: breed || null,
-      age: age ? Number(age) : null,
-      price: price ? price : null,
-      description: description || null,
-      discipline: discipline || null,
-      level: level || null,
-      height: height || null,
-      gender: gender || null,
-      location: location || null,
-      keyDetails: keyDetails || null,
-      saleStatus: saleStatus as
-        | "FOR_SALE"
-        | "CONSIDERING_OFFERS"
-        | "LEASE"
-        | "SOLD"
-        | "NOT_AVAILABLE",
-      image: imagePath,
-      isPublished: publishToMarketplace,
-      isActive: publishToMarketplace,
+      ...buildHorseListingMutation({
+        name,
+        age: age ? Number(age) : null,
+        height: height || null,
+        location: location || null,
+        description: description || null,
+        keyDetails: keyDetails || null,
+        saleStatus: saleStatus as "FOR_SALE" | "CONSIDERING_OFFERS" | "LEASE" | "SOLD" | "NOT_AVAILABLE",
+        isPublished: publishToMarketplace,
+        image: imagePath,
+        breedOptionId,
+        sexOptionId,
+        primaryDisciplineId,
+        pricingVisibilityOptionId,
+        saleTypeOptionId,
+        colorOptionId,
+        importStatusOptionId,
+        secondaryDisciplineIds,
+        bestSuitedForIds,
+        currentlyCompetingInIds,
+        experiencedThroughIds,
+        schoolingThroughIds,
+        idealRiderIds,
+        horseTypeIds,
+        feiPassport,
+        equiVaultAvailable,
+        registrationStatus: registrationStatus || null,
+        showHighlights: showHighlights || null,
+      }),
+      ...buildHorseListingRelationWrites({
+        name,
+        age: age ? Number(age) : null,
+        height: height || null,
+        location: location || null,
+        description: description || null,
+        keyDetails: keyDetails || null,
+        saleStatus: saleStatus as "FOR_SALE" | "CONSIDERING_OFFERS" | "LEASE" | "SOLD" | "NOT_AVAILABLE",
+        isPublished: publishToMarketplace,
+        image: imagePath,
+        breedOptionId,
+        sexOptionId,
+        primaryDisciplineId,
+        pricingVisibilityOptionId,
+        saleTypeOptionId,
+        colorOptionId,
+        importStatusOptionId,
+        secondaryDisciplineIds,
+        bestSuitedForIds,
+        currentlyCompetingInIds,
+        experiencedThroughIds,
+        schoolingThroughIds,
+        idealRiderIds,
+        horseTypeIds,
+        feiPassport,
+        equiVaultAvailable,
+        registrationStatus: registrationStatus || null,
+        showHighlights: showHighlights || null,
+      }),
     },
   });
 
@@ -172,7 +228,7 @@ export async function POST(
     await deletePublicAsset(existingHorse.image).catch(() => null);
   }
 
-  const significantFields = ['price', 'saleStatus', 'description', 'keyDetails', 'name', 'breed', 'discipline', 'level', 'location'] as const
+  const significantFields = ['saleStatus', 'description', 'keyDetails', 'name', 'location', 'pricingVisibilityOptionId', 'primaryDisciplineId', 'saleTypeOptionId'] as const
   const changedFields = significantFields.filter(field => {
     const before = (existingHorse as Record<string, unknown>)[field]
     const after = (horse as Record<string, unknown>)[field]

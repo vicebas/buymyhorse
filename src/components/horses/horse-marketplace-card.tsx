@@ -14,7 +14,7 @@ export type HorseMarketplaceCardData = {
   gender?: string | null
   discipline?: string | null
   level?: string | null
-  price?: number | string | null
+  pricingVisibility?: string | null
   image?: string | null
   location?: string | null
   saleStatus?: string | null
@@ -58,10 +58,7 @@ export default function HorseMarketplaceCard({
     horse.gender,
   ].filter(Boolean).slice(0, 4) as string[]
 
-  const priceLabel =
-    horse.price !== null && horse.price !== undefined && horse.price !== ""
-      ? `$${Number(horse.price).toLocaleString()}`
-      : "Price on Request"
+  const pricingLabel = horse.pricingVisibility || "Contact for Price"
 
   const marketplaceCardContent = (
     <>
@@ -122,7 +119,7 @@ export default function HorseMarketplaceCard({
         <div className="mt-4 flex items-center justify-between border-t border-[color:var(--border)] pt-3">
           <div>
             <div className="text-[18px] font-extrabold tracking-[-0.03em] text-[color:var(--foreground-strong)]">
-              {priceLabel}
+              {pricingLabel}
             </div>
             <div className="text-[10px] text-[color:var(--foreground-soft)]">
               {horse.sellerProfile.displayName}
@@ -196,7 +193,7 @@ export default function HorseMarketplaceCard({
         <div className="mt-4 flex items-center justify-between border-t border-[color:var(--border)] pt-3">
           <div>
             <div className="text-[17px] font-extrabold tracking-[-0.03em] text-[color:var(--foreground-strong)]">
-              {priceLabel}
+              {pricingLabel}
             </div>
             <div className="text-[10px] text-[color:var(--foreground-soft)]">
               {horse.sellerProfile.displayName}

@@ -5,6 +5,7 @@ import prisma from "@/lib/db/prisma";
 import { authOptions } from "@/lib/auth/options";
 import ResolvedAppHeader from "@/components/layout/resolved-app-header";
 import HorseMarketplaceCard from "@/components/horses/horse-marketplace-card";
+import { horseListingInclude, mapHorseToCard } from "@/lib/horses/listing-data";
 
 export default async function SavedHorsesPage() {
   const session = await getServerSession(authOptions);
@@ -18,30 +19,7 @@ export default async function SavedHorsesPage() {
     orderBy: { createdAt: "desc" },
     include: {
       horse: {
-        select: {
-          id: true,
-          name: true,
-          breed: true,
-          age: true,
-          height: true,
-          gender: true,
-          discipline: true,
-          level: true,
-          price: true,
-          image: true,
-          location: true,
-          saleStatus: true,
-          isPlatformFeatured: true,
-          isPublished: true,
-          deletedAt: true,
-          adminDisabledAt: true,
-          sellerProfile: {
-            select: {
-              displayName: true,
-              adminDisabledAt: true,
-            },
-          },
-        },
+        include: horseListingInclude,
       },
     },
   });
@@ -55,24 +33,7 @@ export default async function SavedHorsesPage() {
       !s.horse.sellerProfile.adminDisabledAt
   );
 
-  const horseCards = visibleSaved.map((s) => ({
-    id: s.horse.id,
-    name: s.horse.name,
-    breed: s.horse.breed,
-    age: s.horse.age,
-    height: s.horse.height,
-    gender: s.horse.gender,
-    discipline: s.horse.discipline,
-    level: s.horse.level,
-    price: s.horse.price ? Number(s.horse.price) : null,
-    image: s.horse.image,
-    location: s.horse.location,
-    saleStatus: s.horse.saleStatus,
-    isPlatformFeatured: s.horse.isPlatformFeatured,
-    sellerProfile: {
-      displayName: s.horse.sellerProfile.displayName,
-    },
-  }));
+  const horseCards = visibleSaved.map((s) => mapHorseToCard(s.horse));
 
   return (
     <main className="min-h-screen bg-[color:var(--background)] text-[color:var(--foreground)]">

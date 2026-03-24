@@ -12,6 +12,11 @@ import ResolvedAppHeader from "@/components/layout/resolved-app-header";
 import { authOptions } from "@/lib/auth/options";
 import { getUserAppHeaderVariant } from "@/lib/auth/get-user-app-header-variant";
 import { isBarnPubliclyVisible } from "@/lib/billing/entitlements";
+import {
+  getHorseBreedLabel,
+  getHorsePricingVisibilityLabel,
+  getHorsePrimaryDisciplineLabel,
+} from "@/lib/horses/listing-data";
 import { resolvePublicAssetUrl } from "@/lib/storage/public-assets";
 
 export default async function PublicSellerPage({
@@ -48,6 +53,16 @@ export default async function PublicSellerPage({
           adminDisabledAt: null,
         },
         orderBy: [{ isBarnFeatured: "desc" }, { barnDisplayOrder: "asc" }, { createdAt: "desc" }],
+        include: {
+          breedOption: true,
+          primaryDiscipline: true,
+          pricingVisibilityOption: true,
+          divisionTags: {
+            include: {
+              divisionOption: true,
+            },
+          },
+        },
       },
       user: {
         select: {
@@ -73,7 +88,7 @@ export default async function PublicSellerPage({
   const featuredHorses = seller.horses.filter((horse) => horse.isBarnFeatured);
   const rosterHorses = [...seller.horses]
     .filter((horse) => {
-      if (discipline && horse.discipline !== discipline) {
+      if (discipline && getHorsePrimaryDisciplineLabel(horse) !== discipline) {
         return false;
       }
 
@@ -143,7 +158,7 @@ export default async function PublicSellerPage({
   const disciplineOptions = Array.from(
     new Set(
       seller.horses
-        .map((horse) => horse.discipline?.trim())
+        .map((horse) => getHorsePrimaryDisciplineLabel(horse)?.trim())
         .filter((value): value is string => Boolean(value))
     )
   ).sort((a, b) => a.localeCompare(b));
@@ -272,13 +287,11 @@ export default async function PublicSellerPage({
                   <div className="mt-4">
                     <h3 className="text-xl font-semibold text-[color:var(--foreground-strong)]">{horse.name}</h3>
                     <p className="mt-1 text-sm text-[color:var(--foreground-soft)]">
-                      {horse.breed || "Breed not specified"}
+                      {getHorseBreedLabel(horse) || "Breed not specified"}
                     </p>
 
                     <p className="mt-3 text-2xl font-extrabold text-[color:var(--foreground-strong)]">
-                      {horse.price
-                        ? `$${Number(horse.price).toLocaleString()}`
-                        : "Price on request"}
+                      {getHorsePricingVisibilityLabel(horse)}
                     </p>
                   </div>
                 </Link>
@@ -339,13 +352,11 @@ export default async function PublicSellerPage({
                   <div className="mt-4">
                     <h3 className="text-xl font-semibold text-[color:var(--foreground-strong)]">{horse.name}</h3>
                     <p className="mt-1 text-sm text-[color:var(--foreground-soft)]">
-                      {horse.breed || "Breed not specified"}
+                      {getHorseBreedLabel(horse) || "Breed not specified"}
                     </p>
 
                     <p className="mt-3 text-2xl font-extrabold text-[color:var(--foreground-strong)]">
-                      {horse.price
-                        ? `$${Number(horse.price).toLocaleString()}`
-                        : "Price on request"}
+                      {getHorsePricingVisibilityLabel(horse)}
                     </p>
                   </div>
                 </Link>

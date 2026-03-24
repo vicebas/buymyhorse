@@ -10,6 +10,14 @@ import { authOptions } from "@/lib/auth/options";
 import { getUserAppHeaderVariant } from "@/lib/auth/get-user-app-header-variant";
 import { getBuyerHorseAccess } from "@/lib/vault/access";
 import { isHorsePubliclyVisible } from "@/lib/billing/entitlements";
+import {
+  getHorseBestSuitedForLabel,
+  getHorseBreedLabel,
+  getHorsePrimaryDisciplineLabel,
+  getHorsePricingVisibilityLabel,
+  getHorseSexLabel,
+  horseListingInclude,
+} from "@/lib/horses/listing-data";
 
 export default async function HorsePage({
   params,
@@ -22,13 +30,13 @@ export default async function HorsePage({
   const horse = await prisma.horse.findUnique({
     where: { id },
     include: {
+      ...horseListingInclude,
       media: {
         where: {
           status: "READY",
         },
         orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }],
       },
-      sellerProfile: true,
       attachedEquiTags: {
         orderBy: {
           createdAt: "desc",
@@ -83,12 +91,13 @@ export default async function HorsePage({
     ? horse.keyDetails.split("\n").map((item) => item.trim()).filter(Boolean)
     : [];
   const infoItems = [
-    { label: "Breed", value: horse.breed || "Not specified" },
+    { label: "Breed", value: getHorseBreedLabel(horse) || "Not specified" },
     { label: "Age", value: horse.age ? `${horse.age} years` : "Not specified" },
-    { label: "Discipline", value: horse.discipline || "Not specified" },
-    { label: "Level", value: horse.level || "Not specified" },
+    { label: "Discipline", value: getHorsePrimaryDisciplineLabel(horse) || "Not specified" },
+    { label: "Best Suited For", value: getHorseBestSuitedForLabel(horse) || "Not specified" },
     { label: "Height", value: horse.height ? `${horse.height} hh` : "Not specified" },
-    { label: "Sex", value: horse.gender || "Not specified" },
+    { label: "Sex", value: getHorseSexLabel(horse) || "Not specified" },
+    { label: "Pricing", value: getHorsePricingVisibilityLabel(horse) },
     { label: "Location", value: horse.location || "Not specified" },
     {
       label: "Status",
@@ -188,14 +197,12 @@ export default async function HorsePage({
             </div>
 
             <p className="mt-2 text-lg text-[color:var(--foreground-soft)]">
-              {horse.breed || "Breed not specified"}
+              {getHorseBreedLabel(horse) || "Breed not specified"}
             </p>
 
             <div className="mt-6">
               <p className="text-3xl font-extrabold text-[color:var(--foreground-strong)]">
-                {horse.price
-                  ? `$${Number(horse.price).toLocaleString()}`
-                  : "Price on request"}
+                {getHorsePricingVisibilityLabel(horse)}
               </p>
             </div>
 

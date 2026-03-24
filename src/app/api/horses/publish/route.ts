@@ -51,15 +51,33 @@ export async function POST(req: Request) {
       id: true,
       sellerProfileId: true,
       name: true,
-      breed: true,
       age: true,
-      discipline: true,
-      level: true,
       height: true,
-      gender: true,
       location: true,
       description: true,
       image: true,
+      breedOptionId: true,
+      sexOptionId: true,
+      primaryDisciplineId: true,
+      pricingVisibilityOptionId: true,
+      idealRiders: {
+        select: {
+          idealRiderOptionId: true,
+        },
+      },
+      horseTypes: {
+        select: {
+          horseTypeOptionId: true,
+        },
+      },
+      divisionTags: {
+        where: {
+          context: "BEST_SUITED_FOR",
+        },
+        select: {
+          divisionOptionId: true,
+        },
+      },
       adminDisabledAt: true,
       adminDisableReason: true,
       sellerProfile: {
@@ -84,7 +102,12 @@ export async function POST(req: Request) {
   const nextPublishedState = Boolean(body.isPublished);
 
   if (nextPublishedState) {
-    const publishValidation = validateHorseForPublishing(existingHorse);
+    const publishValidation = validateHorseForPublishing({
+      ...existingHorse,
+      bestSuitedForIds: existingHorse.divisionTags.map((item) => item.divisionOptionId),
+      idealRiderIds: existingHorse.idealRiders.map((item) => item.idealRiderOptionId),
+      horseTypeIds: existingHorse.horseTypes.map((item) => item.horseTypeOptionId),
+    });
 
     if (!publishValidation.isPublishReady) {
       return NextResponse.json(

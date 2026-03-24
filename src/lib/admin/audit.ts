@@ -22,8 +22,9 @@ export async function logAdminAction({
     | "BILLING_SETTINGS_UPDATED"
     | "HORSE_SLOT_ADJUSTED"
     | "USER_ROLE_CHANGED"
-    | "ADMIN_GRANT_REVOKED";
-  targetType: "BARN" | "HORSE" | "BILLING" | "USER" | "ACCESS_GRANT";
+    | "ADMIN_GRANT_REVOKED"
+    | "LISTING_OPTIONS_UPDATED";
+  targetType: "BARN" | "HORSE" | "BILLING" | "USER" | "ACCESS_GRANT" | "LISTING_OPTION";
   targetId: string;
   reason?: string | null;
   metadata?: Prisma.InputJsonObject | null;

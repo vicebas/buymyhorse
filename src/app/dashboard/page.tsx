@@ -5,6 +5,7 @@ import ResolvedAppHeader from "@/components/layout/resolved-app-header";
 import MainHeader from "@/components/layout/main-header";
 import DashboardExperience from "@/components/dashboard/dashboard-experience";
 import { isHorsePubliclyVisible } from "@/lib/billing/entitlements";
+import { horseListingInclude, mapHorseToCard } from "@/lib/horses/listing-data";
 
 export default async function UserDashboardPage() {
     const session = await getServerSession(authOptions);
@@ -14,21 +15,6 @@ export default async function UserDashboardPage() {
         deletedAt: null,
         adminDisabledAt: null,
         sellerProfile: { adminDisabledAt: null },
-    };
-
-    const sellerProfileSelect = {
-        displayName: true,
-        plan: true,
-        billingCadence: true,
-        billingStatus: true,
-        adminPlanOverride: true,
-        adminBillingCadenceOverride: true,
-        adminBillingStatusOverride: true,
-        adminBillingOverrideReason: true,
-        adminBillingOverrideExpiresAt: true,
-        trialEndsAt: true,
-        currentPeriodEndsAt: true,
-        adminDisabledAt: true,
     };
 
     // Fetch seller profile, barn follows, and featured horses in parallel.
@@ -41,7 +27,7 @@ export default async function UserDashboardPage() {
             : Promise.resolve([]),
         prisma.horse.findMany({
             where: { ...baseHorseWhere, isPlatformFeatured: true },
-            include: { sellerProfile: { select: sellerProfileSelect } },
+            include: horseListingInclude,
             orderBy: [{ platformFeaturedAt: "desc" }, { createdAt: "desc" }],
             take: 24,
         }),
@@ -55,41 +41,24 @@ export default async function UserDashboardPage() {
     const contentHorsesRaw = hasFollows
         ? await prisma.horse.findMany({
             where: { ...baseHorseWhere, sellerProfileId: { in: followedSellerIds } },
-            include: { sellerProfile: { select: sellerProfileSelect } },
+            include: horseListingInclude,
             orderBy: [{ updatedAt: "desc" }],
             take: 24,
           })
         : await prisma.horse.findMany({
             where: { ...baseHorseWhere, isPlatformFeatured: false },
-            include: { sellerProfile: { select: sellerProfileSelect } },
+            include: horseListingInclude,
             orderBy: [{ createdAt: "desc" }],
             take: 48,
           });
 
-    const toCard = (horse: (typeof contentHorsesRaw)[0]) => ({
-        id: horse.id,
-        name: horse.name,
-        breed: horse.breed,
-        age: horse.age,
-        height: horse.height,
-        gender: horse.gender,
-        discipline: horse.discipline,
-        level: horse.level,
-        price: horse.price ? Number(horse.price) : null,
-        image: horse.image,
-        location: horse.location,
-        saleStatus: horse.saleStatus,
-        isPlatformFeatured: horse.isPlatformFeatured,
-        sellerProfile: { displayName: horse.sellerProfile.displayName },
-    });
-
     const featuredVisibleHorses = featuredHorses.filter(isHorsePubliclyVisible).slice(0, 6);
     const contentVisible = contentHorsesRaw.filter(isHorsePubliclyVisible).slice(0, hasFollows ? 24 : 12);
 
-    const featuredHorseCards = featuredVisibleHorses.map(toCard);
+    const featuredHorseCards = featuredVisibleHorses.map(mapHorseToCard);
     // followedBarnsHorses is non-null only when the user follows barns; null triggers fresh-listings fallback.
-    const followedBarnsHorses = hasFollows ? contentVisible.map(toCard) : null;
-    const horseCards = hasFollows ? [] : contentVisible.map(toCard);
+    const followedBarnsHorses = hasFollows ? contentVisible.map(mapHorseToCard) : null;
+    const horseCards = hasFollows ? [] : contentVisible.map(mapHorseToCard);
 
     const isLoggedIn = Boolean(session?.user?.id);
     const isSeller = Boolean(sellerProfile?.id);

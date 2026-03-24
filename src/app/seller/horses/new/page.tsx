@@ -7,6 +7,7 @@ import SellerAppHeader from "@/components/layout/seller-app-header";
 import { authOptions } from "@/lib/auth/options";
 import prisma from "@/lib/db/prisma";
 import { getBarnModerationMessage } from "@/lib/admin/moderation";
+import { getActiveListingOptions } from "@/lib/horses/listing-options";
 
 export default async function NewHorsePage() {
   const session = await getServerSession(authOptions);
@@ -29,6 +30,8 @@ export default async function NewHorsePage() {
   if (!seller) {
     redirect("/mybarn/onboard");
   }
+
+  const options = await getActiveListingOptions();
 
   return (
     <main className="min-h-screen bg-background text-foreground">
@@ -53,7 +56,7 @@ export default async function NewHorsePage() {
             message={getBarnModerationMessage(seller.adminDisableReason)}
           />
         ) : (
-          <HorseForm mode="create" />
+          <HorseForm mode="create" options={options} />
         )}
       </section>
     </main>

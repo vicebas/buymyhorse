@@ -22,7 +22,6 @@ import {
 import prisma from "@/lib/db/prisma";
 import { authOptions } from "@/lib/auth/options";
 import AdminBlockedNotice from "@/components/admin/admin-blocked-notice";
-import { getBarnEntitlements } from "@/lib/billing/entitlements";
 import { getBarnModerationMessage } from "@/lib/admin/moderation";
 import SellerAppHeader from "@/components/layout/seller-app-header";
 import PublishToggleButton from "@/components/horses/publish-toggle-button";
@@ -31,6 +30,13 @@ import { Button } from "@/components/ui/button";
 import { ensureHorseHasEquiTag } from "@/lib/equitag/service";
 import { resolvePublicAssetUrl } from "@/lib/storage/public-assets";
 import { getBillingSettings } from "@/lib/billing/settings";
+import {
+    getHorseBestSuitedForLabel,
+    getHorseBreedLabel,
+    getHorsePrimaryDisciplineLabel,
+    getHorsePricingVisibilityLabel,
+    getHorseSexLabel,
+} from "@/lib/horses/listing-data";
 
 export default async function SellerPage() {
     const session = await getServerSession(authOptions);
@@ -49,6 +55,15 @@ export default async function SellerPage() {
                     createdAt: "desc",
                 },
                 include: {
+                    breedOption: true,
+                    sexOption: true,
+                    primaryDiscipline: true,
+                    pricingVisibilityOption: true,
+                    divisionTags: {
+                        include: {
+                            divisionOption: true,
+                        },
+                    },
                     attachedEquiTags: {
                         orderBy: {
                             createdAt: "desc",
@@ -165,25 +180,6 @@ export default async function SellerPage() {
         const remainingHours = hours % 24;
 
         return remainingHours > 0 ? `${days}d ${remainingHours}h` : `${days}d`;
-    }
-
-    function formatBillingStatus(status: string) {
-        switch (status) {
-            case "TRIALING":
-                return "Trialing";
-            case "ACTIVE":
-                return "Active";
-            case "PAST_DUE":
-                return "Past due";
-            case "CANCELED":
-                return "Canceled";
-            case "EXPIRED":
-                return "Expired";
-            case "INCOMPLETE":
-                return "Incomplete";
-            default:
-                return status;
-        }
     }
 
     const averageResponseTime = formatDuration(averageResponseMs);
@@ -443,7 +439,7 @@ export default async function SellerPage() {
                                             </div>
 
                                             <p className="mt-2 text-[color:var(--foreground-soft)]">
-                                                {horse.breed || "Breed not specified"} {horse.age ? `• ${horse.age}` : ""}
+                                                {getHorseBreedLabel(horse) || "Breed not specified"} {horse.age ? `• ${horse.age}` : ""}
                                             </p>
 
                                             {horse.adminDisabledAt ? (
@@ -462,14 +458,13 @@ export default async function SellerPage() {
 
                                             <div className="mt-4 flex flex-wrap gap-4 text-sm text-[color:var(--foreground-soft)]">
                                                 <span>{horse.age ? `${horse.age} yrs` : "Age not set"}</span>
-                                                <span>{horse.discipline || "Discipline not set"}</span>
-                                                <span>{horse.gender || "Gender not set"}</span>
+                                                <span>{getHorsePrimaryDisciplineLabel(horse) || "Discipline not set"}</span>
+                                                <span>{getHorseSexLabel(horse) || "Sex not set"}</span>
+                                                <span>{getHorseBestSuitedForLabel(horse) || "Best suited for not set"}</span>
                                             </div>
 
                                             <p className="mt-4 text-3xl font-extrabold text-[color:var(--foreground-strong)]">
-                                                {horse.price
-                                                    ? `$${Number(horse.price).toLocaleString()}`
-                                                    : "Price on request"}
+                                                {getHorsePricingVisibilityLabel(horse)}
                                             </p>
                                         </div>
                                     </div>

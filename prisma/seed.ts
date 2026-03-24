@@ -12,6 +12,7 @@ import {
 } from "../src/generated/prisma/enums";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { uploadPublicAsset } from "../src/lib/storage/s3";
+import { seedListingOptions } from "../src/lib/horses/listing-options";
 
 const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL! });
 const prisma = new PrismaClient({ adapter });
@@ -534,6 +535,7 @@ async function readImageFiles(dir: string): Promise<string[]> {
 // ---------------------------------------------------------------------------
 async function main() {
   console.log("🌱  Starting demo seed...\n");
+  await seedListingOptions();
 
   const DEMO_PASSWORD = "Demo1234!";
   const passwordHash = await bcrypt.hash(DEMO_PASSWORD, 10);

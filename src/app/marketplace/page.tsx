@@ -7,22 +7,30 @@ import { authOptions } from "@/lib/auth/options";
 import MarketplaceFilters from "@/components/marketplace/marketplace-filters";
 import HorseMarketplaceCard from "@/components/horses/horse-marketplace-card";
 import { isHorsePubliclyVisible } from "@/lib/billing/entitlements";
+import { getActiveListingOptions } from "@/lib/horses/listing-options";
+import { horseListingInclude, mapHorseToCard } from "@/lib/horses/listing-data";
 
 export default async function MarketplacePage({
   searchParams,
 }: {
   searchParams: Promise<{
-    org?: string;
     breed?: string;
-    maxPrice?: string;
+    discipline?: string;
+    pricingVisibility?: string;
+    saleType?: string;
+    sex?: string;
+    location?: string;
   }>;
 }) {
   const params = await searchParams;
   const session = await getServerSession(authOptions);
 
-  const org = params.org?.trim() || "";
   const breed = params.breed?.trim() || "";
-  const maxPrice = params.maxPrice?.trim() || "";
+  const discipline = params.discipline?.trim() || "";
+  const pricingVisibility = params.pricingVisibility?.trim() || "";
+  const saleType = params.saleType?.trim() || "";
+  const sex = params.sex?.trim() || "";
+  const location = params.location?.trim() || "";
 
   const sellerProfile = session?.user?.id
     ? await prisma.sellerProfile.findUnique({
@@ -44,6 +52,8 @@ export default async function MarketplacePage({
       )
     : new Set();
 
+  const listingOptions = await getActiveListingOptions();
+
   const horses = await prisma.horse.findMany({
     where: {
       isPublished: true,
@@ -51,50 +61,22 @@ export default async function MarketplacePage({
       adminDisabledAt: null,
       sellerProfile: {
         adminDisabledAt: null,
-        ...(org
-          ? {
-              displayName: {
-                contains: org,
-                mode: "insensitive",
-              },
-            }
-          : {}),
       },
-      ...(breed
+      ...(breed ? { breedOptionId: breed } : {}),
+      ...(discipline ? { primaryDisciplineId: discipline } : {}),
+      ...(pricingVisibility ? { pricingVisibilityOptionId: pricingVisibility } : {}),
+      ...(saleType ? { saleTypeOptionId: saleType } : {}),
+      ...(sex ? { sexOptionId: sex } : {}),
+      ...(location
         ? {
-          breed: {
-            contains: breed,
-            mode: "insensitive",
-          },
-        }
-        : {}),
-      ...(maxPrice
-        ? {
-          price: {
-            lte: Number(maxPrice),
-          },
-        }
+            location: {
+              contains: location,
+              mode: "insensitive",
+            },
+          }
         : {}),
     },
-    include: {
-      sellerProfile: {
-        select: {
-          displayName: true,
-          slug: true,
-          plan: true,
-          billingCadence: true,
-          billingStatus: true,
-          adminPlanOverride: true,
-          adminBillingCadenceOverride: true,
-          adminBillingStatusOverride: true,
-          adminBillingOverrideReason: true,
-          adminBillingOverrideExpiresAt: true,
-          trialEndsAt: true,
-          currentPeriodEndsAt: true,
-          adminDisabledAt: true,
-        },
-      },
-    },
+    include: horseListingInclude,
     orderBy: [
       { isPlatformFeatured: "desc" },
       { platformFeaturedAt: "desc" },
@@ -105,22 +87,7 @@ export default async function MarketplacePage({
   const visibleHorses = horses.filter((horse) => isHorsePubliclyVisible(horse));
 
   const horseCards = visibleHorses.map((horse) => ({
-    id: horse.id,
-    name: horse.name,
-    breed: horse.breed,
-    age: horse.age,
-    height: horse.height,
-    gender: horse.gender,
-    discipline: horse.discipline,
-    level: horse.level,
-    price: horse.price ? Number(horse.price) : null,
-    image: horse.image,
-    location: horse.location,
-    saleStatus: horse.saleStatus,
-    isPlatformFeatured: horse.isPlatformFeatured,
-    sellerProfile: {
-      displayName: horse.sellerProfile.displayName,
-    },
+    ...mapHorseToCard(horse),
     isSaved: savedHorseIds.has(horse.id),
   }));
 
@@ -144,9 +111,13 @@ export default async function MarketplacePage({
         </div>
 
         <MarketplaceFilters
-          defaultOrg={org}
           defaultBreed={breed}
-          defaultMaxPrice={maxPrice}
+          defaultDiscipline={discipline}
+          defaultPricingVisibility={pricingVisibility}
+          defaultSaleType={saleType}
+          defaultSex={sex}
+          defaultLocation={location}
+          options={listingOptions}
         />
 
         <div className="mt-8 flex items-center justify-between">
