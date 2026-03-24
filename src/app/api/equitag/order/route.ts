@@ -68,7 +68,7 @@ export async function POST(req: Request) {
   });
 
   const origin = process.env.NEXTAUTH_URL || "http://localhost:3000";
-
+  console.log("Origin for checkout session:", origin);
   const checkoutSession = await createEquiTagCheckoutSession({
     sellerId: seller.id,
     userId: session.user.id,
