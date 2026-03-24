@@ -7,6 +7,7 @@ import prisma from "@/lib/db/prisma";
 import { authOptions } from "@/lib/auth/options";
 import SellerAppHeader from "@/components/layout/seller-app-header";
 import { Button } from "@/components/ui/button";
+import { formatDateMDY } from "@/lib/formatting";
 
 const STATUS_BADGES: Record<string, { label: string; className: string }> = {
   PENDING_PAYMENT: { label: "Pending Payment", className: "bg-amber-100 text-amber-800" },
@@ -97,6 +98,13 @@ export default async function EquiTagOrdersPage({
           >
             <FolderOpen className="h-4 w-4" />
             My Horses
+          </Link>
+          <Link
+            href="/mybarn/equivault"
+            className="inline-flex items-center gap-2 rounded-lg px-5 py-2 text-md font-medium text-[color:var(--foreground-soft)]"
+          >
+            <FileText className="h-4 w-4" />
+            EquiVault Overview
           </Link>
           <Link
             href="/mybarn/requests"
@@ -195,12 +203,7 @@ export default async function EquiTagOrdersPage({
                         <span>Tag: {order.equiTag?.code ?? "—"}</span>
                         <span>Qty: {order.quantity}</span>
                         <span>
-                          Ordered:{" "}
-                          {order.createdAt.toLocaleDateString("en-US", {
-                            month: "short",
-                            day: "numeric",
-                            year: "numeric",
-                          })}
+                          Ordered: {formatDateMDY(order.createdAt)}
                         </span>
                       </div>
                       {order.deliveryCompany && (
@@ -211,12 +214,7 @@ export default async function EquiTagOrdersPage({
                       )}
                       {order.estimatedDeliveryDate && (
                         <p className="text-sm text-[color:var(--foreground-soft)]">
-                          Est. delivery:{" "}
-                          {order.estimatedDeliveryDate.toLocaleDateString("en-US", {
-                            month: "short",
-                            day: "numeric",
-                            year: "numeric",
-                          })}
+                          Est. delivery: {formatDateMDY(order.estimatedDeliveryDate)}
                         </p>
                       )}
                     </div>

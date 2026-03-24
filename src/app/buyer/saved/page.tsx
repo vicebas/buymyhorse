@@ -44,19 +44,19 @@ export default async function SavedHorsesPage() {
           <p className="mono text-sm font-medium uppercase tracking-[0.18em] text-[color:var(--foreground-soft)]">
             My Account
           </p>
-          <h1 className="mt-2 text-5xl font-extrabold">Saved Horses</h1>
+          <h1 className="mt-2 text-5xl font-extrabold">Favorites</h1>
           <p className="mt-3 max-w-2xl text-[color:var(--foreground-soft)]">
-            Horses you&apos;ve saved from the marketplace.
+            Horses you&apos;ve favorited from the marketplace.
           </p>
         </div>
 
         {horseCards.length === 0 ? (
           <div className="mt-8 rounded-3xl border border-dashed border-[color:var(--border)] bg-[color:var(--card)] p-12 text-center shadow-[var(--shadow-card)]">
             <h2 className="text-3xl font-extrabold text-[color:var(--foreground-strong)]">
-              No saved horses yet
+              No favorites yet
             </h2>
             <p className="mt-3 text-sm text-[color:var(--foreground-soft)]">
-              Browse the marketplace and tap the heart on any listing to save it here.
+              Browse the marketplace and tap the heart on any listing to add it here.
             </p>
             <a
               href="/marketplace"

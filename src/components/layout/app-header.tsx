@@ -15,6 +15,7 @@ import {
   Menu,
   MessageSquare,
   Plus,
+  ShoppingBag,
   User,
   Users,
   VenetianMask,
@@ -37,6 +38,11 @@ export interface AppHeaderUser {
   image?: string | null;
 }
 
+export interface AppHeaderCTA {
+  label: string;
+  action: string;
+}
+
 interface AppHeaderProps {
   variant: AppHeaderVariant;
   notifications?: {
@@ -44,6 +50,8 @@ interface AppHeaderProps {
     pendingRequestCount: number;
   };
   user?: AppHeaderUser;
+  primaryCta?: AppHeaderCTA | null;
+  secondaryCta?: AppHeaderCTA | null;
 }
 
 type HeaderNavItem = {
@@ -120,7 +128,13 @@ function HeaderAvatar({ user }: { user?: AppHeaderUser }) {
   );
 }
 
-export default function AppHeader({ variant, notifications, user }: AppHeaderProps) {
+export default function AppHeader({
+  variant,
+  notifications,
+  user,
+  primaryCta,
+  secondaryCta,
+}: AppHeaderProps) {
   const pathname = usePathname();
   const isBuyer = variant === "buyer";
   const isSeller = variant === "seller";
@@ -148,9 +162,12 @@ export default function AppHeader({ variant, notifications, user }: AppHeaderPro
   const brandHref = isAdmin ? "/admin" : isSeller ? "/mybarn" : "/dashboard";
 
   const navItems = getNavItems(variant, notifications);
-  const mobileActionItems = isBuyer
-    ? getBuyerMobileActions(notifications)
-    : [];
+  const mobileActionItems = getMobileActionItems({
+    variant,
+    notifications,
+    primaryCta,
+    secondaryCta,
+  });
 
   function handleMobileMenuToggle() {
     closeSellerMenu();
@@ -206,11 +223,19 @@ export default function AppHeader({ variant, notifications, user }: AppHeaderPro
                   />
                 </Link>
 
-                <Link href="/mybarn/onboard">
-                  <Button className="btn-brand-green border-0">
-                    Create Your Barn
-                  </Button>
-                </Link>
+                {secondaryCta ? (
+                  <Link href={secondaryCta.action}>
+                    <Button variant="outline">{secondaryCta.label}</Button>
+                  </Link>
+                ) : null}
+
+                {primaryCta ? (
+                  <Link href={primaryCta.action}>
+                    <Button className="btn-brand-green border-0">
+                      {primaryCta.label}
+                    </Button>
+                  </Link>
+                ) : null}
 
                 <LogoutButton />
               </div>
@@ -219,6 +244,18 @@ export default function AppHeader({ variant, notifications, user }: AppHeaderPro
             {isSeller ? (
               <div className="hidden items-center gap-2 md:flex">
                 <NotificationBell userRole="seller" />
+
+                {secondaryCta ? (
+                  <Link href={secondaryCta.action}>
+                    <Button variant="outline">{secondaryCta.label}</Button>
+                  </Link>
+                ) : null}
+
+                {primaryCta ? (
+                  <Link href={primaryCta.action}>
+                    <Button className="btn-brand-green border-0">{primaryCta.label}</Button>
+                  </Link>
+                ) : null}
 
                 <div className="relative" ref={sellerMenuRef}>
                 <Button
@@ -388,6 +425,7 @@ function getNavItems(
         badgeCount: notifications?.pendingRequestCount || 0,
       },
       { href: "/marketplace", label: "Marketplace", key: "marketplace", icon: LayoutGrid },
+      { href: "/shop", label: "Shop", key: "shop", icon: ShoppingBag },
       {
         href: "/mybarn/messages",
         label: "Messages",
@@ -413,28 +451,53 @@ function getNavItems(
   return [
     { href: "/dashboard", label: "Dashboard", key: "dashboard", icon: Home },
     { href: "/marketplace", label: "Marketplace", key: "marketplace", icon: LayoutGrid },
-    { href: "/buyer/saved", label: "Saved", key: "saved", icon: Heart },
+    { href: "/shop", label: "Shop", key: "shop", icon: ShoppingBag },
+    { href: "/buyer/saved", label: "Favorites", key: "saved", icon: Heart },
   ];
 }
 
-function getBuyerMobileActions(
-  notifications?: AppHeaderProps["notifications"]
-): HeaderActionItem[] {
-  return [
-    {
-      href: "/messages",
+function getMobileActionItems({
+  variant,
+  notifications,
+  primaryCta,
+  secondaryCta,
+}: {
+  variant: AppHeaderVariant;
+  notifications?: AppHeaderProps["notifications"];
+  primaryCta?: AppHeaderCTA | null;
+  secondaryCta?: AppHeaderCTA | null;
+}): HeaderActionItem[] {
+  const items: HeaderActionItem[] = [];
+
+  if (variant === "buyer" || variant === "seller") {
+    items.push({
+      href: variant === "seller" ? "/mybarn/messages" : "/messages",
       label: "Messages",
       icon: MessageSquare,
       badgeCount: notifications?.unreadMessageCount || 0,
-    },
-    {
-      href: "/mybarn/onboard",
-      label: "Create Your Barn",
+    });
+  }
+
+  if (secondaryCta) {
+    items.push({
+      href: secondaryCta.action,
+      label: secondaryCta.label,
       icon: Plus,
+      variant: "outline",
+    });
+  }
+
+  if (primaryCta) {
+    items.push({
+      href: primaryCta.action,
+      label: primaryCta.label,
+      icon: primaryCta.label === "Buy EquiTags" ? ShoppingBag : Plus,
       buttonClassName: "btn-brand-green w-full justify-start border-0",
       variant: "default",
-    },
-  ];
+    });
+  }
+
+  return items;
 }
 
 function getUserInitials(user?: AppHeaderUser) {
@@ -470,12 +533,14 @@ function getActiveItem(variant: AppHeaderVariant, pathname: string) {
   if (variant === "seller") {
     if (pathname === "/dashboard") return "dashboard";
     if (pathname.startsWith("/marketplace")) return "marketplace";
+    if (pathname.startsWith("/shop")) return "shop";
     if (pathname.startsWith("/mybarn/messages") || pathname.startsWith("/seller/messages")) return "messages";
     if (pathname.startsWith("/mybarn/requests") || pathname.startsWith("/seller/requests")) return "requests";
     if (pathname.startsWith("/mybarn/billing") || pathname.startsWith("/seller/billing")) return "billing";
     return "mybarn";
   }
 
+  if (pathname.startsWith("/shop")) return "shop";
   if (pathname.startsWith("/marketplace")) return "marketplace";
   return "dashboard";
 }

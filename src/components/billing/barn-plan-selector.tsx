@@ -44,7 +44,7 @@ export default function BarnPlanSelector({
                 : "text-[color:var(--foreground-soft)]"
             }`}
           >
-            {value === "MONTHLY" ? "Monthly" : "Yearly"}
+            {value === "MONTHLY" ? "MONTHLY SUBSCRIPTION" : "ANNUAL SUBSCRIPTION"}
           </button>
         ))}
       </div>
@@ -52,7 +52,7 @@ export default function BarnPlanSelector({
       <div className="grid gap-6 lg:grid-cols-[1.15fr_0.85fr]">
         <article className="relative rounded-[2rem] border border-[color:var(--accent)] bg-[color:var(--background-elevated)] p-6 shadow-[var(--shadow-card)]">
           <div className="absolute -top-3 left-6 rounded-full bg-[color:var(--accent)] px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] text-[color:var(--accent-foreground)]">
-            Activation
+            MyBarn Created
           </div>
 
           <div className="flex items-start justify-between gap-3">
@@ -61,7 +61,7 @@ export default function BarnPlanSelector({
                 HorseRoster Program Activation
               </h3>
               <p className="mt-2 text-sm leading-6 text-[color:var(--foreground-soft)]">
-                Includes one active public horse profile with its EquiTag. Additional horses can be added later as one-time purchases.
+                Includes one active public horse profile with its EquiTag. Additional horse profiles can be added later as one-time purchases.
               </p>
             </div>
             {currentCadence === selectedCadence ? (
@@ -84,7 +84,7 @@ export default function BarnPlanSelector({
           <ul className="mt-6 space-y-3">
             <li className="flex items-start gap-3 text-sm text-[color:var(--foreground)]">
               <Check className="mt-0.5 h-4 w-4 text-[color:var(--primary)]" />
-              <span>1 active horse included in the activation</span>
+              <span>1 active horse profile included in MyBarn activation</span>
             </li>
             <li className="flex items-start gap-3 text-sm text-[color:var(--foreground)]">
               <Check className="mt-0.5 h-4 w-4 text-[color:var(--primary)]" />
@@ -92,12 +92,12 @@ export default function BarnPlanSelector({
             </li>
             <li className="flex items-start gap-3 text-sm text-[color:var(--foreground)]">
               <Check className="mt-0.5 h-4 w-4 text-[color:var(--primary)]" />
-              <span>Buy extra horse slots later without changing your activation cadence</span>
+              <span>Buy additional horse profiles later without changing your activation cadence</span>
             </li>
             {trialEnabled ? (
               <li className="flex items-start gap-3 text-sm text-[color:var(--foreground)]">
                 <Check className="mt-0.5 h-4 w-4 text-[color:var(--primary)]" />
-                <span>{trialDays}-day activation trial currently available for new barns</span>
+                <span>{trialDays}-day MyBarn activation trial currently available for new barns</span>
               </li>
             ) : null}
           </ul>
@@ -111,7 +111,7 @@ export default function BarnPlanSelector({
             Additional Horse Profile
           </h3>
           <p className="mt-2 text-sm leading-6 text-[color:var(--foreground-soft)]">
-            Add more active horses as your roster grows. Each extra slot is a one-time purchase tied to your barn account.
+            Add more active horses as your roster grows. Each additional horse profile is a one-time purchase tied to your barn account.
           </p>
 
           <div className="mt-8 flex items-end gap-2">
@@ -122,7 +122,7 @@ export default function BarnPlanSelector({
           <ul className="mt-6 space-y-3 text-sm text-[color:var(--foreground)]">
             <li className="flex items-start gap-3">
               <Check className="mt-0.5 h-4 w-4 text-[color:var(--primary)]" />
-              <span>Durable horse-slot entitlement on the barn account</span>
+              <span>Durable horse-profile entitlement on the barn account</span>
             </li>
             <li className="flex items-start gap-3">
               <Check className="mt-0.5 h-4 w-4 text-[color:var(--primary)]" />

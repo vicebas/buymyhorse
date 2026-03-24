@@ -8,6 +8,13 @@ import { useRouter } from "next/navigation";
 
 import { resolvePublicAssetUrl } from "@/lib/storage/public-assets";
 import { Button } from "@/components/ui/button";
+import {
+  HORSE_GALLERY_MAX_IMAGES,
+  HORSE_GALLERY_MAX_VIDEOS,
+  HORSE_IMAGE_MAX_BYTES,
+  HORSE_VIDEO_MAX_BYTES,
+  getHorseMediaLimitSummary,
+} from "@/lib/horses/media-limits";
 import { cn } from "@/lib/utils";
 
 type ExistingMedia = {
@@ -46,6 +53,34 @@ export default function HorseGalleryManager({
     [queuedFiles]
   );
 
+  const existingImageCount = existingMedia.filter((item) => item.type === "IMAGE").length;
+  const existingVideoCount = existingMedia.filter((item) => item.type === "VIDEO").length;
+
+  function validateFiles(files: File[], currentQueued: File[] = []) {
+    const queuedImages = currentQueued.filter((file) => file.type.startsWith("image/")).length;
+    const queuedVideos = currentQueued.filter((file) => file.type.startsWith("video/")).length;
+    const nextImages = files.filter((file) => file.type.startsWith("image/"));
+    const nextVideos = files.filter((file) => file.type.startsWith("video/"));
+
+    if (files.some((file) => file.type.startsWith("image/") && file.size > HORSE_IMAGE_MAX_BYTES)) {
+      return "Gallery photos must be 10 MB or smaller.";
+    }
+
+    if (files.some((file) => file.type.startsWith("video/") && file.size > HORSE_VIDEO_MAX_BYTES)) {
+      return "Hosted horse videos must be 250 MB or smaller.";
+    }
+
+    if (existingImageCount + queuedImages + nextImages.length > HORSE_GALLERY_MAX_IMAGES) {
+      return `Each horse can have up to ${HORSE_GALLERY_MAX_IMAGES} gallery photos.`;
+    }
+
+    if (existingVideoCount + queuedVideos + nextVideos.length > HORSE_GALLERY_MAX_VIDEOS) {
+      return `Each horse can have up to ${HORSE_GALLERY_MAX_VIDEOS} hosted videos.`;
+    }
+
+    return null;
+  }
+
   function handleSelectedFiles(fileList: FileList | null) {
     if (!fileList?.length) {
       return;
@@ -54,6 +89,13 @@ export default function HorseGalleryManager({
     const files = Array.from(fileList).filter(
       (file) => file.type.startsWith("image/") || file.type.startsWith("video/")
     );
+
+    const validationError = validateFiles(files, queuedFiles);
+
+    if (validationError) {
+      setError(validationError);
+      return;
+    }
 
     setQueuedFiles((current) => [...current, ...files]);
     setError("");
@@ -162,7 +204,7 @@ export default function HorseGalleryManager({
                 Files are uploaded into HorseRoster, processed inside the app container, and prepared for fast public playback.
               </p>
               <p className="mono mt-3 text-xs uppercase tracking-[0.18em] text-[color:var(--foreground-soft)]">
-                Images and videos only • In-app processing • Public gallery assets
+                {getHorseMediaLimitSummary()} • In-app processing • Public gallery assets
               </p>
             </div>
           </div>
@@ -243,8 +285,8 @@ export default function HorseGalleryManager({
               {horseName}
             </h2>
           </div>
-          <div className="rounded-full bg-[color:var(--muted)] px-4 py-2 text-sm font-medium text-[color:var(--foreground-strong)]">
-            {existingMedia.length} item{existingMedia.length === 1 ? "" : "s"}
+            <div className="rounded-full bg-[color:var(--muted)] px-4 py-2 text-sm font-medium text-[color:var(--foreground-strong)]">
+            {existingMedia.length} item{existingMedia.length === 1 ? "" : "s"} • {existingImageCount}/{HORSE_GALLERY_MAX_IMAGES} photos • {existingVideoCount}/{HORSE_GALLERY_MAX_VIDEOS} videos
           </div>
         </div>
 

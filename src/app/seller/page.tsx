@@ -15,8 +15,8 @@ import {
     CircleX,
     Clock3,
     Trash2,
-    CreditCard,
     Package,
+    ShoppingBag,
 } from "lucide-react";
 
 import prisma from "@/lib/db/prisma";
@@ -59,6 +59,11 @@ export default async function SellerPage() {
                     sexOption: true,
                     primaryDiscipline: true,
                     pricingVisibilityOption: true,
+                    featureMetrics: {
+                        select: {
+                            profileViews: true,
+                        },
+                    },
                     divisionTags: {
                         include: {
                             divisionOption: true,
@@ -122,14 +127,15 @@ export default async function SellerPage() {
         })
     );
 
-    const [entitlements, billingSettings] = await Promise.all([
-        getBarnEntitlements(seller.id),
-        getBillingSettings(),
-    ]);
+    const billingSettings = await getBillingSettings();
 
     const totalHorses = horses.length;
     const publishedHorses = horses.filter((horse) => horse.isPublished).length;
     const inactiveHorses = horses.filter((horse) => !horse.isPublished).length;
+    const totalProfileViews = horses.reduce(
+        (sum, horse) => sum + (horse.featureMetrics?.profileViews ?? 0),
+        0
+    );
 
     const accessRequests = await prisma.accessRequest.findMany({
         where: {
@@ -195,7 +201,7 @@ export default async function SellerPage() {
                     </p>
                     <h1 className="mt-3 text-5xl font-extrabold">MyBarn</h1>
                     <p className="mt-3 max-w-2xl text-lg text-[color:var(--foreground-soft)]">
-                        Manage your sales roster, documents, and buyer inquiries.
+                        Manage your horse profiles, EquiVault documents, favorites-ready listings, and buyer inquiries.
                     </p>
                 </div>
             </section>
@@ -234,11 +240,92 @@ export default async function SellerPage() {
                                     </Link>
 
                                     <Link href={`/barn/${seller.slug}`}>
-                                        <Button variant="outline">View Public Page</Button>
+                                        <Button variant="outline">View Barn Profile</Button>
                                     </Link>
                                 </div>
                             </div>
                         </div>
+                    </div>
+                </div>
+
+                <div className="mt-6 grid gap-4 xl:grid-cols-[1.3fr_0.7fr]">
+                    <div className="rounded-3xl border border-[color:var(--border)] bg-[color:var(--card)] p-6 shadow-[var(--shadow-card)]">
+                        <p className="mono text-xs font-medium uppercase tracking-[0.18em] text-[color:var(--foreground-soft)]">
+                            Quick Actions
+                        </p>
+                        <div className="mt-4 flex flex-wrap gap-3">
+                            <Link href="/mybarn/horses/new">
+                                <Button className="inline-flex items-center gap-2" disabled={Boolean(seller.adminDisabledAt)}>
+                                    <Plus className="h-4 w-4" />
+                                    Add Horse
+                                </Button>
+                            </Link>
+                            <Link href="/shop#equitags">
+                                <Button variant="outline" className="inline-flex items-center gap-2">
+                                    <Package className="h-4 w-4" />
+                                    Get EquiTags
+                                </Button>
+                            </Link>
+                            <Link href="/mybarn/equivault">
+                                <Button variant="outline" className="inline-flex items-center gap-2">
+                                    <FileText className="h-4 w-4" />
+                                    EquiVault Overview
+                                </Button>
+                            </Link>
+                        </div>
+                    </div>
+
+                    <div className="rounded-3xl border border-[color:var(--border)] bg-[color:var(--card)] p-6 shadow-[var(--shadow-card)]">
+                        <p className="mono text-xs font-medium uppercase tracking-[0.18em] text-[color:var(--foreground-soft)]">
+                            Featured Horses
+                        </p>
+                        <div className="mt-4 space-y-3 text-sm text-[color:var(--foreground-soft)]">
+                            <p>Phase 1 featured horses are selected by views, favorites, click-throughs, recent activity, and optional admin picks.</p>
+                            <Link href="/dashboard">
+                                <Button variant="outline" className="mt-1 inline-flex items-center gap-2">
+                                    <ShoppingBag className="h-4 w-4" />
+                                    View Featured Horses
+                                </Button>
+                            </Link>
+                        </div>
+                    </div>
+                </div>
+
+                <div className="mt-6 grid gap-4 md:grid-cols-3">
+                    <div className="rounded-3xl border border-[color:var(--border)] bg-[color:var(--card)] p-5 shadow-[var(--shadow-card)]">
+                        <p className="mono text-xs font-medium uppercase tracking-[0.18em] text-[color:var(--foreground-soft)]">
+                            EquiTags
+                        </p>
+                        <p className="mt-3 text-sm text-[color:var(--foreground-soft)]">
+                            Order printed QR tools for horse profiles, barn pages, and in-person handoffs.
+                        </p>
+                        <Link href="/shop#equitags" className="mt-4 inline-flex">
+                            <Button variant="outline">Get EquiTags</Button>
+                        </Link>
+                    </div>
+
+                    <div className="rounded-3xl border border-[color:var(--border)] bg-[color:var(--card)] p-5 shadow-[var(--shadow-card)]">
+                        <p className="mono text-xs font-medium uppercase tracking-[0.18em] text-[color:var(--foreground-soft)]">
+                            Featured Horses
+                        </p>
+                        <p className="mt-3 text-sm text-[color:var(--foreground-soft)]">
+                            Merit-based ranking now drives featured horses, with admin picks available as manual overrides.
+                        </p>
+                        <Link href="/dashboard" className="mt-4 inline-flex">
+                            <Button variant="outline">View Featured Horses</Button>
+                        </Link>
+                    </div>
+
+                    <div className="rounded-3xl border border-[color:var(--border)] bg-[color:var(--card)] p-5 shadow-[var(--shadow-card)]">
+                        <p className="mono text-xs font-medium uppercase tracking-[0.18em] text-[color:var(--foreground-soft)]">
+                            Horse Profiles
+                        </p>
+                        <p className="mt-3 text-sm text-[color:var(--foreground-soft)]">
+                            Expand your public roster capacity with additional horse profiles when you need them.
+                        </p>
+                        <Link href="/mybarn/billing" className="mt-4 inline-flex">
+                            <Button variant="outline">Buy Profiles</Button>
+                        </Link>
                     </div>
                 </div>
 
@@ -272,8 +359,12 @@ export default async function SellerPage() {
                             <Eye className="h-4 w-4 text-blue-600" />
                             Total Views
                         </div>
-                        <p className="mt-4 text-4xl font-extrabold text-[color:var(--foreground-strong)]">1,247</p>
-                        <p className="mt-1 text-sm text-[color:var(--foreground-soft)]">+12% this week</p>
+                        <p className="mt-4 text-4xl font-extrabold text-[color:var(--foreground-strong)]">
+                            {totalProfileViews.toLocaleString()}
+                        </p>
+                        <p className="mt-1 text-sm text-[color:var(--foreground-soft)]">
+                            Total horse profile views across your barn
+                        </p>
                     </div>
 
                     <div className="rounded-2xl border border-[color:var(--border)] bg-[color:var(--card)] p-5 shadow-[var(--shadow-card)]">
@@ -357,6 +448,14 @@ export default async function SellerPage() {
                         </button>
 
                         <Link
+                            href="/mybarn/equivault"
+                            className="inline-flex items-center gap-2 rounded-lg px-5 py-2 text-md font-medium text-[color:var(--foreground-soft)]"
+                        >
+                            <FileText className="h-4 w-4" />
+                            EquiVault Overview
+                        </Link>
+
+                        <Link
                             href="/mybarn/requests"
                             className="inline-flex items-center gap-2 rounded-lg px-5 py-2 text-md font-medium text-[color:var(--foreground-soft)]"
                         >
@@ -373,13 +472,6 @@ export default async function SellerPage() {
                         </Link>
 
                     </div>
-
-                    <Link href="/mybarn/horses/new">
-                        <Button className="inline-flex items-center gap-2" disabled={Boolean(seller.adminDisabledAt)}>
-                            <Plus className="h-4 w-4" />
-                            Add Horse
-                        </Button>
-                    </Link>
                 </div>
 
                 {horses.length === 0 ? (
@@ -463,7 +555,10 @@ export default async function SellerPage() {
                                                 <span>{getHorseBestSuitedForLabel(horse) || "Best suited for not set"}</span>
                                             </div>
 
-                                            <p className="mt-4 text-3xl font-extrabold text-[color:var(--foreground-strong)]">
+                                            <p className="mt-4 text-xs font-semibold uppercase tracking-[0.14em] text-[color:var(--foreground-soft)]">
+                                                Pricing visibility
+                                            </p>
+                                            <p className="mt-2 text-sm font-semibold text-[color:var(--foreground-strong)]">
                                                 {getHorsePricingVisibilityLabel(horse)}
                                             </p>
                                         </div>
@@ -512,7 +607,7 @@ export default async function SellerPage() {
                                         <Link href={`/mybarn/horses/${horse.id}/vault`}>
                                             <Button variant="outline" className="inline-flex items-center gap-2">
                                                 <FileText className="h-4 w-4" />
-                                                Vault
+                                                Documents
                                             </Button>
                                         </Link>
 

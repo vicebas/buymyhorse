@@ -7,6 +7,7 @@ import { ArrowRight, Bell, Search } from "lucide-react";
 import BuyerDashboardHero from "@/components/dashboard/buyer-dashboard-hero";
 import DashboardAuthModal from "@/components/dashboard/dashboard-auth-modal";
 import HorseMarketplaceCard, { type HorseMarketplaceCardData } from "@/components/horses/horse-marketplace-card";
+import type { AppHeaderCTA } from "@/components/layout/app-header";
 import HomepageMarketingSections from "@/components/dashboard/homepage-marketing-sections";
 
 export default function DashboardExperience({
@@ -14,13 +15,15 @@ export default function DashboardExperience({
   featuredHorses,
   followedBarnsHorses,
   isLoggedIn,
-  isSeller,
+  primaryCta,
+  secondaryCta,
 }: {
   horses: HorseMarketplaceCardData[];
   featuredHorses: HorseMarketplaceCardData[];
   followedBarnsHorses: HorseMarketplaceCardData[] | null;
   isLoggedIn: boolean;
-  isSeller: boolean;
+  primaryCta?: AppHeaderCTA | null;
+  secondaryCta?: AppHeaderCTA | null;
 }) {
   const [authOpen, setAuthOpen] = useState(false);
 
@@ -35,7 +38,8 @@ export default function DashboardExperience({
       <BuyerDashboardHero
         listingCount={totalCount}
         isLoggedIn={isLoggedIn}
-        isSeller={isSeller}
+        primaryCta={primaryCta}
+        secondaryCta={secondaryCta}
         onRequireAuth={openAuthModal}
       />
 
@@ -50,10 +54,10 @@ export default function DashboardExperience({
                 Featured Horses
               </p>
               <h2 className="mt-3 text-4xl font-extrabold tracking-[-0.04em] text-[color:var(--foreground-strong)]">
-                Admin-curated platform picks
+                Featured horses selected by engagement and admin picks
               </h2>
               <p className="mt-3 max-w-2xl text-base text-[color:var(--foreground-soft)]">
-                A tighter edit of standout listings selected for extra marketplace visibility.
+                Phase 1 featured horses are merit-based, using views, favorites, click-throughs, recent activity, and optional admin overrides.
               </p>
             </div>
 
@@ -82,7 +86,7 @@ export default function DashboardExperience({
                   Latest from followed barns
                 </h2>
                 <p className="mt-3 max-w-2xl text-base text-[color:var(--foreground-soft)]">
-                  Horses from the barns you follow, sorted by most recently updated.
+                  Tap the heart on any barn profile to follow it and keep its newest horses in one place.
                 </p>
               </div>
 
@@ -130,13 +134,13 @@ export default function DashboardExperience({
             <div className="flex flex-col gap-4 border-b border-[color:var(--border)] pb-6 md:flex-row md:items-end md:justify-between">
               <div>
                 <p className="mono text-[11px] uppercase tracking-[0.22em] text-[color:var(--foreground-soft)]">
-                  Current Roster
+                  Horse Marketplace
                 </p>
                 <h2 className="mt-3 text-4xl font-extrabold tracking-[-0.04em] text-[color:var(--foreground-strong)]">
-                  Fresh listings from the marketplace
+                  Browse horses from trusted barns and trainers
                 </h2>
                 <p className="mt-3 max-w-2xl text-base text-[color:var(--foreground-soft)]">
-                  Built around the HorseRoster listing card system: fast facts, clean pricing, and quicker comparison.
+                  Compare pricing visibility, core listing details, and polished public profiles built for faster buyer review.
                 </p>
               </div>
 
@@ -163,7 +167,7 @@ export default function DashboardExperience({
             {isLoggedIn && (
               <p className="mt-4 text-sm text-[color:var(--foreground-soft)]">
                 <Bell className="mr-1.5 inline-block h-3.5 w-3.5 align-text-bottom" />
-                Follow barns from their profile pages to see their latest horses here.
+                Follow barns with the heart icon on their profile pages to keep their latest horses here.
               </p>
             )}
 

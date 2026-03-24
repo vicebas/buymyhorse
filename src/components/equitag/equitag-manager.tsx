@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { Download, ExternalLink, Link2, Plus } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import { formatDateMDY } from "@/lib/formatting";
 import { resolvePublicAssetUrl } from "@/lib/storage/public-assets";
 
 type EquiTagItem = {
@@ -201,7 +202,7 @@ export default function EquiTagManager({
                       {tag.code}
                     </span>
                     <span className="text-xs text-[color:var(--foreground-soft)]">
-                      Created {new Date(tag.createdAt).toLocaleDateString()}
+                      Created {formatDateMDY(tag.createdAt)}
                     </span>
                   </div>
 

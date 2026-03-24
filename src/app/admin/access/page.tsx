@@ -5,6 +5,7 @@ import AdminGrantRevokeButton from "@/components/admin/admin-grant-revoke-button
 import { getAdminAccessConsoleData, getAdminAccessFilters } from "@/lib/admin/access";
 import { getAdminAnalyticsRange } from "@/lib/admin/analytics";
 import { requireAdminPageSession } from "@/lib/auth/admin";
+import { formatDateTimeMDY } from "@/lib/formatting";
 
 function SummaryCard({
   label,
@@ -27,11 +28,7 @@ function SummaryCard({
 }
 
 function formatDateTime(value: Date | string | null | undefined) {
-  if (!value) {
-    return "Not set";
-  }
-
-  return new Date(value).toLocaleString();
+  return formatDateTimeMDY(value);
 }
 
 function formatRequestStatus(value: string) {

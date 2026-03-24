@@ -151,7 +151,7 @@ export async function POST(
     if (!canPublish) {
       return NextResponse.json(
         {
-          error: "Your current activation does not include another published horse slot. Buy extra horse slots or keep this horse inactive.",
+          error: "Your current activation does not include another published horse profile. Buy additional horse profiles or keep this horse inactive.",
         },
         { status: 403 }
       );

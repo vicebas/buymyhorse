@@ -4,6 +4,12 @@ import { NextResponse } from "next/server";
 import prisma from "@/lib/db/prisma";
 import { getHorseWriteBlockError, getSellerWriteBlockError } from "@/lib/admin/moderation";
 import { authOptions } from "@/lib/auth/options";
+import {
+  HORSE_GALLERY_MAX_IMAGES,
+  HORSE_GALLERY_MAX_VIDEOS,
+  HORSE_IMAGE_MAX_BYTES,
+  HORSE_VIDEO_MAX_BYTES,
+} from "@/lib/horses/media-limits";
 import { processHorseMediaUpload } from "@/lib/media/horse-media";
 
 export const runtime = "nodejs";
@@ -58,6 +64,11 @@ export async function POST(
           media: true,
         },
       },
+      media: {
+        select: {
+          type: true,
+        },
+      },
     },
   });
 
@@ -78,6 +89,33 @@ export async function POST(
 
   if (files.length === 0) {
     return NextResponse.json({ error: "Choose at least one media file." }, { status: 400 });
+  }
+
+  const nextImageFiles = files.filter((file) => file.type.startsWith("image/"));
+  const nextVideoFiles = files.filter((file) => file.type.startsWith("video/"));
+  const existingImageCount = horse.media.filter((item) => item.type === "IMAGE").length;
+  const existingVideoCount = horse.media.filter((item) => item.type === "VIDEO").length;
+
+  if (files.some((file) => file.type.startsWith("image/") && file.size > HORSE_IMAGE_MAX_BYTES)) {
+    return NextResponse.json({ error: "Gallery photos must be 10 MB or smaller." }, { status: 400 });
+  }
+
+  if (files.some((file) => file.type.startsWith("video/") && file.size > HORSE_VIDEO_MAX_BYTES)) {
+    return NextResponse.json({ error: "Hosted horse videos must be 250 MB or smaller." }, { status: 400 });
+  }
+
+  if (existingImageCount + nextImageFiles.length > HORSE_GALLERY_MAX_IMAGES) {
+    return NextResponse.json(
+      { error: `Each horse can have up to ${HORSE_GALLERY_MAX_IMAGES} gallery photos.` },
+      { status: 400 }
+    );
+  }
+
+  if (existingVideoCount + nextVideoFiles.length > HORSE_GALLERY_MAX_VIDEOS) {
+    return NextResponse.json(
+      { error: `Each horse can have up to ${HORSE_GALLERY_MAX_VIDEOS} hosted videos.` },
+      { status: 400 }
+    );
   }
 
   try {

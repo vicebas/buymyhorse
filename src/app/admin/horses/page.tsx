@@ -3,6 +3,8 @@ import Link from "next/link";
 import AdminHorseFeatureToggleForm from "@/components/admin/admin-horse-feature-toggle-form";
 import AdminStatusToggleForm from "@/components/admin/admin-status-toggle-form";
 import prisma from "@/lib/db/prisma";
+import { formatDateTimeMDY } from "@/lib/formatting";
+import { getFeaturedHorseScore, getRecentEngagementScore } from "@/lib/horses/featured";
 
 export default async function AdminHorsesPage({
   searchParams,
@@ -51,6 +53,29 @@ export default async function AdminHorsesPage({
       isPublished: true,
       isPlatformFeatured: true,
       platformFeaturedAt: true,
+      updatedAt: true,
+      featureMetrics: {
+        select: {
+          profileViews: true,
+          clickThroughs: true,
+          lastProfileViewAt: true,
+          lastClickThroughAt: true,
+        },
+      },
+      _count: {
+        select: {
+          savedByUsers: true,
+        },
+      },
+      savedByUsers: {
+        orderBy: {
+          createdAt: "desc",
+        },
+        take: 1,
+        select: {
+          createdAt: true,
+        },
+      },
       adminDisabledAt: true,
       adminDisableReason: true,
       sellerProfile: {
@@ -82,7 +107,7 @@ export default async function AdminHorsesPage({
           >
             <option value="all">All horses</option>
             <option value="published">Published only</option>
-            <option value="featured">Featured only</option>
+            <option value="featured">Admin picks only</option>
             <option value="disabled">Disabled only</option>
           </select>
           <button className="rounded-lg bg-[color:var(--accent)] px-4 py-2 text-sm font-semibold text-[color:var(--accent-foreground)]">
@@ -116,7 +141,7 @@ export default async function AdminHorsesPage({
                   </span>
                   {horse.isPlatformFeatured ? (
                     <span className="rounded-full bg-[rgba(15,42,68,0.1)] px-3 py-1 text-xs font-semibold uppercase tracking-[0.12em] text-[#0f2a44]">
-                      Featured Pick
+                      Admin Pick
                     </span>
                   ) : null}
                   {horse.sellerProfile.adminDisabledAt ? (
@@ -131,9 +156,17 @@ export default async function AdminHorsesPage({
                 </p>
                 {horse.isPlatformFeatured ? (
                   <p className="mt-2 text-sm text-[color:var(--foreground)]">
-                    Featured at: {horse.platformFeaturedAt ? new Date(horse.platformFeaturedAt).toLocaleString() : "Recently"}
+                    Admin featured at: {horse.platformFeaturedAt ? formatDateTimeMDY(horse.platformFeaturedAt) : "Recently"}
                   </p>
                 ) : null}
+                <div className="mt-4 grid gap-3 text-sm text-[color:var(--foreground-soft)] md:grid-cols-2">
+                  <p>Featured score: {getFeaturedHorseScore(horse).toFixed(2)}</p>
+                  <p>Recent engagement: {getRecentEngagementScore(horse)}</p>
+                  <p>Profile views: {horse.featureMetrics?.profileViews ?? 0}</p>
+                  <p>Favorites: {horse._count.savedByUsers}</p>
+                  <p>Click-throughs: {horse.featureMetrics?.clickThroughs ?? 0}</p>
+                  <p>Last activity: {formatDateTimeMDY(horse.savedByUsers[0]?.createdAt ?? horse.featureMetrics?.lastClickThroughAt ?? horse.featureMetrics?.lastProfileViewAt ?? horse.updatedAt)}</p>
+                </div>
 
                 {horse.adminDisableReason ? (
                   <p className="mt-4 text-sm text-[color:var(--foreground)]">

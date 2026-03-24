@@ -435,7 +435,7 @@ export default function HorseForm({ mode, options, initialValues, horseId }: Hor
               mode={mode}
               horseId={horseId}
               title="Generate horse description"
-              description="Review the English draft, then replace or append it to the horse description field."
+              description="Review the English draft, then Replace or Add it to the horse description field."
               getContext={getDescriptionContext}
               onReplace={(nextValue) => setDescription(nextValue.trim())}
               onAppend={(nextValue) =>

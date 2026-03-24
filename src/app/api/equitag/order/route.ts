@@ -57,21 +57,6 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "EquiTag not found." }, { status: 404 });
   }
 
-  const existingActiveOrder = await prisma.equiTagOrder.findFirst({
-    where: {
-      equiTagId,
-      status: { notIn: ["CANCELLED", "DELIVERED"] },
-    },
-    select: { id: true, status: true },
-  });
-
-  if (existingActiveOrder) {
-    return NextResponse.json(
-      { error: "An active order already exists for this EquiTag." },
-      { status: 409 }
-    );
-  }
-
   const order = await prisma.equiTagOrder.create({
     data: {
       sellerProfileId: seller.id,

@@ -7,6 +7,8 @@ import SellerAppHeader from "@/components/layout/seller-app-header";
 import SellerRequestsShell from "@/components/seller/seller-requests-shell";
 import type { SellerVaultRequestItem } from "@/components/seller/seller-requests-shell";
 import { Card, CardContent } from "@/components/ui/card";
+import Link from "next/link";
+import { FileText, FolderOpen, Package } from "lucide-react";
 
 export default async function SellerRequestsPage() {
   const session = await getServerSession(authOptions);
@@ -154,8 +156,36 @@ export default async function SellerRequestsPage() {
           </p>
         </div>
 
+        <div className="inline-flex rounded-xl bg-[color:var(--muted)] p-1">
+          <Link
+            href="/mybarn"
+            className="inline-flex items-center gap-2 rounded-lg px-5 py-2 text-md font-medium text-[color:var(--foreground-soft)]"
+          >
+            <FolderOpen className="h-4 w-4" />
+            My Horses
+          </Link>
+          <Link
+            href="/mybarn/equivault"
+            className="inline-flex items-center gap-2 rounded-lg px-5 py-2 text-md font-medium text-[color:var(--foreground-soft)]"
+          >
+            <FileText className="h-4 w-4" />
+            EquiVault Overview
+          </Link>
+          <button className="inline-flex items-center gap-2 rounded-lg bg-[color:var(--background-elevated)] px-5 py-2 text-md font-medium text-[color:var(--foreground-strong)] shadow-[var(--shadow-card)]">
+            <FileText className="h-4 w-4" />
+            EquiVault Requests
+          </button>
+          <Link
+            href="/mybarn/equitag-orders"
+            className="inline-flex items-center gap-2 rounded-lg px-5 py-2 text-md font-medium text-[color:var(--foreground-soft)]"
+          >
+            <Package className="h-4 w-4" />
+            EquiTag Orders
+          </Link>
+        </div>
+
         {requestItems.length === 0 ? (
-          <Card className="rounded-3xl border-[color:var(--border)] shadow-[var(--shadow-card)]">
+          <Card className="mt-8 rounded-3xl border-[color:var(--border)] shadow-[var(--shadow-card)]">
             <CardContent className="p-10 text-center">
               <p className="text-lg text-[color:var(--foreground)]">No requests yet</p>
               <p className="mt-2 text-sm text-[color:var(--foreground-soft)]">
@@ -164,7 +194,9 @@ export default async function SellerRequestsPage() {
             </CardContent>
           </Card>
         ) : (
-          <SellerRequestsShell requests={requestItems} />
+          <div className="mt-8">
+            <SellerRequestsShell requests={requestItems} />
+          </div>
         )}
       </section>
     </main>

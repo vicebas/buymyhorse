@@ -53,7 +53,7 @@ export default function SaveHorseButton({
       type="button"
       onClick={handleClick}
       disabled={isPending}
-      aria-label={saved ? "Remove from saved" : "Save horse"}
+      aria-label={saved ? "Remove from favorites" : "Favorite horse"}
       className={
         isDetail
           ? `inline-flex items-center gap-2 rounded-2xl border px-4 py-2.5 text-sm font-medium transition-colors ${
@@ -72,7 +72,7 @@ export default function SaveHorseButton({
         size={isDetail ? 16 : 13}
         className={saved ? "fill-current" : ""}
       />
-      {isDetail && (saved ? "Saved" : "Save")}
+      {isDetail && (saved ? "Favorited" : "Favorite")}
     </button>
   );
 }

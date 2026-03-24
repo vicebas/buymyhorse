@@ -5,6 +5,7 @@ import { useState } from "react";
 
 import GrantRevokeButton from "@/components/seller/grant-revoke-button";
 import RequestActionButtons from "@/components/seller/request-action-buttons";
+import { formatDateMDY } from "@/lib/formatting";
 import { formatDocumentCategory } from "@/lib/vault/document-categories";
 
 export type SellerVaultRequestItem = {
@@ -185,7 +186,7 @@ export default function SellerRequestsShell({
                       {request.status}
                     </span>
                     <span className="text-xs text-[color:var(--foreground-soft)]">
-                      {new Date(request.createdAt).toLocaleDateString()}
+                      {formatDateMDY(request.createdAt)}
                     </span>
                   </div>
 
@@ -269,7 +270,7 @@ export default function SellerRequestsShell({
                       Requested At
                     </p>
                     <p className="mt-2 text-sm text-[color:var(--foreground)]">
-                      {new Date(activeRequest.createdAt).toLocaleString()}
+                      {formatDateMDY(activeRequest.createdAt)}
                     </p>
                   </div>
 
@@ -365,7 +366,7 @@ export default function SellerRequestsShell({
                         Expires:{" "}
                         <span className="font-medium">
                           {activeRequest.grant.expiresAt
-                            ? new Date(activeRequest.grant.expiresAt).toLocaleDateString()
+                            ? formatDateMDY(activeRequest.grant.expiresAt)
                             : "No expiration"}
                         </span>
                       </p>

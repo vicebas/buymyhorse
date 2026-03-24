@@ -1,21 +1,23 @@
 "use client";
 
 import Link from "next/link";
-import { Search, SlidersHorizontal, Sparkles } from "lucide-react";
+import { Sparkles } from "lucide-react";
+
+import type { AppHeaderCTA } from "@/components/layout/app-header";
 
 export default function BuyerDashboardHero({
   listingCount,
   isLoggedIn,
-  isSeller,
+  primaryCta,
+  secondaryCta,
   onRequireAuth,
 }: {
   listingCount: number;
   isLoggedIn: boolean;
-  isSeller: boolean;
+  primaryCta?: AppHeaderCTA | null;
+  secondaryCta?: AppHeaderCTA | null;
   onRequireAuth: () => void;
 }) {
-  const messageHref = isSeller ? "/mybarn/messages" : "/messages";
-
   return (
     <section className="border-b border-[color:var(--border)]">
       <div className="mx-auto max-w-7xl px-6 py-8">
@@ -40,18 +42,19 @@ export default function BuyerDashboardHero({
               <div className="mt-8 flex flex-wrap gap-3">
                 {isLoggedIn ? (
                   <>
-                    <Link
-                      href="/marketplace"
-                      className="btn-brand-green"
-                    >
-                      Browse Horses
-                    </Link>
-                    <Link
-                      href={messageHref}
-                      className="inline-flex items-center rounded-full border border-[color:var(--border)] bg-[color:var(--background-elevated)] px-5 py-3 text-sm font-semibold text-[color:var(--foreground)] transition hover:bg-[color:var(--background-elevated)]"
-                    >
-                      View Messages
-                    </Link>
+                    {primaryCta ? (
+                      <Link href={primaryCta.action} className="btn-brand-green">
+                        {primaryCta.label}
+                      </Link>
+                    ) : null}
+                    {secondaryCta ? (
+                      <Link
+                        href={secondaryCta.action}
+                        className="inline-flex items-center rounded-full border border-[color:var(--border)] bg-[color:var(--background-elevated)] px-5 py-3 text-sm font-semibold text-[color:var(--foreground)] transition hover:bg-[color:var(--background-elevated)]"
+                      >
+                        {secondaryCta.label}
+                      </Link>
+                    ) : null}
                   </>
                 ) : (
                   <>

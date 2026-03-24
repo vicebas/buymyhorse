@@ -142,10 +142,10 @@ export default function SellerSettingsForm({
       <Card className="rounded-3xl border-[color:var(--border)] shadow-[var(--shadow-card)]">
       <CardHeader>
         <CardTitle className="text-2xl font-extrabold text-[color:var(--foreground-strong)]">
-          Barn Frontpage
+          Barn Profile
         </CardTitle>
         <CardDescription>
-          Control the public barn presentation, hero imagery, and which horses appear first on your barn frontpage.
+          Control your public barn presentation, hero imagery, and which horses appear first on your barn profile.
         </CardDescription>
       </CardHeader>
 
@@ -171,7 +171,7 @@ export default function SellerSettingsForm({
                 onChange={(e) => setLogoFile(e.target.files?.[0] || null)}
               />
 
-              <Label>Frontpage cover image</Label>
+              <Label>Barn profile cover image</Label>
 
               <div className="overflow-hidden rounded-2xl border border-[color:var(--border)] bg-[color:var(--background-elevated)]">
                 <Image
@@ -276,7 +276,7 @@ export default function SellerSettingsForm({
                     scope="barn-settings"
                     mode="edit"
                     title="Generate barn story"
-                    description="Review the English draft, then replace or append it to the barn story field."
+                    description="Review the English draft, then Replace or Add it to the barn story field."
                     getContext={getBarnBioContext}
                     onReplace={(nextValue) =>
                       setForm((prev) => ({ ...prev, bio: nextValue.trim() }))
@@ -308,7 +308,7 @@ export default function SellerSettingsForm({
                   Featured Barn Roster
                 </h3>
                 <p className="mt-1 text-sm text-[color:var(--foreground-soft)]">
-                  Choose which published horses should appear first on the public barn page and control their order.
+                  Choose which published horses should appear first on the public barn profile and control their order.
                 </p>
               </div>
               <div className="rounded-full bg-[color:var(--muted)] px-4 py-2 text-sm font-medium text-[color:var(--foreground-strong)]">
@@ -343,8 +343,8 @@ export default function SellerSettingsForm({
                       </p>
                       <p className="mt-1 text-sm text-[color:var(--foreground-soft)]">
                         {horse.isPublished
-                          ? "Published and eligible for the public barn frontpage."
-                          : "Draft horses cannot be featured on the public barn page."}
+                          ? "Published and eligible for the public barn profile."
+                          : "Draft horses cannot be featured on the public barn profile."}
                       </p>
                     </div>
 
@@ -419,7 +419,7 @@ export default function SellerSettingsForm({
                   Saving...
                 </>
               ) : (
-                "Save Barn Frontpage"
+                "Save Barn Profile"
               )}
             </Button>
           </div>

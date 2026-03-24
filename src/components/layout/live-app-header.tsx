@@ -3,6 +3,7 @@
 import { useState } from "react";
 
 import AppHeader, {
+  type AppHeaderCTA,
   type AppHeaderUser,
   type AppHeaderVariant,
 } from "@/components/layout/app-header";
@@ -17,10 +18,14 @@ export default function LiveAppHeader({
   variant,
   initialNotifications,
   user,
+  primaryCta,
+  secondaryCta,
 }: {
   variant: AppHeaderVariant;
   initialNotifications?: HeaderNotifications;
   user?: AppHeaderUser;
+  primaryCta?: AppHeaderCTA | null;
+  secondaryCta?: AppHeaderCTA | null;
 }) {
   const [notifications, setNotifications] = useState<HeaderNotifications>(
     initialNotifications ?? {
@@ -55,5 +60,13 @@ export default function LiveAppHeader({
     },
   });
 
-  return <AppHeader variant={variant} notifications={notifications} user={user} />;
+  return (
+    <AppHeader
+      variant={variant}
+      notifications={notifications}
+      user={user}
+      primaryCta={primaryCta}
+      secondaryCta={secondaryCta}
+    />
+  );
 }

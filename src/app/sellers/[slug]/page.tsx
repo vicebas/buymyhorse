@@ -194,7 +194,7 @@ export default async function PublicSellerPage({
 
               <div className="rounded-[1.75rem] bg-[color:var(--background-elevated)]/92 p-6 backdrop-blur">
                 <p className="mono text-xs font-medium uppercase tracking-[0.18em] text-[color:var(--foreground-soft)]">
-                  Barn Frontpage
+                  Barn Profile
                 </p>
 
                 <h1 className="mt-3 text-5xl font-extrabold text-[color:var(--foreground-strong)]">
@@ -265,7 +265,7 @@ export default async function PublicSellerPage({
                 Featured Horses
               </p>
               <h2 className="mt-2 text-3xl font-extrabold text-[color:var(--foreground-strong)]">
-                Curated Frontpage Roster
+                Curated Barn Profile Roster
               </h2>
             </div>
 

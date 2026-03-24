@@ -11,11 +11,11 @@ export function verificationEmailTemplate(params: {
 
   return {
     to: toEmail,
-    subject: `Verify your ${BRAND_NAME} email address`,
+    subject: `Confirm your ${BRAND_NAME} email`,
     text: [
       `Hi ${toName},`,
       "",
-      `Please verify your email address by visiting the link below:`,
+      `Please confirm your email address to finish setting up your ${BRAND_NAME} account:`,
       verifyUrl,
       "",
       `This link expires in 24 hours. If you didn't create a ${BRAND_NAME} account, you can ignore this email.`,
@@ -35,13 +35,13 @@ export function verificationEmailTemplate(params: {
         </tr>
         <tr>
           <td style="padding:40px;">
-            <h1 style="margin:0 0 16px;font-size:24px;font-weight:700;color:#1a1a1a;">Verify your email address</h1>
+            <h1 style="margin:0 0 16px;font-size:24px;font-weight:700;color:#1a1a1a;">Confirm your email</h1>
             <p style="margin:0 0 8px;color:#555;font-size:15px;line-height:1.6;">Hi ${toName},</p>
             <p style="margin:0 0 32px;color:#555;font-size:15px;line-height:1.6;">
-              Click the button below to verify your email address and complete your ${BRAND_NAME} account setup.
+              Confirm your email address to finish setting up your ${BRAND_NAME} account.
             </p>
             <a href="${verifyUrl}" style="display:inline-block;background-color:#16a34a;color:#ffffff;text-decoration:none;padding:14px 28px;border-radius:8px;font-weight:600;font-size:15px;">
-              Verify email address
+              Confirm email
             </a>
             <p style="margin:32px 0 0;color:#999;font-size:13px;line-height:1.5;">
               This link expires in 24 hours. If you didn't create a ${BRAND_NAME} account, you can safely ignore this email.

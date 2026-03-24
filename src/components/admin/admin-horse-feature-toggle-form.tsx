@@ -47,7 +47,7 @@ export default function AdminHorseFeatureToggleForm({
         onClick={() => handleToggle(!isFeatured)}
         disabled={loading}
       >
-        {loading ? "Saving..." : isFeatured ? "Remove Featured Pick" : "Mark Featured Pick"}
+        {loading ? "Saving..." : isFeatured ? "Remove Admin Pick" : "Mark Admin Pick"}
       </Button>
 
       {error ? <p className="text-xs text-[color:var(--destructive)]">{error}</p> : null}

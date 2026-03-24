@@ -7,8 +7,9 @@ import { authOptions } from "@/lib/auth/options";
 import MarketplaceFilters from "@/components/marketplace/marketplace-filters";
 import HorseMarketplaceCard from "@/components/horses/horse-marketplace-card";
 import { isHorsePubliclyVisible } from "@/lib/billing/entitlements";
+import { featuredHorseInclude, sortHorsesByFeaturedPriority } from "@/lib/horses/featured";
 import { getActiveListingOptions } from "@/lib/horses/listing-options";
-import { horseListingInclude, mapHorseToCard } from "@/lib/horses/listing-data";
+import { mapHorseToCard } from "@/lib/horses/listing-data";
 
 export default async function MarketplacePage({
   searchParams,
@@ -76,15 +77,13 @@ export default async function MarketplacePage({
           }
         : {}),
     },
-    include: horseListingInclude,
-    orderBy: [
-      { isPlatformFeatured: "desc" },
-      { platformFeaturedAt: "desc" },
-      { createdAt: "desc" },
-    ],
+    include: featuredHorseInclude,
+    orderBy: [{ updatedAt: "desc" }],
   });
 
-  const visibleHorses = horses.filter((horse) => isHorsePubliclyVisible(horse));
+  const visibleHorses = sortHorsesByFeaturedPriority(
+    horses.filter((horse) => isHorsePubliclyVisible(horse))
+  );
 
   const horseCards = visibleHorses.map((horse) => ({
     ...mapHorseToCard(horse),

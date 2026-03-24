@@ -156,15 +156,18 @@ export default function HorseEquiTagModal({
 
                     {sellerProfileId && (
                       <div className="mt-4 border-t border-[color:var(--border)] pt-4">
-                        {activeOrder && statusInfo ? (
-                          <div className="flex items-center gap-2">
-                            <span className={`rounded-full px-3 py-1 text-xs font-semibold ${statusInfo.className}`}>
-                              {statusInfo.label}
-                            </span>
-                            <span className="text-xs text-[color:var(--foreground-soft)]">Physical order</span>
-                          </div>
-                        ) : orderingTagId === tag.id ? (
+                        {orderingTagId === tag.id ? (
                           <div className="space-y-3">
+                            {activeOrder && statusInfo ? (
+                              <div className="flex items-center gap-2">
+                                <span className={`rounded-full px-3 py-1 text-xs font-semibold ${statusInfo.className}`}>
+                                  {statusInfo.label}
+                                </span>
+                                <span className="text-xs text-[color:var(--foreground-soft)]">
+                                  Active order exists. You can still place another order.
+                                </span>
+                              </div>
+                            ) : null}
                             <p className="text-xs font-semibold text-[color:var(--foreground-soft)]">Quantity</p>
                             <div className="flex items-center gap-3">
                               <button
@@ -209,16 +212,26 @@ export default function HorseEquiTagModal({
                             </div>
                           </div>
                         ) : (
-                          <Button
-                            type="button"
-                            size="sm"
-                            variant="outline"
-                            onClick={() => setOrderingTagId(tag.id)}
-                            className="inline-flex items-center gap-2"
-                          >
-                            <ShoppingCart className="h-3.5 w-3.5" />
-                            Order Physical
-                          </Button>
+                          <div className="space-y-3">
+                            {activeOrder && statusInfo ? (
+                              <div className="flex items-center gap-2">
+                                <span className={`rounded-full px-3 py-1 text-xs font-semibold ${statusInfo.className}`}>
+                                  {statusInfo.label}
+                                </span>
+                                <span className="text-xs text-[color:var(--foreground-soft)]">Physical order</span>
+                              </div>
+                            ) : null}
+                            <Button
+                              type="button"
+                              size="sm"
+                              variant="outline"
+                              onClick={() => setOrderingTagId(tag.id)}
+                              className="inline-flex items-center gap-2"
+                            >
+                              <ShoppingCart className="h-3.5 w-3.5" />
+                              Order Physical
+                            </Button>
+                          </div>
                         )}
                       </div>
                     )}

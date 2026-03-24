@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { authOptions } from "@/lib/auth/options";
 import { getBarnEntitlements } from "@/lib/billing/entitlements";
 import prisma from "@/lib/db/prisma";
+import { formatDateMDY } from "@/lib/formatting";
 
 function formatBillingStatus(status: string) {
   switch (status) {
@@ -74,10 +75,10 @@ export default async function SellerBillingPage() {
             Barn billing
           </p>
           <h1 className="mt-3 text-5xl font-extrabold text-[color:var(--foreground-strong)]">
-            Activation and horse slots
+            MyBarn Activation
           </h1>
           <p className="mt-3 max-w-3xl text-lg text-[color:var(--foreground-soft)]">
-            Manage your activation cadence, buy additional horse slots, and see exactly how much public roster capacity your barn has right now.
+            Manage your activation cadence, buy additional horse profiles, and see exactly how much public roster capacity your barn has right now.
           </p>
         </div>
       </section>
@@ -91,10 +92,10 @@ export default async function SellerBillingPage() {
                 <p className="font-semibold">
                   {!entitlements.billingActive
                     ? "Your activation is not currently active."
-                    : "You have used all currently available horse slots."}
+                    : "You have used all currently available horse profiles."}
                 </p>
                 <p className="text-sm opacity-90">
-                  Draft horses stay in your barn, but public horse visibility depends on active billing and available horse-slot capacity.
+                  Draft horses stay in your barn, but public horse visibility depends on active billing and available horse-profile capacity.
                 </p>
               </div>
             </div>
@@ -109,7 +110,7 @@ export default async function SellerBillingPage() {
             </div>
             <p className="mt-4 text-3xl font-extrabold text-[color:var(--foreground-strong)]">HorseRoster</p>
             <p className="mt-1 text-sm text-[color:var(--foreground-soft)]">
-              {effectiveBilling.effectiveBillingCadence === "MONTHLY" ? "Monthly" : "Yearly"}
+              {effectiveBilling.effectiveBillingCadence === "MONTHLY" ? "MONTHLY SUBSCRIPTION" : "ANNUAL SUBSCRIPTION"}
             </p>
           </div>
 
@@ -123,9 +124,9 @@ export default async function SellerBillingPage() {
             </p>
             <p className="mt-1 text-sm text-[color:var(--foreground-soft)]">
               {seller.trialEndsAt
-                ? `Trial ends ${seller.trialEndsAt.toLocaleDateString()}`
+                ? `Trial ends ${formatDateMDY(seller.trialEndsAt)}`
                 : seller.currentPeriodEndsAt
-                  ? `Renews ${seller.currentPeriodEndsAt.toLocaleDateString()}`
+                  ? `Renews ${formatDateMDY(seller.currentPeriodEndsAt)}`
                   : "Waiting for Stripe sync"}
             </p>
           </div>
@@ -133,20 +134,20 @@ export default async function SellerBillingPage() {
           <div className="rounded-[2rem] border border-[color:var(--border)] bg-[color:var(--card)] p-5 shadow-[var(--shadow-card)]">
             <div className="flex items-center gap-2 text-sm text-[color:var(--foreground-soft)]">
               <ShoppingBag className="h-4 w-4" />
-              Published horses
+              Published horse profiles
             </div>
             <p className="mt-4 text-3xl font-extrabold text-[color:var(--foreground-strong)]">
               {entitlements.usage.publishedHorseCount}/{entitlements.activation.totalHorseCapacity}
             </p>
             <p className="mt-1 text-sm text-[color:var(--foreground-soft)]">
-              Base included slot: {entitlements.activation.includedHorseSlots}
+              Base included profile: {entitlements.activation.includedHorseSlots}
             </p>
           </div>
 
           <div className="rounded-[2rem] border border-[color:var(--border)] bg-[color:var(--card)] p-5 shadow-[var(--shadow-card)]">
             <div className="flex items-center gap-2 text-sm text-[color:var(--foreground-soft)]">
               <Repeat className="h-4 w-4" />
-              Extra slots
+              Additional profiles
             </div>
             <p className="mt-4 text-3xl font-extrabold text-[color:var(--foreground-strong)]">
               {entitlements.usage.totalExtraHorseSlots}
@@ -160,10 +161,10 @@ export default async function SellerBillingPage() {
         <div className="grid gap-8 xl:grid-cols-[1.35fr_0.65fr]">
           <div className="rounded-[2rem] border border-[color:var(--border)] bg-[color:var(--card)] p-6 shadow-[var(--shadow-card)]">
             <h2 className="text-2xl font-extrabold text-[color:var(--foreground-strong)]">
-              Activation controls
+              MyBarn Activation
             </h2>
             <p className="mt-2 text-sm leading-6 text-[color:var(--foreground-soft)]">
-              Switch between monthly and yearly activation, then buy one-time extra horse slots whenever you need more public roster capacity.
+              Switch between monthly and annual activation, then buy one-time additional horse profiles whenever you need more public roster capacity.
             </p>
 
             <div className="mt-6">
@@ -187,11 +188,11 @@ export default async function SellerBillingPage() {
                   Stripe synced: {seller.billingCadence} / {seller.billingStatus}
                 </p>
                 <p>
-                  Effective: {effectiveBilling.effectiveBillingCadence} / {effectiveBilling.effectiveBillingStatus}
+                    Effective: {effectiveBilling.effectiveBillingCadence} / {effectiveBilling.effectiveBillingStatus}
                 </p>
                 {effectiveBilling.overrideActive ? (
                   <p>
-                    Admin override active{effectiveBilling.overrideExpiresAt ? ` until ${effectiveBilling.overrideExpiresAt.toLocaleDateString()}` : ""}.
+                    Admin override active{effectiveBilling.overrideExpiresAt ? ` until ${formatDateMDY(effectiveBilling.overrideExpiresAt)}` : ""}.
                   </p>
                 ) : null}
                 {effectiveBilling.overrideReason ? <p>Admin note: {effectiveBilling.overrideReason}</p> : null}
@@ -220,7 +221,7 @@ export default async function SellerBillingPage() {
               </h2>
               <ul className="mt-4 space-y-3 text-sm leading-6 text-[color:var(--foreground-soft)]">
                 <li>A horse must include required listing details and a main image before it can be published.</li>
-                <li>Base activation includes one active horse slot; extra slots are additive.</li>
+                <li>Base activation includes one active horse profile; additional horse profiles are additive.</li>
                 <li>If activation is inactive, public horse pages, marketplace listings, and barn roster exposure are hidden until billing is active again.</li>
               </ul>
             </div>

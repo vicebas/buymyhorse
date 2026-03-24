@@ -60,7 +60,7 @@ export default function BillingPlanManager({
     const quantity = Number(extraQuantity);
 
     if (!Number.isFinite(quantity) || quantity < 1) {
-      setError("Enter a valid quantity for extra horse slots.");
+      setError("Enter a valid quantity for additional horse profiles.");
       return;
     }
 
@@ -79,7 +79,7 @@ export default function BillingPlanManager({
     setExtraLoading(false);
 
     if (!res.ok || !data?.url) {
-      setError(data?.error || "Unable to open the extra horse checkout right now.");
+      setError(data?.error || "Unable to open the additional horse profile checkout right now.");
       return;
     }
 
@@ -109,10 +109,10 @@ export default function BillingPlanManager({
         <div className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
           <div>
             <h3 className="text-xl font-extrabold text-[color:var(--foreground-strong)]">
-              Buy additional horse slots
+              BUY ADDITIONAL HORSE PROFILES
             </h3>
             <p className="mt-2 text-sm leading-6 text-[color:var(--foreground-soft)]">
-              Extra horse slots are one-time purchases that expand your active horse capacity whenever your activation is active.
+              Additional horse profiles are one-time purchases that expand your active public roster whenever your activation is active.
             </p>
           </div>
           <div className="text-sm text-[color:var(--foreground-soft)]">
@@ -135,13 +135,13 @@ export default function BillingPlanManager({
             onClick={handleExtraCheckout}
             disabled={extraLoading || !billingActive}
           >
-            {extraLoading ? "Working..." : "Buy extra horse slots"}
+            {extraLoading ? "Working..." : "Buy additional horse profiles"}
           </Button>
         </div>
 
         {!billingActive ? (
           <p className="mt-3 text-sm text-[color:var(--destructive)]">
-            Activation must be active before you can buy extra horse slots.
+            MyBarn activation must be active before you can buy additional horse profiles.
           </p>
         ) : null}
       </div>

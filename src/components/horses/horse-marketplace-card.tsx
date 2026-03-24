@@ -39,6 +39,20 @@ export default function HorseMarketplaceCard({
   isSaved?: boolean
   isLoggedIn?: boolean
 }) {
+  function trackClickthrough() {
+    const url = `/api/horses/${horse.id}/clickthrough`;
+
+    if (typeof navigator !== "undefined" && "sendBeacon" in navigator) {
+      navigator.sendBeacon(url, new Blob([], { type: "application/json" }));
+      return;
+    }
+
+    void fetch(url, {
+      method: "POST",
+      keepalive: true,
+    });
+  }
+
   const saleLabel = formatSaleStatus(horse.saleStatus)
 
   const meta = [
@@ -75,7 +89,7 @@ export default function HorseMarketplaceCard({
         </span>
         {horse.isPlatformFeatured ? (
           <span className="absolute right-3 top-3 rounded-[3px] bg-[rgba(15,42,68,0.9)] px-2 py-1 text-[8px] font-bold uppercase tracking-[0.1em] text-[#f8f6f2]">
-            Featured Pick
+            Admin Pick
           </span>
         ) : null}
 
@@ -118,11 +132,11 @@ export default function HorseMarketplaceCard({
 
         <div className="mt-4 flex items-center justify-between border-t border-[color:var(--border)] pt-3">
           <div>
-            <div className="text-[18px] font-extrabold tracking-[-0.03em] text-[color:var(--foreground-strong)]">
-              {pricingLabel}
+            <div className="text-[13px] font-bold tracking-[-0.02em] text-[color:var(--foreground-strong)]">
+              {horse.sellerProfile.displayName}
             </div>
             <div className="text-[10px] text-[color:var(--foreground-soft)]">
-              {horse.sellerProfile.displayName}
+              {pricingLabel}
             </div>
           </div>
 
@@ -149,7 +163,7 @@ export default function HorseMarketplaceCard({
         </span>
         {horse.isPlatformFeatured ? (
           <span className="absolute right-2.5 top-2.5 rounded-[3px] bg-[rgba(15,42,68,0.9)] px-2 py-1 text-[9px] font-bold uppercase tracking-[0.12em] text-[#f8f6f2]">
-            Featured Pick
+            Admin Pick
           </span>
         ) : null}
 
@@ -192,11 +206,11 @@ export default function HorseMarketplaceCard({
 
         <div className="mt-4 flex items-center justify-between border-t border-[color:var(--border)] pt-3">
           <div>
-            <div className="text-[17px] font-extrabold tracking-[-0.03em] text-[color:var(--foreground-strong)]">
-              {pricingLabel}
-            </div>
-            <div className="text-[10px] text-[color:var(--foreground-soft)]">
+            <div className="text-[13px] font-bold tracking-[-0.02em] text-[color:var(--foreground-strong)]">
               {horse.sellerProfile.displayName}
+            </div>
+            <div className="text-[10px] font-semibold uppercase tracking-[0.08em] text-[color:var(--foreground-soft)]">
+              Stable
             </div>
           </div>
 
@@ -229,7 +243,7 @@ export default function HorseMarketplaceCard({
   }
 
   return (
-    <Link href={`/horses/${horse.id}`} className={cardClasses}>
+    <Link href={`/horses/${horse.id}`} className={cardClasses} onClick={trackClickthrough}>
       {cardContent}
     </Link>
   )

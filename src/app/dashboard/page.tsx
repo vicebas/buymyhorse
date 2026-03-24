@@ -5,7 +5,9 @@ import ResolvedAppHeader from "@/components/layout/resolved-app-header";
 import MainHeader from "@/components/layout/main-header";
 import DashboardExperience from "@/components/dashboard/dashboard-experience";
 import { isHorsePubliclyVisible } from "@/lib/billing/entitlements";
+import { featuredHorseInclude, getFeaturedHorses } from "@/lib/horses/featured";
 import { horseListingInclude, mapHorseToCard } from "@/lib/horses/listing-data";
+import { getHeaderCTAs } from "@/lib/mybarn/primary-cta";
 
 export default async function UserDashboardPage() {
     const session = await getServerSession(authOptions);
@@ -18,7 +20,7 @@ export default async function UserDashboardPage() {
     };
 
     // Fetch seller profile, barn follows, and featured horses in parallel.
-    const [sellerProfile, barnFollows, featuredHorses] = await Promise.all([
+    const [sellerProfile, barnFollows, featuredHorses, ctas] = await Promise.all([
         session?.user?.id
             ? prisma.sellerProfile.findUnique({ where: { userId: session.user.id }, select: { id: true } })
             : Promise.resolve(null),
@@ -26,11 +28,12 @@ export default async function UserDashboardPage() {
             ? prisma.barnFollow.findMany({ where: { userId: session.user.id }, select: { sellerProfileId: true } })
             : Promise.resolve([]),
         prisma.horse.findMany({
-            where: { ...baseHorseWhere, isPlatformFeatured: true },
-            include: horseListingInclude,
-            orderBy: [{ platformFeaturedAt: "desc" }, { createdAt: "desc" }],
-            take: 24,
+            where: baseHorseWhere,
+            include: featuredHorseInclude,
+            orderBy: [{ updatedAt: "desc" }],
+            take: 120,
         }),
+        getHeaderCTAs(session?.user?.id),
     ]);
 
     const followedSellerIds = barnFollows.map((f) => f.sellerProfileId);
@@ -52,7 +55,7 @@ export default async function UserDashboardPage() {
             take: 48,
           });
 
-    const featuredVisibleHorses = featuredHorses.filter(isHorsePubliclyVisible).slice(0, 6);
+    const featuredVisibleHorses = getFeaturedHorses(featuredHorses.filter(isHorsePubliclyVisible), 6);
     const contentVisible = contentHorsesRaw.filter(isHorsePubliclyVisible).slice(0, hasFollows ? 24 : 12);
 
     const featuredHorseCards = featuredVisibleHorses.map(mapHorseToCard);
@@ -61,12 +64,10 @@ export default async function UserDashboardPage() {
     const horseCards = hasFollows ? [] : contentVisible.map(mapHorseToCard);
 
     const isLoggedIn = Boolean(session?.user?.id);
-    const isSeller = Boolean(sellerProfile?.id);
-
     return (
         <main className="min-h-screen bg-[color:var(--background)] text-[color:var(--foreground)]">
             {isLoggedIn ? (
-                <ResolvedAppHeader variant={isSeller ? "seller" : "buyer"} />
+                <ResolvedAppHeader variant={sellerProfile?.id ? "seller" : "buyer"} />
             ) : (
                 <MainHeader activeItem="dashboard" />
             )}
@@ -75,7 +76,8 @@ export default async function UserDashboardPage() {
                 featuredHorses={featuredHorseCards}
                 followedBarnsHorses={followedBarnsHorses}
                 isLoggedIn={isLoggedIn}
-                isSeller={isSeller}
+                primaryCta={isLoggedIn ? ctas.primary : null}
+                secondaryCta={isLoggedIn ? ctas.secondary : null}
             />
         </main>
     );

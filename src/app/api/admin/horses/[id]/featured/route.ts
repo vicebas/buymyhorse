@@ -51,7 +51,7 @@ export async function POST(
     actionType: body.featured ? "HORSE_PLATFORM_FEATURED" : "HORSE_PLATFORM_UNFEATURED",
     targetType: "HORSE",
     targetId: horse.id,
-    reason: body.featured ? "Horse marked as platform featured." : "Horse removed from platform featured.",
+    reason: body.featured ? "Horse marked as an admin pick." : "Horse removed from admin picks.",
     metadata: {
       horseName: horse.name,
       previousFeatured: horse.isPlatformFeatured,

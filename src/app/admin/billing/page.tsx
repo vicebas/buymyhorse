@@ -4,6 +4,7 @@ import AdminHorseSlotAdjustmentForm from "@/components/admin/admin-horse-slot-ad
 import { getBarnEntitlements, getEffectiveBarnBillingState } from "@/lib/billing/entitlements";
 import { getBillingSettings } from "@/lib/billing/settings";
 import prisma from "@/lib/db/prisma";
+import { formatDateMDY } from "@/lib/formatting";
 
 export default async function AdminBillingPage({
   searchParams,
@@ -149,7 +150,7 @@ export default async function AdminBillingPage({
                     <p>Stripe subscription: {barn.stripeSubscriptionId || "None"}</p>
                     {effective.overrideActive ? (
                       <p>
-                        Override active{effective.overrideExpiresAt ? ` until ${effective.overrideExpiresAt.toLocaleDateString()}` : ""}.
+                        Override active{effective.overrideExpiresAt ? ` until ${formatDateMDY(effective.overrideExpiresAt)}` : ""}.
                       </p>
                     ) : null}
                     {effective.overrideReason ? <p>Override note: {effective.overrideReason}</p> : null}

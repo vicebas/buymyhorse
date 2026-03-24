@@ -142,7 +142,7 @@ function SellerOnboardPageContent() {
                   Choose your activation cadence
                 </CardTitle>
                 <CardDescription className="text-[color:var(--foreground-soft)]">
-                  HorseRoster activation includes one active horse. Buy extra horse slots later as your roster grows.
+                  HorseRoster activation includes one active horse profile. Buy additional horse profiles later as your roster grows.
                 </CardDescription>
               </CardHeader>
 
@@ -165,7 +165,7 @@ function SellerOnboardPageContent() {
                   Barn details
                 </CardTitle>
                 <CardDescription className="text-[color:var(--foreground-soft)]">
-                  Complete the essentials for your public barn frontpage and marketplace identity.
+                  Complete the essentials for your public barn profile and marketplace identity.
                 </CardDescription>
               </CardHeader>
 
@@ -227,7 +227,7 @@ function SellerOnboardPageContent() {
                           scope="barn-onboarding"
                           mode="create"
                           title="Generate barn story"
-                          description="Review the English draft, then replace or append it to the barn story field before creating your barn."
+                          description="Review the English draft, then Replace or Add it to the barn story field before creating your barn."
                           getContext={getBarnBioContext}
                           onReplace={(nextValue) =>
                             setForm((prev) => ({ ...prev, bio: nextValue.trim() }))
@@ -304,7 +304,7 @@ function SellerOnboardPageContent() {
                 <ul className="space-y-3 leading-6">
                   <li>Activation includes 1 active horse profile.</li>
                   <li>Every horse gets its EquiTag automatically.</li>
-                  <li>Additional horse slots can be purchased later for $14.99 each.</li>
+                  <li>Additional horse profiles can be purchased later for $14.99 each.</li>
                   <li>Your account only becomes a barn after this form is submitted.</li>
                 </ul>
               </CardContent>

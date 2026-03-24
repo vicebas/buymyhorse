@@ -7,6 +7,7 @@ import Cropper, { type Area } from "react-easy-crop";
 import { Camera, ImagePlus, UploadCloud, X } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import { HORSE_IMAGE_MAX_BYTES } from "@/lib/horses/media-limits";
 import { cn } from "@/lib/utils";
 
 interface HorseImageUploaderProps {
@@ -120,6 +121,11 @@ export default function HorseImageUploader({
 
       if (!file.type.startsWith("image/")) {
         setImageError("Please choose an image file.");
+        return;
+      }
+
+      if (file.size > HORSE_IMAGE_MAX_BYTES) {
+        setImageError("Primary horse photos must be 10 MB or smaller.");
         return;
       }
 
@@ -252,7 +258,7 @@ export default function HorseImageUploader({
                 Use a wide, well-lit photo with the horse centered from shoulder to head whenever possible.
               </p>
               <p className="mono mt-3 text-xs uppercase tracking-[0.18em] text-[color:var(--foreground-soft)]">
-                JPG, PNG, or WEBP • Crop before upload
+                JPG, PNG, or WEBP • 10 MB max • Crop before upload
               </p>
             </div>
 

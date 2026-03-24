@@ -54,6 +54,21 @@ export default async function HorsePage({
     notFound();
   }
 
+  await prisma.horseFeatureMetrics.upsert({
+    where: { horseId: horse.id },
+    update: {
+      profileViews: {
+        increment: 1,
+      },
+      lastProfileViewAt: new Date(),
+    },
+    create: {
+      horseId: horse.id,
+      profileViews: 1,
+      lastProfileViewAt: new Date(),
+    },
+  });
+
   const access = session?.user?.id
     ? await getBuyerHorseAccess(session.user.id, horse.id)
     : null;
@@ -201,7 +216,10 @@ export default async function HorsePage({
             </p>
 
             <div className="mt-6">
-              <p className="text-3xl font-extrabold text-[color:var(--foreground-strong)]">
+              <p className="text-sm font-semibold uppercase tracking-[0.12em] text-[color:var(--foreground-soft)]">
+                Pricing visibility
+              </p>
+              <p className="mt-2 text-lg font-semibold text-[color:var(--foreground-strong)]">
                 {getHorsePricingVisibilityLabel(horse)}
               </p>
             </div>
