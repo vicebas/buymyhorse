@@ -27,5 +27,6 @@ fi
 pull_url="https://${GITHUB_USERNAME}:${GITHUB_TOKEN}@github.com/${repo_path}"
 
 git pull "$pull_url" "$branch_name"
+npx prisma generate
 docker compose --env-file .env.production build
 docker compose --env-file .env.production up -d
