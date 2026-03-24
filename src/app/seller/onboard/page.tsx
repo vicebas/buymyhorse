@@ -178,7 +178,7 @@ function SellerOnboardPageContent() {
                         <Store className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[color:var(--foreground-soft)]" />
                         <Input
                           id="displayName"
-                          placeholder="Vinicius Stables"
+                          placeholder="Stables"
                           className="pl-10"
                           value={form.displayName}
                           onChange={(e) => setForm((prev) => ({ ...prev, displayName: e.target.value }))}
@@ -196,7 +196,7 @@ function SellerOnboardPageContent() {
                         <MapPin className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[color:var(--foreground-soft)]" />
                         <Input
                           id="location"
-                          placeholder="Sao Paulo, Brazil"
+                          placeholder="Wellington, FL"
                           className="pl-10"
                           value={form.location}
                           onChange={(e) => setForm((prev) => ({ ...prev, location: e.target.value }))}
