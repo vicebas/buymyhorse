@@ -150,7 +150,7 @@ export default function HorseMediaGallery({
 
               <div className="px-3 py-2">
                 <p className="truncate text-xs font-medium text-[color:var(--foreground-strong)]">
-                  {item.type === "image" ? `Photo ${index + 1}` : item.title}
+                  {item.type === "image" ? `Photo ${index + 1}` : `Video ${index + 1}`}
                 </p>
               </div>
             </button>
