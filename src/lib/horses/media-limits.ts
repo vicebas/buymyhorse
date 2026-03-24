@@ -1,5 +1,5 @@
 export const HORSE_GALLERY_MAX_IMAGES = 20;
-export const HORSE_GALLERY_MAX_VIDEOS = 2;
+export const HORSE_GALLERY_MAX_VIDEOS = 3;
 export const HORSE_IMAGE_MAX_BYTES = 10 * 1024 * 1024;
 export const HORSE_VIDEO_MAX_BYTES = 250 * 1024 * 1024;
 
