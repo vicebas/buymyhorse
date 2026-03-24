@@ -615,6 +615,8 @@ model EquiTagOrder {
   status                  EquiTagOrderStatus @default(PENDING_PAYMENT)
   stripeCheckoutSessionId String?            @unique
   stripePaymentIntentId   String?
+  canceledBySellerAt      DateTime?
+  canceledByAdminAt       DateTime?
   deliveryCompany         String?
   trackingCode            String?
   estimatedDeliveryDate   DateTime?

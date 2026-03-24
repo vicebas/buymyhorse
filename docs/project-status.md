@@ -16,11 +16,18 @@ Last updated: 2026-03-24
 - Client-approved scope changes supersede parts of the older BuyMyHorse PDF: EquiTag scans may resolve to a barn or a horse, billing is the activation-plus-extra-slots model, and public-endpoint rate limiting is not currently planned.
 
 ## Completed (most recent first)
+- **EquiTag pending-payment orders can now be retried or seller-cancelled, with separate seller/admin cancellation behavior.**
+  - **Seller recovery actions**: Added seller-only retry and cancel endpoints at `POST /api/equitag/orders/[id]/retry-payment` and `POST /api/equitag/orders/[id]/cancel`, plus `src/components/equitag/equitag-order-actions.tsx` on `/mybarn/equitag-orders`.
+  - **Pending-payment only**: Seller retry/cancel is restricted to `PENDING_PAYMENT` orders only. If payment failed or checkout was abandoned, the seller can reopen Stripe checkout or cancel the order; no non-pending order can be cancelled by the seller through this flow.
+  - **Visibility rules**: Seller-cancelled orders are hidden from the seller order list by filtering `canceledBySellerAt`, while admin-cancelled orders remain visible to the seller with a cancelled state message.
+  - **Payment/admin sync**: `EquiTagOrder` now tracks `canceledBySellerAt` and `canceledByAdminAt` in Prisma, admin cancellation updates the admin marker, and successful Stripe payment confirmation clears any cancellation markers before moving the order back to `CONFIRMED`.
 - **Featured horses are now Phase 1 merit-based, with admin overrides.**
   - **Engagement model**: Added `HorseFeatureMetrics` in `prisma/schema.prisma` plus a shared featured-ranking service in `src/lib/horses/featured.ts`. Featured horses now rank by the agreed weighted score across profile views, favorites, click-throughs, and recent activity.
   - **Tracking**: Public horse pages now increment profile views, marketplace/dashboard horse-card clicks now post click-through tracking, and favorites continue to contribute through the existing saved-horse relation counts.
   - **Admin override**: Existing admin featured controls on `/admin/horses` are now treated as manual `Admin Pick` overrides and are pinned ahead of merit-ranked horses while still showing score diagnostics for views, favorites, clicks, and recent activity.
   - **Public consumption**: `/dashboard` featured horses now come from the merit-based ranking plus admin picks, and `/marketplace` ordering now prioritizes the same featured logic instead of only the old `isPlatformFeatured` flag.
+- **Deployment helper script added.**
+  - Added root-level `deploy.sh` that expects `GITHUB_USERNAME` and `GITHUB_TOKEN`, pulls the current branch from GitHub over HTTPS, then runs `docker compose --env-file .env.production build` followed by `docker compose --env-file .env.production up -d`.
 - **Final PDF reconciliation work is now implemented across key app surfaces.**
   - **CTA logic**: Logged-in primary CTA routing now follows the locked MyBarn state machine in `src/lib/mybarn/primary-cta.ts`, with route aliases for `/mybarn/create`, `/mybarn/add-horse`, `/billing`, and `/shop/equitags`. The resolved CTA now appears in the authenticated header and logged-in dashboard hero.
   - **Copy and naming cleanup**: Buyer-facing `Saved` copy is now `Favorites`, `Barn Frontpage` is now `Barn Profile`, barn/horse AI helper wording now uses `Replace` / `Add`, and multiple MyBarn and billing surfaces now use `horse profiles` wording instead of `horse slots`.

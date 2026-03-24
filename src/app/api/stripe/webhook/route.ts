@@ -190,6 +190,8 @@ async function syncEquiTagOrderPayment(session: Stripe.Checkout.Session) {
   await prisma.equiTagOrder.update({
     where: { id: equiTagOrderId },
     data: {
+      canceledBySellerAt: null,
+      canceledByAdminAt: null,
       status: "CONFIRMED",
       stripePaymentIntentId:
         typeof session.payment_intent === "string" ? session.payment_intent : null,

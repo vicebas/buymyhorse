@@ -7,6 +7,7 @@ import prisma from "@/lib/db/prisma";
 import { authOptions } from "@/lib/auth/options";
 import SellerAppHeader from "@/components/layout/seller-app-header";
 import { Button } from "@/components/ui/button";
+import EquiTagOrderActions from "@/components/equitag/equitag-order-actions";
 import { formatDateMDY } from "@/lib/formatting";
 
 const STATUS_BADGES: Record<string, { label: string; className: string }> = {
@@ -42,6 +43,7 @@ export default async function EquiTagOrdersPage({
 
   const where: Record<string, unknown> = {
     sellerProfileId: seller.id,
+    canceledBySellerAt: null,
   };
 
   if (!showAll) {
@@ -217,6 +219,14 @@ export default async function EquiTagOrdersPage({
                           Est. delivery: {formatDateMDY(order.estimatedDeliveryDate)}
                         </p>
                       )}
+                      {order.status === "CANCELLED" && order.canceledByAdminAt ? (
+                        <p className="text-sm text-[color:var(--foreground-soft)]">
+                          This order was cancelled by admin.
+                        </p>
+                      ) : null}
+                      {order.status === "PENDING_PAYMENT" ? (
+                        <EquiTagOrderActions orderId={order.id} />
+                      ) : null}
                     </div>
                   </div>
                 </div>

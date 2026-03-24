@@ -45,6 +45,16 @@ export async function POST(
     where: { id },
     data: {
       ...(status ? { status } : {}),
+      ...(status === "CANCELLED"
+        ? {
+            canceledByAdminAt: new Date(),
+            canceledBySellerAt: null,
+          }
+        : status && status !== "CANCELLED"
+          ? {
+              canceledByAdminAt: null,
+            }
+          : {}),
       deliveryCompany: deliveryCarrier ?? order.deliveryCompany,
       trackingCode: deliveryTrackingNumber ?? order.trackingCode,
       estimatedDeliveryDate: estimatedDeliveryDate !== undefined
