@@ -142,7 +142,7 @@ export default async function HorsePage({
                 type: item.type,
                 processedPath: item.processedPath,
                 posterPath: item.posterPath,
-                fileName: item.fileName,
+                fileName: '',
               }))}
             />
       <div className="mt-10 grid gap-6 lg:grid-cols-[1.2fr]">
