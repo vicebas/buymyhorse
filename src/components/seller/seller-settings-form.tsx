@@ -175,7 +175,7 @@ export default function SellerSettingsForm({
 
               <div className="overflow-hidden rounded-2xl border border-[color:var(--border)] bg-[color:var(--background-elevated)]">
                 <Image
-                  src={resolvePublicAssetUrl(seller.coverImage) || resolvePublicAssetUrl(seller.logo) || "/img/default-horse.png"}
+                  src={resolvePublicAssetUrl(seller.coverImage) || "/img/default-horse.png"}
                   alt={`${seller.displayName} cover`}
                   width={600}
                   height={360}

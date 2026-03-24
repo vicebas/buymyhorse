@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
-import { Check, Bell } from "lucide-react"
+import { Check, Bell, Heart, HeartMinus } from "lucide-react"
 import { Button } from "@/components/ui/button"
 
 interface FollowBarnButtonProps {
@@ -46,12 +46,12 @@ export function FollowBarnButton({ barnSlug, initialIsFollowing, isAuthenticated
     >
       {isFollowing ? (
         <>
-          <Check className="h-3.5 w-3.5" />
-          Following
+          <HeartMinus className="h-3.5 w-3.5" />
+          Unfollow
         </>
       ) : (
         <>
-          <Bell className="h-3.5 w-3.5" />
+          <Heart className="h-3.5 w-3.5" />
           Follow
         </>
       )}

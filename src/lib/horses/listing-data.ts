@@ -101,7 +101,7 @@ export function mapHorseToCard(horse: {
   location?: string | null;
   saleStatus?: string | null;
   isPlatformFeatured?: boolean;
-  sellerProfile: { displayName: string };
+  sellerProfile: { displayName: string; slug: string };
   breed?: string | null;
   gender?: string | null;
   discipline?: string | null;
@@ -131,6 +131,7 @@ export function mapHorseToCard(horse: {
     isPlatformFeatured: Boolean(horse.isPlatformFeatured),
     sellerProfile: {
       displayName: horse.sellerProfile.displayName,
+      slug: horse.sellerProfile.slug,
     },
   };
 }

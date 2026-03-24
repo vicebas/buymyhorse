@@ -16,6 +16,7 @@ Last updated: 2026-03-24
 - Client-approved scope changes supersede parts of the older BuyMyHorse PDF: EquiTag scans may resolve to a barn or a horse, billing is the activation-plus-extra-slots model, and public-endpoint rate limiting is not currently planned.
 
 ## Completed (most recent first)
+- Marketplace/dashboard horse cards now use split navigation: clicking the card opens the horse profile, while clicking the barn name opens the barn profile route.
 - **EquiTag pending-payment orders can now be retried or seller-cancelled, with separate seller/admin cancellation behavior.**
   - **Seller recovery actions**: Added seller-only retry and cancel endpoints at `POST /api/equitag/orders/[id]/retry-payment` and `POST /api/equitag/orders/[id]/cancel`, plus `src/components/equitag/equitag-order-actions.tsx` on `/mybarn/equitag-orders`.
   - **Pending-payment only**: Seller retry/cancel is restricted to `PENDING_PAYMENT` orders only. If payment failed or checkout was abandoned, the seller can reopen Stripe checkout or cancel the order; no non-pending order can be cancelled by the seller through this flow.

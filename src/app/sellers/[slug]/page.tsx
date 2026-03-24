@@ -171,7 +171,7 @@ export default async function PublicSellerPage({
         <div className="overflow-hidden rounded-[2rem] border border-[color:var(--border)] bg-[color:var(--card)] shadow-[var(--shadow-card)]">
           <div className="relative h-[300px] overflow-hidden md:h-[360px]">
             <Image
-              src={resolvePublicAssetUrl(seller.coverImage) || resolvePublicAssetUrl(seller.logo) || "/img/default-horse.png"}
+              src={resolvePublicAssetUrl(seller.coverImage)  || "/img/default-horse.png"}
               alt={`${seller.displayName} cover`}
               fill
               className="object-cover"

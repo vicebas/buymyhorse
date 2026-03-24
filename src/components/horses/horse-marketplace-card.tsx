@@ -2,6 +2,8 @@
 
 import Image from "next/image"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
+import type { KeyboardEvent } from "react"
 import { resolvePublicAssetUrl } from "@/lib/storage/public-assets"
 import SaveHorseButton from "@/components/horses/save-horse-button"
 
@@ -21,6 +23,7 @@ export type HorseMarketplaceCardData = {
   isPlatformFeatured?: boolean
   sellerProfile: {
     displayName: string
+    slug: string
   }
 }
 
@@ -39,6 +42,8 @@ export default function HorseMarketplaceCard({
   isSaved?: boolean
   isLoggedIn?: boolean
 }) {
+  const router = useRouter()
+
   function trackClickthrough() {
     const url = `/api/horses/${horse.id}/clickthrough`;
 
@@ -73,6 +78,22 @@ export default function HorseMarketplaceCard({
   ].filter(Boolean).slice(0, 4) as string[]
 
   const pricingLabel = horse.pricingVisibility || "Contact for Price"
+  const horseHref = `/horses/${horse.id}`
+  const barnHref = `/barn/${horse.sellerProfile.slug}`
+
+  function handleCardClick() {
+    trackClickthrough()
+    router.push(horseHref)
+  }
+
+  function handleCardKeyDown(event: KeyboardEvent<HTMLDivElement>) {
+    if (event.key !== "Enter" && event.key !== " ") {
+      return
+    }
+
+    event.preventDefault()
+    handleCardClick()
+  }
 
   const marketplaceCardContent = (
     <>
@@ -93,7 +114,11 @@ export default function HorseMarketplaceCard({
           </span>
         ) : null}
 
-        <div className="absolute bottom-3 right-3">
+        <div
+          className="absolute bottom-3 right-3"
+          onClick={(event) => event.stopPropagation()}
+          onKeyDown={(event) => event.stopPropagation()}
+        >
           <SaveHorseButton horseId={horse.id} initialSaved={isSaved} isLoggedIn={isLoggedIn} size="card" />
         </div>
       </div>
@@ -133,7 +158,13 @@ export default function HorseMarketplaceCard({
         <div className="mt-4 flex items-center justify-between border-t border-[color:var(--border)] pt-3">
           <div>
             <div className="text-[13px] font-bold tracking-[-0.02em] text-[color:var(--foreground-strong)]">
-              {horse.sellerProfile.displayName}
+              <Link
+                href={barnHref}
+                className="hover:underline"
+                onClick={(event) => event.stopPropagation()}
+              >
+                {horse.sellerProfile.displayName}
+              </Link>
             </div>
             <div className="text-[10px] text-[color:var(--foreground-soft)]">
               {pricingLabel}
@@ -167,7 +198,11 @@ export default function HorseMarketplaceCard({
           </span>
         ) : null}
 
-        <div className="absolute bottom-2.5 right-2.5">
+        <div
+          className="absolute bottom-2.5 right-2.5"
+          onClick={(event) => event.stopPropagation()}
+          onKeyDown={(event) => event.stopPropagation()}
+        >
           <SaveHorseButton horseId={horse.id} initialSaved={isSaved} isLoggedIn={isLoggedIn} size="card" />
         </div>
       </div>
@@ -207,7 +242,13 @@ export default function HorseMarketplaceCard({
         <div className="mt-4 flex items-center justify-between border-t border-[color:var(--border)] pt-3">
           <div>
             <div className="text-[13px] font-bold tracking-[-0.02em] text-[color:var(--foreground-strong)]">
-              {horse.sellerProfile.displayName}
+              <Link
+                href={barnHref}
+                className="hover:underline"
+                onClick={(event) => event.stopPropagation()}
+              >
+                {horse.sellerProfile.displayName}
+              </Link>
             </div>
             <div className="text-[10px] font-semibold uppercase tracking-[0.08em] text-[color:var(--foreground-soft)]">
               Stable
@@ -243,9 +284,15 @@ export default function HorseMarketplaceCard({
   }
 
   return (
-    <Link href={`/horses/${horse.id}`} className={cardClasses} onClick={trackClickthrough}>
+    <div
+      role="link"
+      tabIndex={0}
+      className={`${cardClasses} cursor-pointer`}
+      onClick={handleCardClick}
+      onKeyDown={handleCardKeyDown}
+    >
       {cardContent}
-    </Link>
+    </div>
   )
 }
 
