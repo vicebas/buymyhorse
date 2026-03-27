@@ -69,26 +69,45 @@ export function buildHorseListingRelationWrites(payload: HorseListingPayload) {
 
   return {
     secondaryDisciplines: {
-      deleteMany: {},
       create: payload.secondaryDisciplineIds.map((disciplineId) => ({
         disciplineId,
       })),
     },
     divisionTags: {
-      deleteMany: {},
       create: divisionTags,
     },
     idealRiders: {
-      deleteMany: {},
       create: payload.idealRiderIds.map((idealRiderOptionId) => ({
         idealRiderOptionId,
       })),
     },
     horseTypes: {
-      deleteMany: {},
       create: payload.horseTypeIds.map((horseTypeOptionId) => ({
         horseTypeOptionId,
       })),
+    },
+  };
+}
+
+export function buildHorseListingRelationUpdateWrites(payload: HorseListingPayload) {
+  const relationCreates = buildHorseListingRelationWrites(payload);
+
+  return {
+    secondaryDisciplines: {
+      deleteMany: {},
+      create: relationCreates.secondaryDisciplines.create,
+    },
+    divisionTags: {
+      deleteMany: {},
+      create: relationCreates.divisionTags.create,
+    },
+    idealRiders: {
+      deleteMany: {},
+      create: relationCreates.idealRiders.create,
+    },
+    horseTypes: {
+      deleteMany: {},
+      create: relationCreates.horseTypes.create,
     },
   };
 }

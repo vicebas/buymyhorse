@@ -1,14 +1,15 @@
 import type { CopyGenerationProvider } from "@/lib/ai/copy";
 
-const DEFAULT_ANTHROPIC_MODEL = process.env.ANTHROPIC_MODEL || "claude-opus-4-6";
+const DEFAULT_ANTHROPIC_MODEL = "claude-opus-4-6";
 
 export class AnthropicCopyGenerationProvider implements CopyGenerationProvider {
   constructor(
     private readonly apiKey: string,
     private readonly model = DEFAULT_ANTHROPIC_MODEL
-  ) {}
+  ) {} 
 
   async generateText(input: { system: string; prompt: string }) {
+    console.log("Model:", this.model);
     const response = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
       headers: {

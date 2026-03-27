@@ -95,6 +95,15 @@ enum EquiTagOrderStatus {
   CANCELLED
 }
 
+enum ProductEventType {
+  SIGNUP
+  LOGIN
+  HORSE_CREATION
+  HORSE_EDIT
+  DOCUMENT_UPLOAD
+  GALLERY_UPLOAD
+}
+
 model User {
   id    String  @id @default(cuid())
   name  String?
@@ -118,6 +127,7 @@ model User {
   adminBillingOverrides  SellerProfile[]     @relation("BarnBillingOverrideBy")
   adminDisabledHorses    Horse[]             @relation("HorseAdminDisabledBy")
   adminActionLogs        AdminActionLog[]    @relation("AdminActionActor")
+  productEvents          ProductEvent[]      @relation("ProductEventActor")
 
   sellerProfile SellerProfile?
 
@@ -893,6 +903,25 @@ model Notification {
 
   @@index([userId, isRead])
   @@index([userId, createdAt])
+}
+
+model ProductEvent {
+  id              String           @id @default(cuid())
+  actorUserId     String
+  eventType       ProductEventType
+  horseId         String?
+  horseDocumentId String?
+  horseMediaId    String?
+  metadata        Json?
+  createdAt       DateTime         @default(now())
+
+  actorUser User @relation("ProductEventActor", fields: [actorUserId], references: [id], onDelete: Cascade)
+
+  @@index([eventType, createdAt])
+  @@index([actorUserId, createdAt])
+  @@index([horseId, createdAt])
+  @@index([horseDocumentId, createdAt])
+  @@index([horseMediaId, createdAt])
 }
 
 model NotificationPreferences {

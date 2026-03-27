@@ -3,6 +3,7 @@ import CredentialsProvider from "next-auth/providers/credentials"
 import bcrypt from "bcrypt"
 
 import prisma from "@/lib/db/prisma"
+import { trackProductEventSafely } from "@/lib/product-events/track"
 
 
 export const authOptions: NextAuthOptions = {
@@ -37,6 +38,11 @@ export const authOptions: NextAuthOptions = {
         )
 
         if (!valid) return null
+
+        void trackProductEventSafely({
+          actorUserId: user.id,
+          eventType: "LOGIN",
+        })
 
         return user
       },

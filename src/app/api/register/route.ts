@@ -5,6 +5,7 @@ import { z } from "zod";
 import prisma from "@/lib/db/prisma";
 import { createEmailVerificationToken } from "@/lib/auth/tokens";
 import { sendVerificationEmail } from "@/lib/email/mailer";
+import { trackProductEventSafely } from "@/lib/product-events/track";
 
 const registerSchema = z.object({
   name: z.string().trim().min(2, "Name is required."),
@@ -51,6 +52,11 @@ export async function POST(req: Request) {
         name: true,
         email: true,
       },
+    });
+
+    void trackProductEventSafely({
+      actorUserId: user.id,
+      eventType: "SIGNUP",
     });
 
     // Fire-and-forget verification email — don't block the response

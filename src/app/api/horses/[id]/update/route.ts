@@ -6,9 +6,13 @@ import prisma from "@/lib/db/prisma";
 import { getHorseWriteBlockError, getSellerWriteBlockError } from "@/lib/admin/moderation";
 import { authOptions } from "@/lib/auth/options";
 import { canPublishHorseForSeller, validateHorseForPublishing } from "@/lib/billing/entitlements";
-import { buildHorseListingMutation, buildHorseListingRelationWrites } from "@/lib/horses/upsert-horse-listing";
+import {
+  buildHorseListingMutation,
+  buildHorseListingRelationUpdateWrites,
+} from "@/lib/horses/upsert-horse-listing";
 import { parseStringList } from "@/lib/horses/listing-options";
 import { dispatchHorseNotification } from "@/lib/notifications/dispatch";
+import { trackProductEventSafely } from "@/lib/product-events/track";
 import { deletePublicAsset, uploadPublicAsset } from "@/lib/storage/public-assets";
 
 function safeFileName(name: string) {
@@ -192,7 +196,7 @@ export async function POST(
         registrationStatus: registrationStatus || null,
         showHighlights: showHighlights || null,
       }),
-      ...buildHorseListingRelationWrites({
+      ...buildHorseListingRelationUpdateWrites({
         name,
         age: age ? Number(age) : null,
         height: height || null,
@@ -227,6 +231,12 @@ export async function POST(
   if (file && file.size > 0 && existingHorse.image && existingHorse.image !== imagePath) {
     await deletePublicAsset(existingHorse.image).catch(() => null);
   }
+
+  void trackProductEventSafely({
+    actorUserId: session.user.id,
+    eventType: "HORSE_EDIT",
+    horseId: horse.id,
+  });
 
   const significantFields = ['saleStatus', 'description', 'keyDetails', 'name', 'location', 'pricingVisibilityOptionId', 'primaryDisciplineId', 'saleTypeOptionId'] as const
   const changedFields = significantFields.filter(field => {

@@ -11,6 +11,7 @@ import { parseStringList } from "@/lib/horses/listing-options";
 import { deletePublicAsset, uploadPublicAsset } from "@/lib/storage/public-assets";
 import { NotificationType } from "@/generated/prisma/client";
 import { dispatchHorseNotification } from "@/lib/notifications/dispatch";
+import { trackProductEventSafely } from "@/lib/product-events/track";
 
 function safeFileName(name: string) {
   return name.replace(/[^a-zA-Z0-9._-]/g, "_");
@@ -204,6 +205,12 @@ export async function POST(req: Request) {
       { status: 500 }
     );
   }
+
+  void trackProductEventSafely({
+    actorUserId: session.user.id,
+    eventType: "HORSE_CREATION",
+    horseId: horse.id,
+  });
 
   if (horse.isPublished) {
     dispatchHorseNotification({

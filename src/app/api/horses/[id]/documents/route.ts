@@ -5,6 +5,7 @@ import prisma from "@/lib/db/prisma";
 import { getHorseWriteBlockError, getSellerWriteBlockError } from "@/lib/admin/moderation";
 import { authOptions } from "@/lib/auth/options";
 import { uploadPrivateAsset } from "@/lib/storage/private-assets";
+import { trackProductEventSafely } from "@/lib/product-events/track";
 import { isDocumentCategory } from "@/lib/vault/document-categories";
 
 interface RouteProps {
@@ -145,6 +146,13 @@ export async function POST(req: Request, { params }: RouteProps) {
           fileSizeBytes: file.size,
         },
       },
+    });
+
+    void trackProductEventSafely({
+      actorUserId: session.user.id,
+      eventType: "DOCUMENT_UPLOAD",
+      horseId: horse.id,
+      horseDocumentId: document.id,
     });
 
     return NextResponse.json(document, { status: 201 });

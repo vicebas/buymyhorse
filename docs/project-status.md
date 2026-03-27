@@ -1,6 +1,6 @@
 # HorseRoster Project Status
 
-Last updated: 2026-03-24
+Last updated: 2026-03-27
 
 ## Overall Summary
 - Project branding is in transition from the legacy brand to HorseRoster.
@@ -16,6 +16,17 @@ Last updated: 2026-03-24
 - Client-approved scope changes supersede parts of the older legacy project PDF: EquiTag scans may resolve to a barn or a horse, billing is the activation-plus-extra-profiles model, and public-endpoint rate limiting is not currently planned.
 
 ## Completed (most recent first)
+- **Horse create flow relation writes now correctly distinguish create vs update behavior.**
+  - **Prisma fix**: The shared horse listing relation helper now emits create-safe nested writes for `prisma.horse.create()` and separate update-safe writes with `deleteMany` resets for `prisma.horse.update()`.
+  - **Impact**: Add-horse submissions with taxonomy multi-select data no longer fail on nested `deleteMany` during creation, while edit-horse continues replacing relation rows cleanly.
+- **Horse add/edit multi-select fields now use searchable dropdowns instead of large checkbox grids.**
+  - **Form usability**: Added a shared `react-select`-based horse multi-select component with checkbox options, search, compact selected-state summaries, and hidden native inputs so the existing form payload shape remains unchanged.
+  - **Coverage**: Secondary disciplines, all division-context fields, ideal rider, and horse type/intended-use selections in the shared horse form now use the new dropdown pattern for both create and edit flows.
+  - **Selection visibility**: The multi-select trigger now shows visible selected chips/tags inside the input instead of hiding them behind a summary-only display.
+- **Server-side product event tracking now captures major user actions and exposes an admin inspection view.**
+  - **Schema + service**: Added `ProductEventType` and `ProductEvent` in `prisma/schema.prisma`, a manual migration file for the new table, and shared tracking helpers in `src/lib/product-events/track.ts`.
+  - **Tracked events**: Successful `SIGNUP`, `LOGIN`, `HORSE_CREATION`, `HORSE_EDIT`, `DOCUMENT_UPLOAD`, and per-media `GALLERY_UPLOAD` events now write to Postgres from the server success paths only.
+  - **Admin visibility**: Added `/admin/product-events` with date-range, event-type, actor, and horse-ID filters plus summary counts and a recent-event table. Admin navigation now links to the new surface.
 - Marketplace/dashboard horse cards now use split navigation: clicking the card opens the horse profile, while clicking the barn name opens the barn profile route.
 - **EquiTag pending-payment orders can now be retried or seller-cancelled, with separate seller/admin cancellation behavior.**
   - **Seller recovery actions**: Added seller-only retry and cancel endpoints at `POST /api/equitag/orders/[id]/retry-payment` and `POST /api/equitag/orders/[id]/cancel`, plus `src/components/equitag/equitag-order-actions.tsx` on `/mybarn/equitag-orders`.
@@ -219,6 +230,7 @@ Last updated: 2026-03-24
 - Several pages and components still use legacy fixed light-mode classes such as `bg-white`, `bg-stone-*`, and `text-stone-*`
 - Some pages still expose seller-oriented internal wording or route assumptions even though barn/MyBarn is now the product language
 - Barn dashboard analytics are only partially real; view metrics are still placeholder content
+- Product-event tracking is inspection-only in v1; no aggregate dashboard cards or external analytics vendor fan-out exists yet
 - `README.md` remains the default Next.js boilerplate and is not a reliable project guide
 - Prisma migration execution and Prisma client generation for the latest schema changes are intentionally left manual in the local environment
 - The listing-taxonomy migration SQL now exists in repo, but applying Prisma migrations to the live/local database still follows the manual environment workflow

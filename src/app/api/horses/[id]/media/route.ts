@@ -11,6 +11,7 @@ import {
   HORSE_VIDEO_MAX_BYTES,
 } from "@/lib/horses/media-limits";
 import { processHorseMediaUpload } from "@/lib/media/horse-media";
+import { trackProductEventSafely } from "@/lib/product-events/track";
 
 export const runtime = "nodejs";
 
@@ -145,6 +146,20 @@ export async function POST(
             mimeType: item.mimeType,
             fileName: item.fileName,
             sortOrder: item.sortOrder,
+          },
+        })
+      )
+    );
+
+    void Promise.all(
+      created.map((media) =>
+        trackProductEventSafely({
+          actorUserId: session.user.id,
+          eventType: "GALLERY_UPLOAD",
+          horseId: horse.id,
+          horseMediaId: media.id,
+          metadata: {
+            mediaType: media.type,
           },
         })
       )

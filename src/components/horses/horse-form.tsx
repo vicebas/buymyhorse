@@ -7,6 +7,7 @@ import { Loader2, Megaphone, NotebookPen } from "lucide-react";
 
 import AICopyGenerator from "@/components/ai/ai-copy-generator";
 import HorseImageUploader from "@/components/horses/horse-image-uploader";
+import HorseMultiSelect from "@/components/horses/horse-multi-select";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -194,15 +195,6 @@ export default function HorseForm({ mode, options, initialValues, horseId }: Hor
     };
   }
 
-  function toggleMultiValue(value: string, selected: string[], setter: (values: string[]) => void) {
-    if (selected.includes(value)) {
-      setter(selected.filter((item) => item !== value));
-      return;
-    }
-
-    setter([...selected, value]);
-  }
-
   async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
 
@@ -315,16 +307,17 @@ export default function HorseForm({ mode, options, initialValues, horseId }: Hor
             onChange={setPrimaryDisciplineId}
           />
 
-          <CheckboxGroup
+          <HorseMultiSelect
             label="Secondary Disciplines"
             name="secondaryDisciplineIds"
             options={options.disciplines.filter((discipline) => discipline.id !== primaryDisciplineId)}
             selected={secondaryDisciplineIds}
-            onToggle={(value) => toggleMultiValue(value, secondaryDisciplineIds, setSecondaryDisciplineIds)}
+            onChange={setSecondaryDisciplineIds}
+            placeholder="Select secondary disciplines"
           />
 
           {HORSE_DIVISION_CONTEXTS.map((context) => (
-            <CheckboxGroup
+            <HorseMultiSelect
               key={context.key}
               label={context.label}
               name={context.formKey}
@@ -335,28 +328,18 @@ export default function HorseForm({ mode, options, initialValues, horseId }: Hor
                 experiencedThroughIds,
                 schoolingThroughIds,
               })}
-              onToggle={(value) =>
-                toggleMultiValue(
-                  value,
-                  getSelectedValues(context.formKey, {
-                    bestSuitedForIds,
-                    currentlyCompetingInIds,
-                    experiencedThroughIds,
-                    schoolingThroughIds,
-                  }),
-                  getDivisionSetter(context.formKey, {
-                    setBestSuitedForIds,
-                    setCurrentlyCompetingInIds,
-                    setExperiencedThroughIds,
-                    setSchoolingThroughIds,
-                  })
-                )
-              }
+              onChange={getDivisionSetter(context.formKey, {
+                setBestSuitedForIds,
+                setCurrentlyCompetingInIds,
+                setExperiencedThroughIds,
+                setSchoolingThroughIds,
+              })}
               helperText={
                 context.required
                   ? "At least one selection is required before publishing."
                   : "Optional. Use these to show current record, experience, or schooling scope."
               }
+              placeholder={`Select ${context.label.toLowerCase()}`}
             />
           ))}
         </div>
@@ -367,19 +350,21 @@ export default function HorseForm({ mode, options, initialValues, horseId }: Hor
         description="Show who this horse suits best and what job it is intended to do in the marketplace."
       >
         <div className="space-y-6">
-          <CheckboxGroup
+          <HorseMultiSelect
             label="Ideal Rider"
             name="idealRiderIds"
             options={options.idealRiders}
             selected={idealRiderIds}
-            onToggle={(value) => toggleMultiValue(value, idealRiderIds, setIdealRiderIds)}
+            onChange={setIdealRiderIds}
+            placeholder="Select ideal rider options"
           />
-          <CheckboxGroup
+          <HorseMultiSelect
             label="Horse Type / Intended Use"
             name="horseTypeIds"
             options={options.horseTypes}
             selected={horseTypeIds}
-            onToggle={(value) => toggleMultiValue(value, horseTypeIds, setHorseTypeIds)}
+            onChange={setHorseTypeIds}
+            placeholder="Select horse type and intended use"
           />
         </div>
       </FormSection>
@@ -524,65 +509,6 @@ function SelectField({
           </option>
         ))}
       </select>
-    </div>
-  );
-}
-
-function CheckboxGroup({
-  label,
-  name,
-  options,
-  selected,
-  onToggle,
-  helperText,
-}: {
-  label: string;
-  name: string;
-  options: Array<{ id: string; label: string; disciplineLabel?: string }>;
-  selected: string[];
-  onToggle?: (value: string) => void;
-  helperText?: string;
-}) {
-  return (
-    <div>
-      <div className="flex items-center justify-between gap-3">
-        <Label>{label}</Label>
-        {helperText ? <p className="text-xs text-[color:var(--foreground-soft)]">{helperText}</p> : null}
-      </div>
-      <div className="mt-3 grid gap-3 md:grid-cols-2">
-        {options.length === 0 ? (
-          <div className="rounded-2xl border border-dashed border-[color:var(--border)] bg-[color:var(--background-elevated)] px-4 py-5 text-sm text-[color:var(--foreground-soft)]">
-            No options available yet.
-          </div>
-        ) : (
-          options.map((option) => {
-            const checked = selected.includes(option.id);
-            return (
-              <label
-                key={option.id}
-                className={`rounded-2xl border px-4 py-3 text-sm transition ${
-                  checked
-                    ? "border-[color:var(--accent)] bg-[color:var(--accent)]/10 text-[color:var(--foreground-strong)]"
-                    : "border-[color:var(--border)] bg-[color:var(--background-elevated)] text-[color:var(--foreground)]"
-                }`}
-              >
-                <input
-                  type="checkbox"
-                  name={name}
-                  value={option.id}
-                  defaultChecked={checked}
-                  onChange={onToggle ? () => onToggle(option.id) : undefined}
-                  className="sr-only"
-                />
-                <span className="block font-medium">{option.label}</span>
-                {option.disciplineLabel ? (
-                  <span className="mt-1 block text-xs text-[color:var(--foreground-soft)]">{option.disciplineLabel}</span>
-                ) : null}
-              </label>
-            );
-          })
-        )}
-      </div>
     </div>
   );
 }
