@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Activity, BarChart3, Building2, CreditCard, KeyRound, ListFilter, QrCode, Users, VenetianMask } from "lucide-react";
+import { Activity, AlertTriangle, BarChart3, Building2, CreditCard, KeyRound, ListFilter, QrCode, Users, VenetianMask } from "lucide-react";
 import { usePathname } from "next/navigation";
 
 import { LogoutButton } from "@/components/auth/logout-button";
@@ -10,6 +10,7 @@ import { ThemeToggle } from "@/components/layout/theme-toggle";
 
 const links = [
   { href: "/admin", label: "Overview", icon: BarChart3 },
+  { href: "/admin/errors", label: "Errors", icon: AlertTriangle },
   { href: "/admin/access", label: "Access", icon: KeyRound },
   { href: "/admin/barns", label: "Barns", icon: Building2 },
   { href: "/admin/horses", label: "Horses", icon: VenetianMask },

@@ -5,6 +5,7 @@ import Stripe from "stripe";
 import prisma from "@/lib/db/prisma";
 import { getBillingProductFromPriceId, type BillingCadenceKey } from "@/lib/billing/plans";
 import { getStripe } from "@/lib/stripe";
+import { trackBackendErrorSafely } from "@/lib/errors/track";
 
 export const runtime = "nodejs";
 
@@ -31,16 +32,26 @@ export async function POST(req: Request) {
 
   console.log(`Received Stripe webhook: ${event.type}`);
 
-  if (event.type === "checkout.session.completed") {
-    await handleCheckoutSessionCompleted(event.data.object as Stripe.Checkout.Session);
-  }
+  try {
+    if (event.type === "checkout.session.completed") {
+      await handleCheckoutSessionCompleted(event.data.object as Stripe.Checkout.Session);
+    }
 
-  if (
-    event.type === "customer.subscription.created" ||
-    event.type === "customer.subscription.updated" ||
-    event.type === "customer.subscription.deleted"
-  ) {
-    await syncSubscription(event.data.object as Stripe.Subscription);
+    if (
+      event.type === "customer.subscription.created" ||
+      event.type === "customer.subscription.updated" ||
+      event.type === "customer.subscription.deleted"
+    ) {
+      await syncSubscription(event.data.object as Stripe.Subscription);
+    }
+  } catch (error) {
+    void trackBackendErrorSafely({
+      error,
+      route: "/api/stripe/webhook",
+      method: "POST",
+      metadata: { eventType: event.type },
+    });
+    return NextResponse.json({ error: "Webhook processing failed." }, { status: 500 });
   }
 
   return NextResponse.json({ received: true });

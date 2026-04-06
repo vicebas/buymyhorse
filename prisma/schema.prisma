@@ -941,3 +941,19 @@ model NotificationPreferences {
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
+
+model BackendError {
+  id         String   @id @default(cuid())
+  message    String
+  stack      String?
+  route      String?
+  method     String?
+  userId     String?
+  metadata   Json?
+  resolvedAt DateTime?
+  createdAt  DateTime @default(now())
+
+  @@index([createdAt])
+  @@index([route, createdAt])
+  @@index([resolvedAt, createdAt])
+}
