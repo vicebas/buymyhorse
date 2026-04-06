@@ -1,5 +1,6 @@
 import AdminAnalyticsRangeControls from "@/components/admin/admin-analytics-range-controls";
 import AdminErrorResolveButton from "@/components/admin/admin-error-resolve-button";
+import AdminErrorTestButton from "@/components/admin/admin-error-test-button";
 import { getAdminAnalyticsRange } from "@/lib/admin/analytics";
 import {
   getAdminBackendErrorFilters,
@@ -58,6 +59,12 @@ export default async function AdminErrorsPage({
           <p className="mt-3 max-w-3xl text-base text-[color:var(--foreground-soft)]">
             Errors are captured automatically from instrumented routes. Mark them as resolved once addressed.
           </p>
+          <div className="mt-5 border-t border-[color:var(--border)] pt-5">
+            <p className="mb-3 text-sm font-semibold text-[color:var(--foreground-soft)]">
+              Test error tracking
+            </p>
+            <AdminErrorTestButton />
+          </div>
         </div>
 
         <AdminAnalyticsRangeControls
