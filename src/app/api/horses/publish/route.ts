@@ -153,7 +153,7 @@ export async function POST(req: Request) {
         horseName: horse.name,
         barnName: seller.displayName,
         barnSlug: seller.slug ?? "",
-      }).catch(() => {})
+      }).catch((err) => { console.error("[horses/publish] dispatchHorseNotification failed", err); })
     }
 
     return NextResponse.json(horse);

@@ -16,7 +16,10 @@ export async function POST(
   }
 
   const { id } = await params;
-  const body = (await req.json().catch(() => null)) as { resolved?: boolean } | null;
+  const body = (await req.json().catch((parseError) => {
+    console.error("[admin/errors/resolve] Failed to parse request body", parseError);
+    return null;
+  })) as { resolved?: boolean } | null;
 
   if (typeof body?.resolved !== "boolean") {
     return NextResponse.json({ error: "Invalid request." }, { status: 400 });
