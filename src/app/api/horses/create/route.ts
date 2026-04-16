@@ -46,15 +46,14 @@ export async function POST(req: Request) {
   const height = String(formData.get("height") || "").trim();
   const location = String(formData.get("location") || "").trim();
   const keyDetails = String(formData.get("keyDetails") || "").trim();
-  const saleStatus = String(formData.get("saleStatus") || "FOR_SALE").trim();
   const publishToMarketplace = formData.get("isPublished") === "on";
   const breedOptionId = String(formData.get("breedOptionId") || "").trim() || null;
   const sexOptionId = String(formData.get("sexOptionId") || "").trim() || null;
   const primaryDisciplineId = String(formData.get("primaryDisciplineId") || "").trim() || null;
   const pricingVisibilityOptionId = String(formData.get("pricingVisibilityOptionId") || "").trim() || null;
-  const saleTypeOptionId = String(formData.get("saleTypeOptionId") || "").trim() || null;
   const colorOptionId = String(formData.get("colorOptionId") || "").trim() || null;
   const importStatusOptionId = String(formData.get("importStatusOptionId") || "").trim() || null;
+  const saleTypeIds = parseStringList(formData.getAll("saleTypeIds"));
   const secondaryDisciplineIds = parseStringList(formData.getAll("secondaryDisciplineIds"));
   const bestSuitedForIds = parseStringList(formData.getAll("bestSuitedForIds"));
   const currentlyCompetingInIds = parseStringList(formData.getAll("currentlyCompetingInIds"));
@@ -137,16 +136,15 @@ export async function POST(req: Request) {
         location: location || null,
         description: description || null,
         keyDetails: keyDetails || null,
-        saleStatus: saleStatus as "FOR_SALE" | "SOLD" | "CONSIDERING_OFFERS" | "LEASE" | "NOT_AVAILABLE",
         isPublished: publishToMarketplace,
         image: imagePath,
         breedOptionId,
         sexOptionId,
         primaryDisciplineId,
         pricingVisibilityOptionId,
-        saleTypeOptionId,
         colorOptionId,
         importStatusOptionId,
+        saleTypeIds,
         secondaryDisciplineIds,
         bestSuitedForIds,
         currentlyCompetingInIds,
@@ -166,16 +164,15 @@ export async function POST(req: Request) {
         location: location || null,
         description: description || null,
         keyDetails: keyDetails || null,
-        saleStatus: saleStatus as "FOR_SALE" | "SOLD" | "CONSIDERING_OFFERS" | "LEASE" | "NOT_AVAILABLE",
         isPublished: publishToMarketplace,
         image: imagePath,
         breedOptionId,
         sexOptionId,
         primaryDisciplineId,
         pricingVisibilityOptionId,
-        saleTypeOptionId,
         colorOptionId,
         importStatusOptionId,
+        saleTypeIds,
         secondaryDisciplineIds,
         bestSuitedForIds,
         currentlyCompetingInIds,

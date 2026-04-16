@@ -209,14 +209,6 @@ model SellerContactControl {
   @@index([targetUserId])
 }
 
-enum HorseSaleStatus {
-  FOR_SALE
-  CONSIDERING_OFFERS
-  SOLD
-  LEASE
-  NOT_AVAILABLE
-}
-
 enum HorseDivisionContext {
   BEST_SUITED_FOR
   CURRENTLY_COMPETING_IN
@@ -267,15 +259,12 @@ model Horse {
   sexOptionId               String?
   primaryDisciplineId       String?
   pricingVisibilityOptionId String?
-  saleTypeOptionId          String?
   colorOptionId             String?
   importStatusOptionId      String?
   feiPassport               Boolean @default(false)
   equiVaultAvailable        Boolean @default(false)
   registrationStatus        String?
   showHighlights            String?
-
-  saleStatus HorseSaleStatus @default(FOR_SALE)
 
   price                 Decimal?  @db.Decimal(12, 2)
   image                 String?
@@ -296,7 +285,6 @@ model Horse {
   sexOption               SexOption?               @relation(fields: [sexOptionId], references: [id], onDelete: SetNull)
   primaryDiscipline       DisciplineOption?        @relation("HorsePrimaryDiscipline", fields: [primaryDisciplineId], references: [id], onDelete: SetNull)
   pricingVisibilityOption PricingVisibilityOption? @relation(fields: [pricingVisibilityOptionId], references: [id], onDelete: SetNull)
-  saleTypeOption          SaleTypeOption?          @relation(fields: [saleTypeOptionId], references: [id], onDelete: SetNull)
   colorOption             ColorOption?             @relation(fields: [colorOptionId], references: [id], onDelete: SetNull)
   importStatusOption      ImportStatusOption?      @relation(fields: [importStatusOptionId], references: [id], onDelete: SetNull)
 
@@ -313,6 +301,7 @@ model Horse {
   divisionTags         HorseDivisionTag[]
   idealRiders          HorseIdealRider[]
   horseTypes           HorseTypeSelection[]
+  saleTypes            HorseSaleTypeSelection[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -322,7 +311,6 @@ model Horse {
   @@index([sexOptionId])
   @@index([primaryDisciplineId])
   @@index([pricingVisibilityOptionId])
-  @@index([saleTypeOptionId])
   @@index([colorOptionId])
   @@index([importStatusOptionId])
 }
@@ -409,7 +397,7 @@ model SaleTypeOption {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  horses Horse[]
+  horses HorseSaleTypeSelection[]
 }
 
 model BreedOption {
@@ -507,6 +495,19 @@ model HorseTypeSelection {
 
   @@unique([horseId, horseTypeOptionId])
   @@index([horseTypeOptionId])
+}
+
+model HorseSaleTypeSelection {
+  id               String   @id @default(cuid())
+  horseId          String
+  saleTypeOptionId String
+  createdAt        DateTime @default(now())
+
+  horse          Horse          @relation(fields: [horseId], references: [id], onDelete: Cascade)
+  saleTypeOption SaleTypeOption @relation(fields: [saleTypeOptionId], references: [id], onDelete: Cascade)
+
+  @@unique([horseId, saleTypeOptionId])
+  @@index([saleTypeOptionId])
 }
 
 model HorseMedia {

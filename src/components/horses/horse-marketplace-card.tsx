@@ -17,9 +17,9 @@ export type HorseMarketplaceCardData = {
   discipline?: string | null
   level?: string | null
   pricingVisibility?: string | null
+  saleTypes?: string[]
   image?: string | null
   location?: string | null
-  saleStatus?: string | null
   isPlatformFeatured?: boolean
   sellerProfile: {
     displayName: string
@@ -58,8 +58,6 @@ export default function HorseMarketplaceCard({
     });
   }
 
-  const saleLabel = formatSaleStatus(horse.saleStatus)
-
   const meta = [
     horse.breed,
     horse.age ? `${horse.age}` : null,
@@ -73,9 +71,10 @@ export default function HorseMarketplaceCard({
   const tags = [
     horse.discipline,
     horse.level,
+    ...(horse.saleTypes ?? []),
     horse.breed,
     horse.gender,
-  ].filter(Boolean).slice(0, 4) as string[]
+  ].filter(Boolean) as string[]
 
   const pricingLabel = horse.pricingVisibility || "Contact for Price"
   const horseHref = `/horses/${horse.id}`
@@ -105,9 +104,6 @@ export default function HorseMarketplaceCard({
           className="object-cover transition duration-300 group-hover:scale-[1.02]"
         />
 
-        <span className={`absolute left-3 top-3 rounded-[3px] px-2 py-1 text-[8px] font-bold uppercase tracking-[0.1em] ${getMarketplaceStatusClasses(horse.saleStatus)}`}>
-          {saleLabel}
-        </span>
         {horse.isPlatformFeatured ? (
           <span className="absolute right-3 top-3 rounded-[3px] bg-[rgba(15,42,68,0.9)] px-2 py-1 text-[8px] font-bold uppercase tracking-[0.1em] text-[#f8f6f2]">
             Admin Pick
@@ -189,9 +185,6 @@ export default function HorseMarketplaceCard({
           className="object-cover transition duration-300 group-hover:scale-[1.02]"
         />
 
-        <span className="absolute left-2.5 top-2.5 rounded-[3px] bg-[#2d5438] px-2 py-1 text-[9px] font-bold uppercase tracking-[0.12em] text-white">
-          {saleLabel}
-        </span>
         {horse.isPlatformFeatured ? (
           <span className="absolute right-2.5 top-2.5 rounded-[3px] bg-[rgba(15,42,68,0.9)] px-2 py-1 text-[9px] font-bold uppercase tracking-[0.12em] text-[#f8f6f2]">
             Admin Pick
@@ -294,29 +287,4 @@ export default function HorseMarketplaceCard({
       {cardContent}
     </div>
   )
-}
-
-function formatSaleStatus(status?: string | null) {
-  if (!status) return "For Sale"
-
-  return status
-    .toLowerCase()
-    .split("_")
-    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
-    .join(" ")
-}
-
-function getMarketplaceStatusClasses(status?: string | null) {
-  switch (status) {
-    case "CONSIDERING_OFFERS":
-      return "bg-[#1a3b5a] text-[#e9e3d8]"
-    case "LEASE":
-      return "bg-[#0f2a44] text-[#e9e3d8]"
-    case "SOLD":
-    case "NOT_AVAILABLE":
-      return "bg-[color:var(--muted)] text-[color:var(--foreground-strong)]"
-    case "FOR_SALE":
-    default:
-      return "bg-[#2d5438] text-[#f8f6f2]"
-  }
 }

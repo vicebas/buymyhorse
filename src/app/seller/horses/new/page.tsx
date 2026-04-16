@@ -46,7 +46,7 @@ export default async function NewHorsePage() {
             Add New Horse
           </h1>
           <p className="mt-3 max-w-2xl text-[color:var(--foreground-soft)]">
-            Build a new listing with a polished lead photo, clear sale status, and marketplace-ready details.
+            Build a new listing with a polished lead photo, clear sale type, and marketplace-ready details.
           </p>
         </div>
 

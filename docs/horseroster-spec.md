@@ -90,7 +90,6 @@ Core models:
 
 Important enums:
 - `UserRole`
-- `HorseSaleStatus`
 - `DocumentCategory`
 - `VaultActivityType`
 - `AccessRequestStatus`
@@ -99,7 +98,7 @@ Important enums:
 
 Notable current schema behavior:
 - `SellerProfile` is a one-to-one extension of `User`
-- `Horse` belongs to a seller profile and supports publication state, sale status, and barn-frontpage curation flags
+- `Horse` belongs to a seller profile and supports publication state and barn-frontpage curation flags
 - `EquiTag` belongs to a barn account and can be unattached or attached to either a barn or a horse
 - Access control for private documents uses both request and grant records
 - Conversations are scoped to horse + buyer pairs

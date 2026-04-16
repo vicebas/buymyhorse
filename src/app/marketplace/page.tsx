@@ -66,7 +66,15 @@ export default async function MarketplacePage({
       ...(breed ? { breedOptionId: breed } : {}),
       ...(discipline ? { primaryDisciplineId: discipline } : {}),
       ...(pricingVisibility ? { pricingVisibilityOptionId: pricingVisibility } : {}),
-      ...(saleType ? { saleTypeOptionId: saleType } : {}),
+      ...(saleType
+        ? {
+            saleTypes: {
+              some: {
+                saleTypeOptionId: saleType,
+              },
+            },
+          }
+        : {}),
       ...(sex ? { sexOptionId: sex } : {}),
       ...(location
         ? {

@@ -22,7 +22,6 @@ export const horseListingInclude = {
   sexOption: true,
   primaryDiscipline: true,
   pricingVisibilityOption: true,
-  saleTypeOption: true,
   colorOption: true,
   importStatusOption: true,
   secondaryDisciplines: {
@@ -42,6 +41,11 @@ export const horseListingInclude = {
   idealRiders: {
     include: {
       idealRiderOption: true,
+    },
+  },
+  saleTypes: {
+    include: {
+      saleTypeOption: true,
     },
   },
   horseTypes: {
@@ -92,6 +96,23 @@ export function getHorsePricingVisibilityLabel(horse: {
   return horse.pricingVisibilityOption?.label || "Contact for Price";
 }
 
+export function getHorseSaleTypeLabels(horse: {
+  saleTypes?: Array<{
+    saleTypeOption: { label: string; sortOrder?: number };
+  }>;
+}) {
+  return (
+    horse.saleTypes
+      ?.slice()
+      .sort(
+        (a, b) =>
+          (a.saleTypeOption.sortOrder ?? 0) - (b.saleTypeOption.sortOrder ?? 0) ||
+          a.saleTypeOption.label.localeCompare(b.saleTypeOption.label)
+      )
+      .map((item) => item.saleTypeOption.label) ?? []
+  );
+}
+
 export function mapHorseToCard(horse: {
   id: string;
   name: string;
@@ -99,7 +120,6 @@ export function mapHorseToCard(horse: {
   height?: string | null;
   image?: string | null;
   location?: string | null;
-  saleStatus?: string | null;
   isPlatformFeatured?: boolean;
   sellerProfile: { displayName: string; slug: string };
   breed?: string | null;
@@ -110,6 +130,9 @@ export function mapHorseToCard(horse: {
   sexOption?: { label: string } | null;
   primaryDiscipline?: { label: string } | null;
   pricingVisibilityOption?: { label: string } | null;
+  saleTypes?: Array<{
+    saleTypeOption: { label: string; sortOrder?: number };
+  }>;
   divisionTags?: Array<{
     context: HorseDivisionContext;
     divisionOption: { label: string };
@@ -125,9 +148,9 @@ export function mapHorseToCard(horse: {
     discipline: getHorsePrimaryDisciplineLabel(horse),
     level: getHorseBestSuitedForLabel(horse),
     pricingVisibility: getHorsePricingVisibilityLabel(horse),
+    saleTypes: getHorseSaleTypeLabels(horse),
     image: horse.image ?? null,
     location: horse.location ?? null,
-    saleStatus: horse.saleStatus ?? null,
     isPlatformFeatured: Boolean(horse.isPlatformFeatured),
     sellerProfile: {
       displayName: horse.sellerProfile.displayName,

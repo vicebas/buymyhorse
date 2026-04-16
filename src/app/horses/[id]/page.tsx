@@ -15,6 +15,7 @@ import {
   getHorseBreedLabel,
   getHorsePrimaryDisciplineLabel,
   getHorsePricingVisibilityLabel,
+  getHorseSaleTypeLabels,
   getHorseSexLabel,
   horseListingInclude,
 } from "@/lib/horses/listing-data";
@@ -110,18 +111,11 @@ export default async function HorsePage({
     { label: "Age", value: horse.age ? `${horse.age} years` : "Not specified" },
     { label: "Discipline", value: getHorsePrimaryDisciplineLabel(horse) || "Not specified" },
     { label: "Best Suited For", value: getHorseBestSuitedForLabel(horse) || "Not specified" },
+    { label: "Sale Type", value: getHorseSaleTypeLabels(horse).join(", ") || "Not specified" },
     { label: "Height", value: horse.height ? `${horse.height} hh` : "Not specified" },
     { label: "Sex", value: getHorseSexLabel(horse) || "Not specified" },
     { label: "Pricing", value: getHorsePricingVisibilityLabel(horse) },
     { label: "Location", value: horse.location || "Not specified" },
-    {
-      label: "Status",
-      value: horse.saleStatus
-        .toLowerCase()
-        .split("_")
-        .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
-        .join(" "),
-    },
   ];
   const totalPhotoCount =
     (horse.image ? 1 : 0) + horse.media.filter((item) => item.type === "IMAGE").length;

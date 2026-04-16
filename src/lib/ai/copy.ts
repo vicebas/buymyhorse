@@ -69,7 +69,6 @@ function getHorseDescriptionPrompt(input: CopyGenerationRequest) {
     gender: input.context.gender || "",
     location: input.context.location || "",
     price: input.context.price || "",
-    saleStatus: input.context.saleStatus || "",
     keyDetails: input.context.keyDetails || "",
     existingDescription: existingDraft || "",
     mode: input.mode,

@@ -57,6 +57,11 @@ export async function POST(
           adminDisableReason: true,
         },
       },
+      saleTypes: {
+        select: {
+          saleTypeOptionId: true,
+        },
+      },
     },
   });
 
@@ -78,15 +83,14 @@ export async function POST(
   const height = String(formData.get("height") || "").trim();
   const location = String(formData.get("location") || "").trim();
   const keyDetails = String(formData.get("keyDetails") || "").trim();
-  const saleStatus = String(formData.get("saleStatus") || "FOR_SALE").trim();
   const publishToMarketplace = formData.get("isPublished") === "on";
   const breedOptionId = String(formData.get("breedOptionId") || "").trim() || null;
   const sexOptionId = String(formData.get("sexOptionId") || "").trim() || null;
   const primaryDisciplineId = String(formData.get("primaryDisciplineId") || "").trim() || null;
   const pricingVisibilityOptionId = String(formData.get("pricingVisibilityOptionId") || "").trim() || null;
-  const saleTypeOptionId = String(formData.get("saleTypeOptionId") || "").trim() || null;
   const colorOptionId = String(formData.get("colorOptionId") || "").trim() || null;
   const importStatusOptionId = String(formData.get("importStatusOptionId") || "").trim() || null;
+  const saleTypeIds = parseStringList(formData.getAll("saleTypeIds"));
   const secondaryDisciplineIds = parseStringList(formData.getAll("secondaryDisciplineIds"));
   const bestSuitedForIds = parseStringList(formData.getAll("bestSuitedForIds"));
   const currentlyCompetingInIds = parseStringList(formData.getAll("currentlyCompetingInIds"));
@@ -174,16 +178,15 @@ export async function POST(
         location: location || null,
         description: description || null,
         keyDetails: keyDetails || null,
-        saleStatus: saleStatus as "FOR_SALE" | "CONSIDERING_OFFERS" | "LEASE" | "SOLD" | "NOT_AVAILABLE",
         isPublished: publishToMarketplace,
         image: imagePath,
         breedOptionId,
         sexOptionId,
         primaryDisciplineId,
         pricingVisibilityOptionId,
-        saleTypeOptionId,
         colorOptionId,
         importStatusOptionId,
+        saleTypeIds,
         secondaryDisciplineIds,
         bestSuitedForIds,
         currentlyCompetingInIds,
@@ -203,16 +206,15 @@ export async function POST(
         location: location || null,
         description: description || null,
         keyDetails: keyDetails || null,
-        saleStatus: saleStatus as "FOR_SALE" | "CONSIDERING_OFFERS" | "LEASE" | "SOLD" | "NOT_AVAILABLE",
         isPublished: publishToMarketplace,
         image: imagePath,
         breedOptionId,
         sexOptionId,
         primaryDisciplineId,
         pricingVisibilityOptionId,
-        saleTypeOptionId,
         colorOptionId,
         importStatusOptionId,
+        saleTypeIds,
         secondaryDisciplineIds,
         bestSuitedForIds,
         currentlyCompetingInIds,
@@ -238,12 +240,22 @@ export async function POST(
     horseId: horse.id,
   });
 
-  const significantFields = ['saleStatus', 'description', 'keyDetails', 'name', 'location', 'pricingVisibilityOptionId', 'primaryDisciplineId', 'saleTypeOptionId'] as const
-  const changedFields = significantFields.filter(field => {
+  const significantFields = ['description', 'keyDetails', 'name', 'location', 'pricingVisibilityOptionId', 'primaryDisciplineId'] as const
+  const changedFields: string[] = significantFields.filter(field => {
     const before = (existingHorse as Record<string, unknown>)[field]
     const after = (horse as Record<string, unknown>)[field]
     return String(before ?? '') !== String(after ?? '')
   })
+
+  const previousSaleTypeSet = new Set(existingHorse.saleTypes.map((item) => item.saleTypeOptionId));
+  const nextSaleTypeSet = new Set(saleTypeIds);
+
+  if (
+    previousSaleTypeSet.size !== nextSaleTypeSet.size ||
+    [...previousSaleTypeSet].some((id) => !nextSaleTypeSet.has(id))
+  ) {
+    changedFields.push('sale type');
+  }
 
   if (horse.isPublished && changedFields.length > 0) {
     dispatchHorseNotification({

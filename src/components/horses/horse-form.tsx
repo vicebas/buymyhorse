@@ -31,7 +31,6 @@ type HorseFormValues = {
   description: string;
   height: string;
   location: string;
-  saleStatus: "FOR_SALE" | "CONSIDERING_OFFERS" | "LEASE" | "SOLD" | "NOT_AVAILABLE";
   isPublished: boolean;
   image?: string | null;
   keyDetails: string;
@@ -39,7 +38,7 @@ type HorseFormValues = {
   sexOptionId: string;
   primaryDisciplineId: string;
   pricingVisibilityOptionId: string;
-  saleTypeOptionId: string;
+  saleTypeIds: string[];
   colorOptionId: string;
   importStatusOptionId: string;
   secondaryDisciplineIds: string[];
@@ -78,7 +77,6 @@ const defaultValues: HorseFormValues = {
   description: "",
   height: "",
   location: "",
-  saleStatus: "FOR_SALE",
   isPublished: true,
   image: null,
   keyDetails: "",
@@ -86,7 +84,7 @@ const defaultValues: HorseFormValues = {
   sexOptionId: "",
   primaryDisciplineId: "",
   pricingVisibilityOptionId: "",
-  saleTypeOptionId: "",
+  saleTypeIds: [],
   colorOptionId: "",
   importStatusOptionId: "",
   secondaryDisciplineIds: [],
@@ -156,6 +154,7 @@ export default function HorseForm({ mode, options, initialValues, horseId }: Hor
   const [experiencedThroughIds, setExperiencedThroughIds] = useState(values.experiencedThroughIds);
   const [schoolingThroughIds, setSchoolingThroughIds] = useState(values.schoolingThroughIds);
   const [idealRiderIds, setIdealRiderIds] = useState(values.idealRiderIds);
+  const [saleTypeIds, setSaleTypeIds] = useState(values.saleTypeIds);
   const [horseTypeIds, setHorseTypeIds] = useState(values.horseTypeIds);
 
   const visibleDivisionOptions = useMemo(() => {
@@ -189,7 +188,6 @@ export default function HorseForm({ mode, options, initialValues, horseId }: Hor
       price: String(
         options.pricingVisibility.find((option) => option.id === String(formData.get("pricingVisibilityOptionId") || ""))?.label || ""
       ),
-      saleStatus: String(formData.get("saleStatus") || "").trim(),
       keyDetails: String(formData.get("keyDetails") || "").trim(),
       description: String(formData.get("description") || description || "").trim(),
     };
@@ -246,20 +244,16 @@ export default function HorseForm({ mode, options, initialValues, horseId }: Hor
             <Input id="name" name="name" placeholder="e.g. Sterling Knight" defaultValue={values.name} required />
           </div>
 
-          <SelectField
-            id="saleStatus"
-            label="Sale Status"
-            defaultValue={values.saleStatus}
-            options={[
-              { id: "FOR_SALE", label: "For Sale" },
-              { id: "CONSIDERING_OFFERS", label: "Considering Offers" },
-              { id: "LEASE", label: "Lease" },
-              { id: "SOLD", label: "Sold" },
-              { id: "NOT_AVAILABLE", label: "Not Available" },
-            ]}
-          />
-
-          <SelectField id="saleTypeOptionId" label="Sale Type" defaultValue={values.saleTypeOptionId} options={options.saleTypes} placeholder="Select sale type" />
+          <div className="md:col-span-2">
+            <HorseMultiSelect
+              label="Sale Type"
+              name="saleTypeIds"
+              options={options.saleTypes}
+              selected={saleTypeIds}
+              onChange={setSaleTypeIds}
+              placeholder="Select sale type"
+            />
+          </div>
           <SelectField id="pricingVisibilityOptionId" label="Pricing Visibility" defaultValue={values.pricingVisibilityOptionId} options={options.pricingVisibility} placeholder="Select pricing visibility" />
           <SelectField id="breedOptionId" label="Breed" defaultValue={values.breedOptionId} options={options.breeds} placeholder="Select breed" />
           <SelectField id="sexOptionId" label="Sex" defaultValue={values.sexOptionId} options={options.sexes} placeholder="Select sex" />

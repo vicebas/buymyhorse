@@ -80,7 +80,6 @@ async function main() {
         sexOptionId: pickRandomId(sexes),
         primaryDisciplineId: primaryDiscipline?.id || null,
         pricingVisibilityOptionId: pickRandomId(pricingVisibility),
-        saleTypeOptionId: pickRandomId(saleTypes),
         colorOptionId: pickRandomId(colors),
         importStatusOptionId: pickRandomId(importStatuses),
         feiPassport: Math.random() > 0.5,
@@ -95,6 +94,12 @@ async function main() {
           deleteMany: {},
           create: pickRandomIds(idealRiders, 1, 3).map((idealRiderOptionId) => ({
             idealRiderOptionId,
+          })),
+        },
+        saleTypes: {
+          deleteMany: {},
+          create: pickRandomIds(saleTypes, 1, 3).map((saleTypeOptionId) => ({
+            saleTypeOptionId,
           })),
         },
         horseTypes: {

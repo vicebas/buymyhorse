@@ -15,18 +15,8 @@ type FilterValues = {
   heightMin: string;
   heightMax: string;
   location: string;
-  saleStatus: string;
   sort: string;
 };
-
-const saleStatusOptions = [
-  { value: "", label: "All statuses" },
-  { value: "FOR_SALE", label: "For Sale" },
-  { value: "CONSIDERING_OFFERS", label: "Considering Offers" },
-  { value: "LEASE", label: "Lease" },
-  { value: "SOLD", label: "Sold" },
-  { value: "NOT_AVAILABLE", label: "Not Available" },
-];
 
 const sortOptions = [
   { value: "featured-first", label: "Featured first" },
@@ -55,7 +45,6 @@ export default function PublicBarnFilters({
         values.heightMin,
         values.heightMax,
         values.location,
-        values.saleStatus,
       ].filter(Boolean).length,
     [values]
   );
@@ -76,7 +65,6 @@ export default function PublicBarnFilters({
     setOrDelete(params, "heightMin", values.heightMin);
     setOrDelete(params, "heightMax", values.heightMax);
     setOrDelete(params, "location", values.location);
-    setOrDelete(params, "saleStatus", values.saleStatus);
 
     if (!values.sort || values.sort === "featured-first") {
       params.delete("sort");
@@ -96,7 +84,6 @@ export default function PublicBarnFilters({
       heightMin: "",
       heightMax: "",
       location: "",
-      saleStatus: "",
       sort: "featured-first",
     };
 
@@ -115,7 +102,7 @@ export default function PublicBarnFilters({
             Filter This Barn
           </h3>
           <p className="mt-2 text-sm text-[color:var(--foreground-soft)]">
-            Narrow the public roster by discipline, range, location, and listing status.
+            Narrow the public roster by discipline, range, and location.
           </p>
         </div>
 
@@ -161,23 +148,6 @@ export default function PublicBarnFilters({
                 value={values.location}
                 onChange={(e) => updateValue("location", e.target.value)}
               />
-            </label>
-
-            <label className="block">
-              <span className="mb-2 block text-sm font-medium text-[color:var(--foreground-soft)]">
-                Sale status
-              </span>
-              <select
-                value={values.saleStatus}
-                onChange={(e) => updateValue("saleStatus", e.target.value)}
-                className="h-10 w-full rounded-lg border border-[color:var(--border)] bg-[color:var(--background-elevated)] px-3 text-sm text-[color:var(--foreground)] outline-none transition focus:border-ring focus:ring-3 focus:ring-ring/50"
-              >
-                {saleStatusOptions.map((option) => (
-                  <option key={option.value || "all"} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </select>
             </label>
 
             <label className="block">
@@ -283,7 +253,6 @@ function hasActiveFilters(values: FilterValues) {
       values.ageMax ||
       values.heightMin ||
       values.heightMax ||
-      values.location ||
-      values.saleStatus
+      values.location
   );
 }

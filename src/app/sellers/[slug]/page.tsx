@@ -31,7 +31,6 @@ export default async function PublicSellerPage({
     heightMin?: string;
     heightMax?: string;
     location?: string;
-    saleStatus?: string;
     sort?: string;
   }>;
 }) {
@@ -82,17 +81,12 @@ export default async function PublicSellerPage({
   const heightMin = parseOptionalNumber(filters.heightMin);
   const heightMax = parseOptionalNumber(filters.heightMax);
   const location = filters.location?.trim().toLowerCase() || "";
-  const saleStatus = filters.saleStatus?.trim() || "";
   const sort = filters.sort === "newest" ? "newest" : "featured-first";
 
   const featuredHorses = seller.horses.filter((horse) => horse.isBarnFeatured);
   const rosterHorses = [...seller.horses]
     .filter((horse) => {
       if (discipline && getHorsePrimaryDisciplineLabel(horse) !== discipline) {
-        return false;
-      }
-
-      if (saleStatus && horse.saleStatus !== saleStatus) {
         return false;
       }
 
@@ -153,7 +147,7 @@ export default async function PublicSellerPage({
       : false;
   const hasPublishedHorses = seller.horses.length > 0;
   const hasActiveFilters = Boolean(
-    discipline || ageMin !== null || ageMax !== null || heightMin !== null || heightMax !== null || location || saleStatus
+    discipline || ageMin !== null || ageMax !== null || heightMin !== null || heightMax !== null || location
   );
   const disciplineOptions = Array.from(
     new Set(
@@ -319,7 +313,6 @@ export default async function PublicSellerPage({
                 heightMin: filters.heightMin?.trim() || "",
                 heightMax: filters.heightMax?.trim() || "",
                 location: filters.location?.trim() || "",
-                saleStatus,
                 sort,
               }}
               disciplineOptions={disciplineOptions}

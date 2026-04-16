@@ -8,16 +8,15 @@ export type HorseListingPayload = {
   location: string | null;
   description: string | null;
   keyDetails: string | null;
-  saleStatus: "FOR_SALE" | "CONSIDERING_OFFERS" | "LEASE" | "SOLD" | "NOT_AVAILABLE";
   isPublished: boolean;
   image: string | null;
   breedOptionId: string | null;
   sexOptionId: string | null;
   primaryDisciplineId: string | null;
   pricingVisibilityOptionId: string | null;
-  saleTypeOptionId: string | null;
   colorOptionId: string | null;
   importStatusOptionId: string | null;
+  saleTypeIds: string[];
   secondaryDisciplineIds: string[];
   bestSuitedForIds: string[];
   currentlyCompetingInIds: string[];
@@ -39,7 +38,6 @@ export function buildHorseListingMutation(payload: HorseListingPayload) {
     location: payload.location,
     description: payload.description,
     keyDetails: payload.keyDetails,
-    saleStatus: payload.saleStatus,
     isPublished: payload.isPublished,
     isActive: payload.isPublished,
     image: payload.image,
@@ -47,7 +45,6 @@ export function buildHorseListingMutation(payload: HorseListingPayload) {
     sexOptionId: payload.sexOptionId,
     primaryDisciplineId: payload.primaryDisciplineId,
     pricingVisibilityOptionId: payload.pricingVisibilityOptionId,
-    saleTypeOptionId: payload.saleTypeOptionId,
     colorOptionId: payload.colorOptionId,
     importStatusOptionId: payload.importStatusOptionId,
     feiPassport: payload.feiPassport,
@@ -81,6 +78,11 @@ export function buildHorseListingRelationWrites(payload: HorseListingPayload) {
         idealRiderOptionId,
       })),
     },
+    saleTypes: {
+      create: payload.saleTypeIds.map((saleTypeOptionId) => ({
+        saleTypeOptionId,
+      })),
+    },
     horseTypes: {
       create: payload.horseTypeIds.map((horseTypeOptionId) => ({
         horseTypeOptionId,
@@ -104,6 +106,10 @@ export function buildHorseListingRelationUpdateWrites(payload: HorseListingPaylo
     idealRiders: {
       deleteMany: {},
       create: relationCreates.idealRiders.create,
+    },
+    saleTypes: {
+      deleteMany: {},
+      create: relationCreates.saleTypes.create,
     },
     horseTypes: {
       deleteMany: {},

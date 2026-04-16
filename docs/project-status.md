@@ -16,6 +16,10 @@ Last updated: 2026-03-27
 - Client-approved scope changes supersede parts of the older legacy project PDF: EquiTag scans may resolve to a barn or a horse, billing is the activation-plus-extra-profiles model, and public-endpoint rate limiting is not currently planned.
 
 ## Completed (most recent first)
+- **Sale Type now follows the same multi-select taxonomy flow as the other horse listing metadata.**
+  - **Schema/app model**: Replaced the single `Horse.saleTypeOptionId` relation with join-table-backed horse sale type selections, including migration backfill for existing horse records.
+  - **Seller flow**: Horse create/edit now uses the shared searchable multi-select for sale types, and server-side create/update paths persist repeated `saleTypeIds` just like the other horse taxonomy arrays.
+  - **Buyer visibility**: Marketplace filtering now matches horses by any selected sale type, marketplace cards render sale type chips, and the public horse profile shows all selected sale type values in Key Info.
 - **Horse create flow relation writes now correctly distinguish create vs update behavior.**
   - **Prisma fix**: The shared horse listing relation helper now emits create-safe nested writes for `prisma.horse.create()` and separate update-safe writes with `deleteMany` resets for `prisma.horse.update()`.
   - **Impact**: Add-horse submissions with taxonomy multi-select data no longer fail on nested `deleteMany` during creation, while edit-horse continues replacing relation rows cleanly.
@@ -62,7 +66,7 @@ Last updated: 2026-03-27
   - **Server repos**: `src/server/follows.ts` (toggleBarnFollow, getBarnFollowers), `src/server/notifications.ts` (createNotification, listUserNotifications, markAllRead, 30-min cooldown query), `src/server/notification-preferences.ts` (getOrCreatePreferences, updatePreferences).
   - **Email templates**: 3 new HTML templates in `src/lib/email/templates.ts` — new horse from barn, horse updated, new message. Corresponding send functions added to `src/lib/email/mailer.ts`.
   - **Dispatch service**: `src/lib/notifications/dispatch.ts` — `dispatchHorseNotification` fans out to all barn followers in parallel (respects per-user system + email prefs). `dispatchMessageNotification` checks prefs + 30-min email cooldown per conversation (creates system notification first, then conditionally emails).
-  - **Route hooks**: Fire-and-forget dispatch added to horse create (on publish), horse publish (toggle to true), horse update (only on significant field changes: price, saleStatus, description, keyDetails, name, breed, discipline, level, location — only on published horses), and message send (notifies the other party).
+  - **Route hooks**: Fire-and-forget dispatch added to horse create (on publish), horse publish (toggle to true), horse update (only on significant field changes such as pricing, description, key details, name, and location — only on published horses), and message send (notifies the other party).
   - **API routes**: `GET/POST /api/barns/[slug]/follow` (status + toggle), `GET /api/notifications` (list + unread count), `POST /api/notifications/mark-read` (specific IDs or all), `GET/PATCH /api/settings/notifications` (prefs read/write).
   - **Follow button**: `src/components/barn/follow-barn-button.tsx` — client component with optimistic toggle, loading state, unauthenticated redirect to `/login`. Integrated into `src/app/sellers/[slug]/page.tsx` hero (server-side initial follow status, hidden for barn owners).
   - **Notification bell**: `src/components/layout/notification-bell.tsx` — 60s polling, unread badge capped at "9+", dropdown panel with relative timestamps + per-type routing, marks all read on open. Integrated into `app-header.tsx` for both buyer and seller desktop nav.
