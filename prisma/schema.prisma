@@ -21,12 +21,15 @@ enum UserRole {
 }
 
 enum BarnPlan {
-  ACTIVATION
+  SINGLE_HORSE
+  BARN_STARTER
+  BARN_GROWTH
+  BARN_UNLIMITED
 }
 
 enum BillingCadence {
   MONTHLY
-  YEARLY
+  SEMIANNUAL
 }
 
 enum BarnBillingStatus {
@@ -155,8 +158,8 @@ model SellerProfile {
   headline                            String?
   phone                               String?
   primaryNotificationEmail            String?
-  plan                                BarnPlan           @default(ACTIVATION)
-  billingCadence                      BillingCadence     @default(MONTHLY)
+  plan                                BarnPlan           @default(SINGLE_HORSE)
+  billingCadence                      BillingCadence     @default(SEMIANNUAL)
   billingStatus                       BarnBillingStatus  @default(TRIALING)
   adminDisabledAt                     DateTime?
   adminDisabledByUserId               String?
@@ -587,17 +590,19 @@ model AdminActionLog {
 }
 
 model BillingSettings {
-  id                       String   @id @default("default")
-  activationTrialEnabled   Boolean  @default(false)
-  activationTrialDays      Int      @default(7)
-  activationMonthlyPriceId String?
-  activationYearlyPriceId  String?
-  extraHorsePriceId        String?
-  equitagPhysicalPriceId   String?
-  equitagMaxBatchQuantity  Int      @default(10)
-  updatedByUserId          String?
-  createdAt                DateTime @default(now())
-  updatedAt                DateTime @updatedAt
+  id                      String   @id @default("default")
+  activationTrialEnabled  Boolean  @default(false)
+  activationTrialDays     Int      @default(7)
+  singleHorsePriceId      String?
+  barnStarterPriceId      String?
+  barnGrowthPriceId       String?
+  barnUnlimitedPriceId    String?
+  extraHorsePriceId       String?
+  equitagPhysicalPriceId  String?
+  equitagMaxBatchQuantity Int      @default(10)
+  updatedByUserId         String?
+  createdAt               DateTime @default(now())
+  updatedAt               DateTime @updatedAt
 }
 
 model BarnHorseSlotLedger {

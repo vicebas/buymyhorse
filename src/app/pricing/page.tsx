@@ -16,12 +16,12 @@ export default async function PricingPage() {
   let userState: {
     hasSession: boolean;
     hasBarn: boolean;
-    currentCadence: "MONTHLY" | "YEARLY" | null;
+    currentPlan: "SINGLE_HORSE" | "BARN_STARTER" | "BARN_GROWTH" | "BARN_UNLIMITED" | null;
     currentStatus: "TRIALING" | "ACTIVE" | "INCOMPLETE" | "PAST_DUE" | "CANCELED" | "EXPIRED" | null;
   } = {
     hasSession: false,
     hasBarn: false,
-    currentCadence: null,
+    currentPlan: null,
     currentStatus: null,
   };
 
@@ -34,7 +34,7 @@ export default async function PricingPage() {
       prisma.sellerProfile.findUnique({
         where: { userId: session.user.id },
         select: {
-          billingCadence: true,
+          plan: true,
           billingStatus: true,
         },
       }),
@@ -47,7 +47,7 @@ export default async function PricingPage() {
     userState = {
       hasSession: true,
       hasBarn: Boolean(sellerProfile),
-      currentCadence: sellerProfile?.billingCadence ?? null,
+      currentPlan: sellerProfile?.plan ?? null,
       currentStatus: sellerProfile?.billingStatus ?? null,
     };
   }
@@ -65,11 +65,11 @@ export default async function PricingPage() {
             </div>
 
             <h1 className="mt-8 text-5xl font-extrabold tracking-tight text-[color:var(--foreground-strong)] md:text-6xl">
-              One activation, then add horses as you grow
+              Aggressive launch pricing for every barn size
             </h1>
 
             <p className="mt-5 text-lg leading-8 text-[color:var(--foreground-soft)]">
-              HorseRoster activation includes one active horse. Buy extra horse profiles when your sales roster needs more public capacity.
+              Choose the launch plan that fits your active horse count, then add one-time extra capacity whenever your roster needs more room.
             </p>
           </div>
         </div>
@@ -79,7 +79,7 @@ export default async function PricingPage() {
         <PricingPlanExperience
           hasSession={userState.hasSession}
           hasBarn={userState.hasBarn}
-          currentCadence={userState.currentCadence}
+          currentPlan={userState.currentPlan}
           currentStatus={userState.currentStatus}
           trialEnabled={billingSettings.activationTrialEnabled}
           trialDays={billingSettings.activationTrialDays}
@@ -91,10 +91,10 @@ export default async function PricingPage() {
           <article className="rounded-[2rem] border border-[color:var(--border)] bg-[color:var(--card)] p-6 shadow-[var(--shadow-card)]">
             <div className="flex items-center gap-3 text-[color:var(--foreground-strong)]">
               <CheckCircle2 className="h-5 w-5 text-[color:var(--primary)]" />
-              1 included active horse
+              Plans sized for real rosters
             </div>
             <p className="mt-3 text-sm leading-6 text-[color:var(--foreground-soft)]">
-              Activation covers one active public horse listing. Draft horses can stay in your barn without consuming public capacity.
+              Launch plans cover 1, 5, 20, or unlimited active horse listings while drafts stay in your barn without consuming public capacity.
             </p>
           </article>
 
@@ -104,7 +104,7 @@ export default async function PricingPage() {
               Extra horse add-on
             </div>
             <p className="mt-3 text-sm leading-6 text-[color:var(--foreground-soft)]">
-              Additional horse profiles are one-time purchases for $14.99 each and become available again whenever your activation is active.
+              Additional horse profiles are one-time purchases for $14.99 each and become available again whenever your billing is active.
             </p>
           </article>
 
@@ -114,7 +114,7 @@ export default async function PricingPage() {
               Stripe billing
             </div>
             <p className="mt-3 text-sm leading-6 text-[color:var(--foreground-soft)]">
-              Choose monthly or yearly activation, then manage renewal settings and invoices through the Stripe billing portal.
+              Start on any launch plan, then manage payment methods, invoices, and future plan changes through the Stripe billing portal.
             </p>
           </article>
         </div>

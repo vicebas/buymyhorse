@@ -1,7 +1,10 @@
 import { getBillingSettings } from "@/lib/billing/settings";
+import {
+  BILLING_PLANS,
+  getPlanCadence,
+  type BarnPlanKey,
+} from "@/lib/billing/catalog";
 
-export type BarnPlanKey = "ACTIVATION";
-export type BillingCadenceKey = "MONTHLY" | "YEARLY";
 export type BarnBillingStatusKey =
   | "TRIALING"
   | "ACTIVE"
@@ -10,22 +13,20 @@ export type BarnBillingStatusKey =
   | "CANCELED"
   | "EXPIRED";
 
-export const ACTIVATION_PLAN = {
-  key: "ACTIVATION" as const,
-  name: "HorseRoster Program Activation",
-  includedHorseSlots: 1,
-  description: "Activation includes one active horse and its EquiTag.",
-};
-
-export async function getActivationPriceId(cadence: BillingCadenceKey) {
+export async function getPlanPriceId(planKey: BarnPlanKey) {
   const settings = await getBillingSettings();
-  const priceId =
-    cadence === "YEARLY"
-      ? settings.activationYearlyPriceId
-      : settings.activationMonthlyPriceId;
+
+  const priceIdByPlan: Record<BarnPlanKey, string> = {
+    SINGLE_HORSE: settings.singleHorsePriceId,
+    BARN_STARTER: settings.barnStarterPriceId,
+    BARN_GROWTH: settings.barnGrowthPriceId,
+    BARN_UNLIMITED: settings.barnUnlimitedPriceId,
+  };
+
+  const priceId = priceIdByPlan[planKey];
 
   if (!priceId) {
-    throw new Error(`Missing Stripe activation price ID for ${cadence} in admin billing settings.`);
+    throw new Error(`Missing Stripe price ID for ${BILLING_PLANS[planKey].name} in admin billing settings.`);
   }
 
   return priceId;
@@ -49,18 +50,21 @@ export async function getBillingProductFromPriceId(priceId?: string | null) {
 
   const settings = await getBillingSettings();
 
-  if (settings.activationMonthlyPriceId === priceId) {
-    return {
-      kind: "ACTIVATION" as const,
-      cadence: "MONTHLY" as const,
-    };
-  }
+  const recurringPriceByPlan: Array<[BarnPlanKey, string]> = [
+    ["SINGLE_HORSE", settings.singleHorsePriceId],
+    ["BARN_STARTER", settings.barnStarterPriceId],
+    ["BARN_GROWTH", settings.barnGrowthPriceId],
+    ["BARN_UNLIMITED", settings.barnUnlimitedPriceId],
+  ];
 
-  if (settings.activationYearlyPriceId === priceId) {
-    return {
-      kind: "ACTIVATION" as const,
-      cadence: "YEARLY" as const,
-    };
+  for (const [planKey, configuredPriceId] of recurringPriceByPlan) {
+    if (configuredPriceId === priceId) {
+      return {
+        kind: "PLAN" as const,
+        planKey,
+        cadence: getPlanCadence(planKey),
+      };
+    }
   }
 
   if (settings.extraHorsePriceId === priceId) {

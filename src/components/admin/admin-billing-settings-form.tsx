@@ -9,8 +9,10 @@ import { Input } from "@/components/ui/input";
 export default function AdminBillingSettingsForm({
   activationTrialEnabled,
   activationTrialDays,
-  activationMonthlyPriceId,
-  activationYearlyPriceId,
+  singleHorsePriceId,
+  barnStarterPriceId,
+  barnGrowthPriceId,
+  barnUnlimitedPriceId,
   extraHorsePriceId,
   equitagPhysicalPriceId,
   equitagMaxBatchQuantity,
@@ -19,8 +21,10 @@ export default function AdminBillingSettingsForm({
 }: {
   activationTrialEnabled: boolean;
   activationTrialDays: number;
-  activationMonthlyPriceId: string;
-  activationYearlyPriceId: string;
+  singleHorsePriceId: string;
+  barnStarterPriceId: string;
+  barnGrowthPriceId: string;
+  barnUnlimitedPriceId: string;
   extraHorsePriceId: string;
   equitagPhysicalPriceId: string;
   equitagMaxBatchQuantity: number;
@@ -30,8 +34,10 @@ export default function AdminBillingSettingsForm({
   const router = useRouter();
   const [enabled, setEnabled] = useState(activationTrialEnabled);
   const [days, setDays] = useState(String(activationTrialDays));
-  const [monthlyPriceId, setMonthlyPriceId] = useState(activationMonthlyPriceId);
-  const [yearlyPriceId, setYearlyPriceId] = useState(activationYearlyPriceId);
+  const [singleHorsePlanPriceId, setSingleHorsePlanPriceId] = useState(singleHorsePriceId);
+  const [starterPlanPriceId, setStarterPlanPriceId] = useState(barnStarterPriceId);
+  const [growthPlanPriceId, setGrowthPlanPriceId] = useState(barnGrowthPriceId);
+  const [unlimitedPlanPriceId, setUnlimitedPlanPriceId] = useState(barnUnlimitedPriceId);
   const [extraPriceId, setExtraPriceId] = useState(extraHorsePriceId);
   const [eqPhysicalPriceId, setEqPhysicalPriceId] = useState(equitagPhysicalPriceId);
   const [eqMaxBatch, setEqMaxBatch] = useState(String(equitagMaxBatchQuantity));
@@ -50,8 +56,10 @@ export default function AdminBillingSettingsForm({
       body: JSON.stringify({
         activationTrialEnabled: enabled,
         activationTrialDays: Number(days),
-        activationMonthlyPriceId: monthlyPriceId.trim(),
-        activationYearlyPriceId: yearlyPriceId.trim(),
+        singleHorsePriceId: singleHorsePlanPriceId.trim(),
+        barnStarterPriceId: starterPlanPriceId.trim(),
+        barnGrowthPriceId: growthPlanPriceId.trim(),
+        barnUnlimitedPriceId: unlimitedPlanPriceId.trim(),
         extraHorsePriceId: extraPriceId.trim(),
         equitagPhysicalPriceId: eqPhysicalPriceId.trim(),
         equitagMaxBatchQuantity: Number(eqMaxBatch),
@@ -76,10 +84,10 @@ export default function AdminBillingSettingsForm({
           Billing settings
         </p>
         <h2 className="mt-2 text-2xl font-extrabold text-[color:var(--foreground-strong)]">
-          Activation pricing and trial control
+          Launch pricing and trial control
         </h2>
         <p className="mt-2 text-sm leading-6 text-[color:var(--foreground-soft)]">
-          Stripe secrets stay in env. Admin controls the three Stripe price IDs and the onboarding trial behavior here.
+          Stripe secrets stay in env. Admin controls the launch plan Stripe price IDs, add-on pricing, and the onboarding trial behavior here.
         </p>
       </div>
 
@@ -102,10 +110,10 @@ export default function AdminBillingSettingsForm({
         </div>
         <div className="rounded-2xl bg-[color:var(--background-elevated)] p-4">
           <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[color:var(--foreground-soft)]">
-            Monthly activation price
+            Single Horse price
           </p>
           <p className="mt-2 break-all text-sm text-[color:var(--foreground)]">
-            {monthlyPriceId || "Not configured"}
+            {singleHorsePlanPriceId || "Not configured"}
           </p>
         </div>
         <div className="rounded-2xl bg-[color:var(--background-elevated)] p-4">
@@ -125,20 +133,30 @@ export default function AdminBillingSettingsForm({
               Stripe price IDs
             </p>
             <p className="mt-2 text-sm leading-6 text-[color:var(--foreground-soft)]">
-              These IDs are used for activation checkout and extra horse purchases. Update them here instead of changing the app code.
+              These IDs are used for launch plan checkout and extra horse purchases. Update them here instead of changing the app code.
             </p>
           </div>
 
           <div className="grid gap-3">
             <Input
-              value={monthlyPriceId}
-              onChange={(event) => setMonthlyPriceId(event.target.value)}
-              placeholder="price_... monthly activation"
+              value={singleHorsePlanPriceId}
+              onChange={(event) => setSingleHorsePlanPriceId(event.target.value)}
+              placeholder="price_... Single Horse"
             />
             <Input
-              value={yearlyPriceId}
-              onChange={(event) => setYearlyPriceId(event.target.value)}
-              placeholder="price_... yearly activation"
+              value={starterPlanPriceId}
+              onChange={(event) => setStarterPlanPriceId(event.target.value)}
+              placeholder="price_... Barn Starter"
+            />
+            <Input
+              value={growthPlanPriceId}
+              onChange={(event) => setGrowthPlanPriceId(event.target.value)}
+              placeholder="price_... Barn Growth"
+            />
+            <Input
+              value={unlimitedPlanPriceId}
+              onChange={(event) => setUnlimitedPlanPriceId(event.target.value)}
+              placeholder="price_... Barn Unlimited"
             />
             <Input
               value={extraPriceId}
@@ -191,7 +209,7 @@ export default function AdminBillingSettingsForm({
               onChange={(event) => setEnabled(event.target.checked)}
               className="h-4 w-4 rounded border-[color:var(--border)]"
             />
-            Enable activation trial for new barns
+            Enable launch trial for new barns
           </label>
 
           <div className="max-w-xs space-y-2">

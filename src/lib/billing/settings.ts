@@ -3,8 +3,10 @@ import prisma from "@/lib/db/prisma";
 export const DEFAULT_BILLING_SETTINGS = {
   activationTrialEnabled: false,
   activationTrialDays: 7,
-  activationMonthlyPriceId: process.env.STRIPE_PRICE_ACTIVATION_MONTHLY || "",
-  activationYearlyPriceId: process.env.STRIPE_PRICE_ACTIVATION_YEARLY || "",
+  singleHorsePriceId: process.env.STRIPE_PRICE_SINGLE_HORSE || "",
+  barnStarterPriceId: process.env.STRIPE_PRICE_BARN_STARTER || "",
+  barnGrowthPriceId: process.env.STRIPE_PRICE_BARN_GROWTH || "",
+  barnUnlimitedPriceId: process.env.STRIPE_PRICE_BARN_UNLIMITED || "",
   extraHorsePriceId: process.env.STRIPE_PRICE_EXTRA_HORSE || "",
   equitagPhysicalPriceId: process.env.STRIPE_PRICE_EQUITAG_PHYSICAL || "",
   equitagMaxBatchQuantity: 10,
@@ -21,10 +23,14 @@ export async function getBillingSettings() {
       settings?.activationTrialEnabled ?? DEFAULT_BILLING_SETTINGS.activationTrialEnabled,
     activationTrialDays:
       settings?.activationTrialDays ?? DEFAULT_BILLING_SETTINGS.activationTrialDays,
-    activationMonthlyPriceId:
-      settings?.activationMonthlyPriceId || DEFAULT_BILLING_SETTINGS.activationMonthlyPriceId,
-    activationYearlyPriceId:
-      settings?.activationYearlyPriceId || DEFAULT_BILLING_SETTINGS.activationYearlyPriceId,
+    singleHorsePriceId:
+      settings?.singleHorsePriceId || DEFAULT_BILLING_SETTINGS.singleHorsePriceId,
+    barnStarterPriceId:
+      settings?.barnStarterPriceId || DEFAULT_BILLING_SETTINGS.barnStarterPriceId,
+    barnGrowthPriceId:
+      settings?.barnGrowthPriceId || DEFAULT_BILLING_SETTINGS.barnGrowthPriceId,
+    barnUnlimitedPriceId:
+      settings?.barnUnlimitedPriceId || DEFAULT_BILLING_SETTINGS.barnUnlimitedPriceId,
     extraHorsePriceId: settings?.extraHorsePriceId || DEFAULT_BILLING_SETTINGS.extraHorsePriceId,
     equitagPhysicalPriceId:
       settings?.equitagPhysicalPriceId || DEFAULT_BILLING_SETTINGS.equitagPhysicalPriceId,

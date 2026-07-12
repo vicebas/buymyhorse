@@ -555,7 +555,7 @@ async function main() {
         website: barn.website,
         phone: barn.phone,
         logo: logoKey,
-        plan: BarnPlan.ACTIVATION,
+        plan: BarnPlan.BARN_UNLIMITED,
         billingCadence: BillingCadence.MONTHLY,
         billingStatus: BarnBillingStatus.ACTIVE,
       },

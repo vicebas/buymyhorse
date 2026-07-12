@@ -4,14 +4,14 @@ import { useState } from "react";
 import { Loader2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import type { BillingCadence } from "@/components/billing/barn-plan-selector";
+import type { BillingPlanSelection } from "@/components/billing/barn-plan-selector";
 
 export default function StartCheckoutButton({
-  cadence,
+  planKey,
   label,
   variant = "default",
 }: {
-  cadence: BillingCadence;
+  planKey: BillingPlanSelection;
   label: string;
   variant?: "default" | "outline";
 }) {
@@ -27,7 +27,7 @@ export default function StartCheckoutButton({
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ cadence }),
+      body: JSON.stringify({ planKey }),
     });
 
     const data = await res.json().catch(() => null);

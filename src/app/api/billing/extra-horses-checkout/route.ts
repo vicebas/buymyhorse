@@ -44,7 +44,7 @@ export async function POST(req: Request) {
 
     if (!entitlements.billingActive) {
       return NextResponse.json(
-        { error: "MyBarn activation must be active before you can buy additional horse profiles." },
+        { error: "An active billing plan is required before you can buy additional horse profiles." },
         { status: 403 }
       );
     }

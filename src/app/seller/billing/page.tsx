@@ -8,6 +8,7 @@ import ManageBillingButton from "@/components/billing/manage-billing-button";
 import SellerAppHeader from "@/components/layout/seller-app-header";
 import { Button } from "@/components/ui/button";
 import { authOptions } from "@/lib/auth/options";
+import { BILLING_PLANS } from "@/lib/billing/catalog";
 import { getBarnEntitlements } from "@/lib/billing/entitlements";
 import prisma from "@/lib/db/prisma";
 import { formatDateMDY } from "@/lib/formatting";
@@ -64,6 +65,8 @@ export default async function SellerBillingPage() {
   const entitlements = await getBarnEntitlements(seller.id);
   const effectiveBilling = entitlements.effective;
   const showWarning = !entitlements.billingActive || !entitlements.canPublishMoreHorses;
+  const effectivePlan = BILLING_PLANS[effectiveBilling.effectivePlan as keyof typeof BILLING_PLANS];
+  const syncedPlan = BILLING_PLANS[seller.plan as keyof typeof BILLING_PLANS];
 
   return (
     <main className="min-h-screen bg-[color:var(--background)] text-[color:var(--foreground)]">
@@ -75,10 +78,10 @@ export default async function SellerBillingPage() {
             Barn billing
           </p>
           <h1 className="mt-3 text-5xl font-extrabold text-[color:var(--foreground-strong)]">
-            MyBarn Activation
+            Launch Plan Billing
           </h1>
           <p className="mt-3 max-w-3xl text-lg text-[color:var(--foreground-soft)]">
-            Manage your activation cadence, buy additional horse profiles, and see exactly how much public roster capacity your barn has right now.
+            Manage your current launch plan, buy additional horse profiles, and see exactly how much public roster capacity your barn has right now.
           </p>
         </div>
       </section>
@@ -91,7 +94,7 @@ export default async function SellerBillingPage() {
               <div className="space-y-2">
                 <p className="font-semibold">
                   {!entitlements.billingActive
-                    ? "Your activation is not currently active."
+                    ? "Your billing plan is not currently active."
                     : "You have used all currently available horse profiles."}
                 </p>
                 <p className="text-sm opacity-90">
@@ -106,11 +109,11 @@ export default async function SellerBillingPage() {
           <div className="rounded-[2rem] border border-[color:var(--border)] bg-[color:var(--card)] p-5 shadow-[var(--shadow-card)]">
             <div className="flex items-center gap-2 text-sm text-[color:var(--foreground-soft)]">
               <Rocket className="h-4 w-4" />
-              Activation
+              Current plan
             </div>
-            <p className="mt-4 text-3xl font-extrabold text-[color:var(--foreground-strong)]">HorseRoster</p>
+            <p className="mt-4 text-3xl font-extrabold text-[color:var(--foreground-strong)]">{effectivePlan.name}</p>
             <p className="mt-1 text-sm text-[color:var(--foreground-soft)]">
-              {effectiveBilling.effectiveBillingCadence === "MONTHLY" ? "MONTHLY SUBSCRIPTION" : "ANNUAL SUBSCRIPTION"}
+              {effectivePlan.priceLabel} {effectivePlan.intervalLabel}
             </p>
           </div>
 
@@ -137,10 +140,12 @@ export default async function SellerBillingPage() {
               Published horse profiles
             </div>
             <p className="mt-4 text-3xl font-extrabold text-[color:var(--foreground-strong)]">
-              {entitlements.usage.publishedHorseCount}/{entitlements.activation.totalHorseCapacity}
+              {entitlements.activation.isUnlimited
+                ? `${entitlements.usage.publishedHorseCount} / Unlimited`
+                : `${entitlements.usage.publishedHorseCount}/${entitlements.activation.totalHorseCapacity}`}
             </p>
             <p className="mt-1 text-sm text-[color:var(--foreground-soft)]">
-              Base included profile: {entitlements.activation.includedHorseSlots}
+              Base included profile: {entitlements.activation.isUnlimited ? "Unlimited" : entitlements.activation.includedHorseSlots}
             </p>
           </div>
 
@@ -161,15 +166,15 @@ export default async function SellerBillingPage() {
         <div className="grid gap-8 xl:grid-cols-[1.35fr_0.65fr]">
           <div className="rounded-[2rem] border border-[color:var(--border)] bg-[color:var(--card)] p-6 shadow-[var(--shadow-card)]">
             <h2 className="text-2xl font-extrabold text-[color:var(--foreground-strong)]">
-              MyBarn Activation
+              Launch plans
             </h2>
             <p className="mt-2 text-sm leading-6 text-[color:var(--foreground-soft)]">
-              Switch between monthly and annual activation, then buy one-time additional horse profiles whenever you need more public roster capacity.
+              Switch between launch plans, then buy one-time additional horse profiles whenever you need more public roster capacity.
             </p>
 
             <div className="mt-6">
               <BillingPlanManager
-                currentCadence={effectiveBilling.effectiveBillingCadence as "MONTHLY" | "YEARLY"}
+                currentPlan={effectiveBilling.effectivePlan as "SINGLE_HORSE" | "BARN_STARTER" | "BARN_GROWTH" | "BARN_UNLIMITED"}
                 currentStatus={effectiveBilling.effectiveBillingStatus as "TRIALING" | "ACTIVE" | "INCOMPLETE" | "PAST_DUE" | "CANCELED" | "EXPIRED"}
                 billingActive={entitlements.billingActive}
                 purchasedExtraHorseSlots={entitlements.usage.purchasedExtraHorseSlots}
@@ -185,10 +190,10 @@ export default async function SellerBillingPage() {
               </h2>
               <div className="mt-4 space-y-2 text-sm text-[color:var(--foreground-soft)]">
                 <p>
-                  Stripe synced: {seller.billingCadence} / {seller.billingStatus}
+                  Stripe synced: {syncedPlan.name} / {seller.billingStatus}
                 </p>
                 <p>
-                    Effective: {effectiveBilling.effectiveBillingCadence} / {effectiveBilling.effectiveBillingStatus}
+                    Effective: {effectivePlan.name} / {effectiveBilling.effectiveBillingStatus}
                 </p>
                 {effectiveBilling.overrideActive ? (
                   <p>
@@ -210,19 +215,19 @@ export default async function SellerBillingPage() {
               <div className="mt-5 flex flex-wrap gap-3">
                 {seller.stripeCustomerId ? <ManageBillingButton /> : null}
                 <Link href="/pricing">
-                  <Button variant="outline">View activation pricing</Button>
+                  <Button variant="outline">View launch pricing</Button>
                 </Link>
               </div>
             </div>
 
             <div className="rounded-[2rem] border border-[color:var(--border)] bg-[color:var(--card)] p-6 shadow-[var(--shadow-card)]">
               <h2 className="text-xl font-extrabold text-[color:var(--foreground-strong)]">
-                Activation rules
+                Plan rules
               </h2>
               <ul className="mt-4 space-y-3 text-sm leading-6 text-[color:var(--foreground-soft)]">
                 <li>A horse must include required listing details and a main image before it can be published.</li>
-                <li>Base activation includes one active horse profile; additional horse profiles are additive.</li>
-                <li>If activation is inactive, public horse pages, marketplace listings, and barn roster exposure are hidden until billing is active again.</li>
+                <li>Your selected plan sets the included active horse capacity; additional horse profiles are additive.</li>
+                <li>If billing is inactive, public horse pages, marketplace listings, and barn roster exposure are hidden until billing is active again.</li>
               </ul>
             </div>
           </div>

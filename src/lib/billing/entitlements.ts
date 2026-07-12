@@ -1,5 +1,13 @@
 import prisma from "@/lib/db/prisma";
-import { ACTIVATION_PLAN, isPaidBillingStatus } from "@/lib/billing/plans";
+import {
+  isPaidBillingStatus,
+} from "@/lib/billing/plans";
+import {
+  getIncludedHorseSlots,
+  getPlanDefinition,
+  isUnlimitedPlan,
+  type BarnPlanKey,
+} from "@/lib/billing/catalog";
 
 function hasActiveBillingOverride(seller: {
   adminPlanOverride?: string | null;
@@ -189,13 +197,19 @@ export async function getBarnEntitlements(sellerId: string) {
 
   const usage = await getBarnUsageSummary(seller.id);
   const effective = getEffectiveBarnBillingState(seller);
+  const planKey = effective.effectivePlan as BarnPlanKey;
+  const planDefinition = getPlanDefinition(planKey);
+  const includedHorseSlots = getIncludedHorseSlots(planKey);
   const trialExpired =
     effective.effectiveBillingStatus === "TRIALING" &&
     Boolean(seller.trialEndsAt && seller.trialEndsAt.getTime() < Date.now());
   const billingActive = isPaidBillingStatus(effective.effectiveBillingStatus) && !trialExpired;
-  const totalHorseCapacity = billingActive
-    ? ACTIVATION_PLAN.includedHorseSlots + usage.totalExtraHorseSlots
-    : 0;
+  const unlimited = isUnlimitedPlan(planKey);
+  const totalHorseCapacity = !billingActive
+    ? 0
+    : unlimited
+      ? null
+      : (includedHorseSlots ?? 0) + usage.totalExtraHorseSlots;
 
   return {
     seller,
@@ -204,17 +218,21 @@ export async function getBarnEntitlements(sellerId: string) {
     billingActive,
     trialExpired,
     activation: {
-      name: ACTIVATION_PLAN.name,
-      includedHorseSlots: ACTIVATION_PLAN.includedHorseSlots,
+      key: planDefinition.key,
+      name: planDefinition.name,
+      includedHorseSlots,
       totalHorseCapacity,
+      isUnlimited: unlimited && billingActive,
     },
     limits: {
-      name: ACTIVATION_PLAN.name,
+      name: planDefinition.name,
       horseLimit: totalHorseCapacity,
       equiTagLimit: null,
+      isUnlimited: unlimited && billingActive,
     },
     canCreateEquiTag: true,
-    canPublishMoreHorses: billingActive && usage.publishedHorseCount < totalHorseCapacity,
+    canPublishMoreHorses:
+      billingActive && (unlimited || usage.publishedHorseCount < (totalHorseCapacity ?? 0)),
   };
 }
 
@@ -235,6 +253,10 @@ export async function canPublishHorseForSeller({
     return false;
   }
 
+  if (entitlements.activation.isUnlimited) {
+    return true;
+  }
+
   const publishedCount = await prisma.horse.count({
     where: {
       sellerProfileId: sellerId,
@@ -250,7 +272,7 @@ export async function canPublishHorseForSeller({
     },
   });
 
-  return publishedCount < entitlements.activation.totalHorseCapacity;
+  return publishedCount < (entitlements.activation.totalHorseCapacity ?? 0);
 }
 
 export function validateHorseForPublishing(horse: {
@@ -262,8 +284,8 @@ export function validateHorseForPublishing(horse: {
   image?: string | null;
   breedOptionId?: string | null;
   sexOptionId?: string | null;
-  primaryDisciplineId?: string | null;
   pricingVisibilityOptionId?: string | null;
+  primaryDisciplineId?: string | null;
   bestSuitedForIds?: string[] | null;
   idealRiderIds?: string[] | null;
   horseTypeIds?: string[] | null;
@@ -276,15 +298,14 @@ export function validateHorseForPublishing(horse: {
   if (!horse.location?.trim()) missing.push("location");
   if (!horse.description?.trim()) missing.push("description");
   if (!horse.image?.trim()) missing.push("main image");
-  if (!horse.breedOptionId) missing.push("breed");
-  if (!horse.sexOptionId) missing.push("sex");
-  if (!horse.primaryDisciplineId) missing.push("primary discipline");
   if (!horse.pricingVisibilityOptionId) missing.push("pricing visibility");
+  if (!horse.primaryDisciplineId) missing.push("primary discipline");
   if (!horse.bestSuitedForIds?.length) missing.push("best suited for");
   if (!horse.idealRiderIds?.length) missing.push("ideal rider");
-  if (!horse.horseTypeIds?.length) missing.push("horse type / intended use");
+  if (!horse.horseTypeIds?.length) missing.push("horse type");
 
   return {
+    ok: missing.length === 0,
     isPublishReady: missing.length === 0,
     missing,
   };

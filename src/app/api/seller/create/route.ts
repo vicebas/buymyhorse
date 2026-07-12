@@ -4,9 +4,9 @@ import { z } from "zod";
 
 import { authOptions } from "@/lib/auth/options";
 import { isAdminRole, isSuperAdminRole } from "@/lib/admin/roles";
-import { type BillingCadenceKey } from "@/lib/billing/plans";
+import { getPlanCadence, type BarnPlanKey } from "@/lib/billing/catalog";
 import { getBillingSettings } from "@/lib/billing/settings";
-import { createActivationCheckoutSession } from "@/lib/billing/stripe";
+import { createPlanCheckoutSession } from "@/lib/billing/stripe";
 import prisma from "@/lib/db/prisma";
 
 const sellerSchema = z.object({
@@ -14,7 +14,7 @@ const sellerSchema = z.object({
   location: z.string().trim().max(120).optional().or(z.literal("")),
   website: z.url("Website must be a valid URL.").optional().or(z.literal("")),
   bio: z.string().trim().max(2000).optional().or(z.literal("")),
-  cadence: z.enum(["MONTHLY", "YEARLY"]),
+  planKey: z.enum(["SINGLE_HORSE", "BARN_STARTER", "BARN_GROWTH", "BARN_UNLIMITED"]),
 });
 
 function slugify(text: string) {
@@ -90,6 +90,7 @@ export async function POST(req: Request) {
     const now = new Date();
     const billingSettings = await getBillingSettings();
     const hasTrial = billingSettings.activationTrialEnabled && billingSettings.activationTrialDays > 0;
+    const billingCadence = getPlanCadence(parsed.data.planKey as BarnPlanKey);
 
     const seller = await prisma.sellerProfile.create({
       data: {
@@ -99,8 +100,8 @@ export async function POST(req: Request) {
         location: parsed.data.location || null,
         website: parsed.data.website || null,
         bio: parsed.data.bio || null,
-        plan: "ACTIVATION",
-        billingCadence: parsed.data.cadence,
+        plan: parsed.data.planKey as BarnPlanKey,
+        billingCadence,
         billingStatus: hasTrial ? "TRIALING" : "INCOMPLETE",
         trialEndsAt: hasTrial
           ? new Date(now.getTime() + billingSettings.activationTrialDays * 24 * 60 * 60 * 1000)
@@ -135,11 +136,11 @@ export async function POST(req: Request) {
     }
 
     const origin = new URL(req.url).origin;
-    const checkoutSession = await createActivationCheckoutSession({
+    const checkoutSession = await createPlanCheckoutSession({
       sellerId: seller.id,
       userId: session.user.id,
       displayName: seller.displayName,
-      cadence: parsed.data.cadence as BillingCadenceKey,
+      planKey: parsed.data.planKey as BarnPlanKey,
       origin,
     });
 

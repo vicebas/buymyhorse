@@ -16,15 +16,19 @@ export async function POST(req: Request) {
   const body = (await req.json().catch(() => null)) as {
     activationTrialEnabled?: boolean;
     activationTrialDays?: number;
-    activationMonthlyPriceId?: string;
-    activationYearlyPriceId?: string;
+    singleHorsePriceId?: string;
+    barnStarterPriceId?: string;
+    barnGrowthPriceId?: string;
+    barnUnlimitedPriceId?: string;
     extraHorsePriceId?: string;
     equitagPhysicalPriceId?: string;
     equitagMaxBatchQuantity?: number;
   } | null;
 
-  const activationMonthlyPriceId = body?.activationMonthlyPriceId?.trim() || "";
-  const activationYearlyPriceId = body?.activationYearlyPriceId?.trim() || "";
+  const singleHorsePriceId = body?.singleHorsePriceId?.trim() || "";
+  const barnStarterPriceId = body?.barnStarterPriceId?.trim() || "";
+  const barnGrowthPriceId = body?.barnGrowthPriceId?.trim() || "";
+  const barnUnlimitedPriceId = body?.barnUnlimitedPriceId?.trim() || "";
   const extraHorsePriceId = body?.extraHorsePriceId?.trim() || "";
   const equitagPhysicalPriceId = body?.equitagPhysicalPriceId?.trim() || "";
   const equitagMaxBatchQuantity = body?.equitagMaxBatchQuantity;
@@ -42,8 +46,10 @@ export async function POST(req: Request) {
     typeof body?.activationTrialEnabled !== "boolean" ||
     !hasValidTrialDays ||
     !hasValidBatchQty ||
-    !activationMonthlyPriceId ||
-    !activationYearlyPriceId ||
+    !singleHorsePriceId ||
+    !barnStarterPriceId ||
+    !barnGrowthPriceId ||
+    !barnUnlimitedPriceId ||
     !extraHorsePriceId
   ) {
     return NextResponse.json({ error: "Invalid billing settings." }, { status: 400 });
@@ -57,8 +63,10 @@ export async function POST(req: Request) {
     update: {
       activationTrialEnabled: body.activationTrialEnabled,
       activationTrialDays: safeActivationTrialDays,
-      activationMonthlyPriceId,
-      activationYearlyPriceId,
+      singleHorsePriceId,
+      barnStarterPriceId,
+      barnGrowthPriceId,
+      barnUnlimitedPriceId,
       extraHorsePriceId,
       equitagPhysicalPriceId,
       equitagMaxBatchQuantity: safeBatchQty,
@@ -68,8 +76,10 @@ export async function POST(req: Request) {
       id: "default",
       activationTrialEnabled: body.activationTrialEnabled,
       activationTrialDays: safeActivationTrialDays,
-      activationMonthlyPriceId,
-      activationYearlyPriceId,
+      singleHorsePriceId,
+      barnStarterPriceId,
+      barnGrowthPriceId,
+      barnUnlimitedPriceId,
       extraHorsePriceId,
       equitagPhysicalPriceId,
       equitagMaxBatchQuantity: safeBatchQty,
@@ -82,12 +92,14 @@ export async function POST(req: Request) {
     actionType: "BILLING_SETTINGS_UPDATED",
     targetType: "BILLING",
     targetId: "default",
-    reason: "Updated global activation billing settings",
+    reason: "Updated global launch billing settings",
     metadata: {
       activationTrialEnabled: body.activationTrialEnabled,
       activationTrialDays: safeActivationTrialDays,
-      activationMonthlyPriceId,
-      activationYearlyPriceId,
+      singleHorsePriceId,
+      barnStarterPriceId,
+      barnGrowthPriceId,
+      barnUnlimitedPriceId,
       extraHorsePriceId,
       equitagPhysicalPriceId,
       equitagMaxBatchQuantity: safeBatchQty,

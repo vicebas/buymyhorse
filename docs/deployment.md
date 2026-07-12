@@ -1,6 +1,6 @@
 # HorseRoster — Deployment Guide
 
-This guide covers a full production deployment of HorseRoster on a single AWS EC2 instance using Docker Compose, with Neon (or any managed PostgreSQL) for the database, S3 + CloudFront for media, and Stripe for billing.
+This guide covers a full production deployment of HorseRoster on a single AWS EC2 instance using Docker Compose, with a managed PostgreSQL database such as Amazon RDS, S3 + CloudFront for media, and Stripe for billing.
 
 ---
 
@@ -8,7 +8,7 @@ This guide covers a full production deployment of HorseRoster on a single AWS EC
 
 1. [Prerequisites](#1-prerequisites)
 2. [S3 + CloudFront Setup](#2-s3--cloudfront-setup)
-3. [Database Setup (Neon)](#3-database-setup-neon)
+3. [Database Setup](#3-database-setup)
 4. [EC2 Instance Setup](#4-ec2-instance-setup)
 5. [Stripe Webhook Setup](#5-stripe-webhook-setup)
 6. [Environment File](#6-environment-file)
@@ -24,7 +24,7 @@ This guide covers a full production deployment of HorseRoster on a single AWS EC
 - An AWS account with IAM access
 - A domain name with DNS control
 - Stripe account (for billing)
-- Neon account (or any managed PostgreSQL provider)
+- Managed PostgreSQL database access
 - SendGrid account (transactional email)
 - Anthropic API key (AI highlights feature)
 - Git access to this repository on the EC2 machine
@@ -123,18 +123,22 @@ If using a **dedicated IAM user**, generate an access key pair and add both valu
 
 ---
 
-## 3. Database Setup (Neon)
+## 3. Database Setup
 
-### 3.1 Create a Neon project
+Choose one of these database connection approaches:
 
-1. Go to [neon.tech](https://neon.tech) and create a new project.
-2. Choose a region close to your EC2 instance.
-3. Copy the connection string:
-   ```
-   postgresql://user:password@ep-xxx.us-east-2.aws.neon.tech/neondb?sslmode=require
-   ```
+- Static PostgreSQL credentials via `DATABASE_URL`
+- Amazon RDS IAM auth for the app runtime
 
-### 3.2 Run migrations
+For a static connection string, use the provider's standard PostgreSQL URL, for example:
+
+```text
+postgresql://user:password@db-host:5432/appdb?sslmode=require
+```
+
+For RDS IAM auth at runtime, the app uses `DB_AUTH_MODE=rds-iam` plus `RDSHOST`, `AWS_REGION`, `PGPORT`, `PGDATABASE`, and `PGUSER`. Prisma CLI commands still need a temporary `DATABASE_URL` in the shell session where you run them.
+
+### 3.1 Run migrations
 
 From your dev machine or the EC2 instance after cloning the repo:
 
@@ -144,7 +148,21 @@ DATABASE_URL="<connection-string>" npx prisma migrate deploy
 
 This applies all migrations in `prisma/migrations/` to the production database without running the seeder.
 
-### 3.3 (Optional) Run the demo seeder
+If you are using RDS IAM instead of a static password, generate a temporary token-backed URL before running the command:
+
+```bash
+export RDSHOST="your-rds-host.us-east-2.rds.amazonaws.com"
+export AWS_REGION="us-east-2"
+export PGUSER="postgres"
+export PGDATABASE="postgres"
+export PGPORT="5432"
+
+export DATABASE_URL="postgresql://${PGUSER}:$(aws rds generate-db-auth-token --hostname "$RDSHOST" --port "$PGPORT" --username "$PGUSER" --region "$AWS_REGION" | python3 -c 'import sys, urllib.parse; print(urllib.parse.quote(sys.stdin.read().strip(), safe=\"\"))')@${RDSHOST}:${PGPORT}/${PGDATABASE}?sslmode=require"
+
+npx prisma migrate deploy
+```
+
+### 3.2 (Optional) Run the demo seeder
 
 If you want the demo barns and horses pre-loaded:
 
@@ -232,12 +250,14 @@ cd /home/ubuntu/horseroster
 
 ### 5.2 Create Stripe products and prices
 
-You need three prices in your Stripe account:
+You need five prices in your Stripe account:
 
 | Product | Billing type | Description |
 |---------|-------------|-------------|
-| Barn Activation — Monthly | Recurring, monthly | Monthly barn subscription |
-| Barn Activation — Yearly | Recurring, yearly | Annual barn subscription |
+| Single Horse | Recurring, every 6 months | One active horse included |
+| Barn Starter | Recurring, monthly | Five active horses included |
+| Barn Growth | Recurring, monthly | Twenty active horses included |
+| Barn Unlimited | Recurring, monthly | Unlimited active horses |
 | Additional Horse Profile | One-time | Extra horse listing slot |
 
 Note each `price_...` ID. You will enter these in the admin panel after deploy — **not** in the env file.
@@ -254,7 +274,13 @@ nano /home/ubuntu/horseroster/.env.production
 
 ```env
 # Database
-DATABASE_URL=postgresql://user:password@ep-xxx.us-east-2.aws.neon.tech/neondb?sslmode=require
+DATABASE_URL=postgresql://user:password@db-host:5432/appdb?sslmode=require
+# Or use RDS IAM auth for the app runtime:
+# DB_AUTH_MODE=rds-iam
+# RDSHOST=your-rds-host.us-east-2.rds.amazonaws.com
+# PGPORT=5432
+# PGDATABASE=postgres
+# PGUSER=postgres
 
 # Auth
 NEXTAUTH_URL=https://your-domain.com
@@ -366,10 +392,10 @@ Visit `https://your-domain.com` — you should see the HorseRoster homepage serv
 UPDATE "User" SET role = 'SUPER_ADMIN' WHERE email = 'admin@your-domain.com';
 ```
 
-Connect via the Neon SQL editor in the dashboard, or via `psql`:
+Connect using your database provider's SQL console, or via `psql`:
 
 ```bash
-psql "postgresql://user:password@ep-xxx.us-east-2.aws.neon.tech/neondb?sslmode=require"
+psql "postgresql://user:password@db-host:5432/appdb?sslmode=require"
 ```
 
 ### 8.2 Configure Stripe prices in the admin panel

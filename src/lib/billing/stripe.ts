@@ -1,5 +1,9 @@
 import prisma from "@/lib/db/prisma";
-import { getActivationPriceId, getExtraHorsePriceId, type BillingCadenceKey } from "@/lib/billing/plans";
+import { getPlanCadence, type BarnPlanKey } from "@/lib/billing/catalog";
+import {
+  getExtraHorsePriceId,
+  getPlanPriceId,
+} from "@/lib/billing/plans";
 import { getBillingSettings } from "@/lib/billing/settings";
 import { getStripe } from "@/lib/stripe";
 
@@ -44,26 +48,27 @@ export async function ensureSellerStripeCustomer({
   return customer.id;
 }
 
-export async function createActivationCheckoutSession({
+export async function createPlanCheckoutSession({
   sellerId,
   userId,
   displayName,
-  cadence,
+  planKey,
   origin,
 }: {
   sellerId: string;
   userId: string;
   displayName: string;
-  cadence: BillingCadenceKey;
+  planKey: BarnPlanKey;
   origin: string;
 }) {
   const stripe = getStripe();
   const customerId = await ensureSellerStripeCustomer({
     sellerId,
-    userId,
-    displayName,
+      userId,
+      displayName,
   });
-  const priceId = await getActivationPriceId(cadence);
+  const priceId = await getPlanPriceId(planKey);
+  const cadence = getPlanCadence(planKey);
 
   const checkoutSession = await stripe.checkout.sessions.create({
     mode: "subscription",
@@ -73,13 +78,15 @@ export async function createActivationCheckoutSession({
     line_items: [{ price: priceId, quantity: 1 }],
     metadata: {
       sellerProfileId: sellerId,
-      billingKind: "ACTIVATION",
+      billingKind: "PLAN",
+      planKey,
       cadence,
     },
     subscription_data: {
       metadata: {
         sellerProfileId: sellerId,
-        billingKind: "ACTIVATION",
+        billingKind: "PLAN",
+        planKey,
         cadence,
       },
     },
@@ -88,7 +95,7 @@ export async function createActivationCheckoutSession({
   await prisma.sellerProfile.update({
     where: { id: sellerId },
     data: {
-      plan: "ACTIVATION",
+      plan: planKey,
       billingCadence: cadence,
       billingStatus: "INCOMPLETE",
       stripePriceId: priceId,

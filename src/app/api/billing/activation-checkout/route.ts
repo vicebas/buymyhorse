@@ -3,12 +3,11 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 
 import { authOptions } from "@/lib/auth/options";
-import { type BillingCadenceKey } from "@/lib/billing/plans";
-import { createActivationCheckoutSession } from "@/lib/billing/stripe";
+import { createPlanCheckoutSession } from "@/lib/billing/stripe";
 import prisma from "@/lib/db/prisma";
 
 const checkoutSchema = z.object({
-  cadence: z.enum(["MONTHLY", "YEARLY"]),
+  planKey: z.enum(["SINGLE_HORSE", "BARN_STARTER", "BARN_GROWTH", "BARN_UNLIMITED"]),
 });
 
 export async function POST(req: Request) {
@@ -23,7 +22,7 @@ export async function POST(req: Request) {
     const parsed = checkoutSchema.safeParse(body);
 
     if (!parsed.success) {
-      return NextResponse.json({ error: "Invalid activation selection." }, { status: 400 });
+      return NextResponse.json({ error: "Invalid billing plan selection." }, { status: 400 });
     }
 
     const seller = await prisma.sellerProfile.findUnique({
@@ -40,11 +39,11 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Barn not found." }, { status: 404 });
     }
 
-    const checkoutSession = await createActivationCheckoutSession({
+    const checkoutSession = await createPlanCheckoutSession({
       sellerId: seller.id,
       userId: session.user.id,
       displayName: seller.displayName,
-      cadence: parsed.data.cadence as BillingCadenceKey,
+      planKey: parsed.data.planKey,
       origin: new URL(req.url).origin,
     });
 
@@ -55,7 +54,7 @@ export async function POST(req: Request) {
         error:
           error instanceof Error
             ? error.message
-            : "Unable to start activation checkout right now.",
+            : "Unable to start billing checkout right now.",
       },
       { status: 500 }
     );

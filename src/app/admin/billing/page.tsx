@@ -1,6 +1,7 @@
 import AdminBillingOverrideForm from "@/components/admin/admin-billing-override-form";
 import AdminBillingSettingsForm from "@/components/admin/admin-billing-settings-form";
 import AdminHorseSlotAdjustmentForm from "@/components/admin/admin-horse-slot-adjustment-form";
+import { BILLING_PLANS } from "@/lib/billing/catalog";
 import { getBarnEntitlements, getEffectiveBarnBillingState } from "@/lib/billing/entitlements";
 import { getBillingSettings } from "@/lib/billing/settings";
 import prisma from "@/lib/db/prisma";
@@ -62,8 +63,10 @@ export default async function AdminBillingPage({
       <AdminBillingSettingsForm
         activationTrialEnabled={settings.activationTrialEnabled}
         activationTrialDays={settings.activationTrialDays}
-        activationMonthlyPriceId={settings.activationMonthlyPriceId}
-        activationYearlyPriceId={settings.activationYearlyPriceId}
+        singleHorsePriceId={settings.singleHorsePriceId}
+        barnStarterPriceId={settings.barnStarterPriceId}
+        barnGrowthPriceId={settings.barnGrowthPriceId}
+        barnUnlimitedPriceId={settings.barnUnlimitedPriceId}
         extraHorsePriceId={settings.extraHorsePriceId}
         equitagPhysicalPriceId={settings.equitagPhysicalPriceId}
         equitagMaxBatchQuantity={settings.equitagMaxBatchQuantity}
@@ -90,6 +93,8 @@ export default async function AdminBillingPage({
         {barns.map((barn) => {
           const effective = getEffectiveBarnBillingState(barn);
           const entitlements = entitlementsByBarn.get(barn.id);
+          const syncedPlan = BILLING_PLANS[barn.plan as keyof typeof BILLING_PLANS];
+          const effectivePlan = BILLING_PLANS[effective.effectivePlan as keyof typeof BILLING_PLANS];
 
           return (
             <article
@@ -111,7 +116,7 @@ export default async function AdminBillingPage({
                         Stripe synced
                       </p>
                       <p className="mt-2 text-sm text-[color:var(--foreground)]">
-                        {barn.billingCadence} / {barn.billingStatus}
+                        {syncedPlan.name} / {barn.billingStatus}
                       </p>
                     </div>
                     <div className="rounded-2xl bg-[color:var(--background-elevated)] p-4">
@@ -119,7 +124,7 @@ export default async function AdminBillingPage({
                         Effective app state
                       </p>
                       <p className="mt-2 text-sm text-[color:var(--foreground)]">
-                        {effective.effectiveBillingCadence} / {effective.effectiveBillingStatus}
+                        {effectivePlan.name} / {effective.effectiveBillingStatus}
                       </p>
                     </div>
                   </div>
@@ -140,7 +145,9 @@ export default async function AdminBillingPage({
                       </div>
                       <div className="rounded-2xl bg-[color:var(--background-elevated)] p-4">
                         <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[color:var(--foreground-soft)]">Total capacity</p>
-                        <p className="mt-2 text-lg font-bold text-[color:var(--foreground-strong)]">{entitlements.activation.totalHorseCapacity}</p>
+                        <p className="mt-2 text-lg font-bold text-[color:var(--foreground-strong)]">
+                          {entitlements.activation.isUnlimited ? "Unlimited" : entitlements.activation.totalHorseCapacity}
+                        </p>
                       </div>
                     </div>
                   ) : null}
@@ -160,9 +167,9 @@ export default async function AdminBillingPage({
                 <div className="space-y-4">
                   <AdminBillingOverrideForm
                     sellerId={barn.id}
-                    currentCadence={barn.billingCadence}
+                    currentPlan={barn.plan}
                     currentStatus={barn.billingStatus}
-                    overrideCadence={barn.adminBillingCadenceOverride}
+                    overridePlan={barn.adminPlanOverride}
                     overrideStatus={barn.adminBillingStatusOverride}
                     overrideReason={barn.adminBillingOverrideReason}
                     overrideExpiresAt={barn.adminBillingOverrideExpiresAt?.toISOString() || null}

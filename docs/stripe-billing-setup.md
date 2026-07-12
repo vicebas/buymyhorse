@@ -9,19 +9,23 @@ Use [`.env.example`](/home/vicebas/Workspace/buymyhorse/buymyhorse/.env.example)
 
 ## Admin Billing Configuration
 Configure these in `/admin/billing` instead of `.env`:
-- activation monthly price ID
-- activation yearly price ID
+- Single Horse price ID
+- Barn Starter price ID
+- Barn Growth price ID
+- Barn Unlimited price ID
 - extra horse price ID
-- activation trial enabled / days
+- launch trial enabled / days
 
 ## Local Wiring
-1. Create the three Stripe Prices in the same Stripe account you want to test:
-   - Activation Monthly
-   - Activation Yearly
+1. Create the five Stripe Prices in the same Stripe account you want to test:
+   - Single Horse
+   - Barn Starter
+   - Barn Growth
+   - Barn Unlimited
    - Additional Horse Profile
 2. Put `STRIPE_SECRET_KEY` and `STRIPE_WEBHOOK_SECRET` in your local `.env`.
 3. Sign in as an admin and open `/admin/billing`.
-4. Save the three Stripe `price_...` IDs in the billing settings form.
+4. Save the five Stripe `price_...` IDs in the billing settings form.
 5. Set `NEXTAUTH_URL=http://localhost:3000`.
 
 ## Local Webhook Forwarding
@@ -47,7 +51,7 @@ npm run dev
 2. Sign in with an admin account and confirm `/admin/billing` shows:
 - Stripe secret key: configured
 - Stripe webhook secret: configured
-- saved price IDs for monthly activation, yearly activation, and extra horse
+- saved price IDs for the four launch plans and extra horse
 
 3. Sign in with a buyer account and open:
 
@@ -55,10 +59,10 @@ npm run dev
 /mybarn/onboard
 ```
 
-4. Choose `Monthly` or `Yearly` activation and submit the barn form.
+4. Choose a launch plan and submit the barn form.
 Expected:
 - barn is created
-- if the admin trial is enabled, the user lands in `/mybarn` with a trialing activation
+- if the admin trial is enabled, the user lands in `/mybarn` with a trialing plan
 - if the admin trial is disabled, the app redirects to Stripe Checkout
 
 5. From MyBarn billing:
@@ -68,7 +72,7 @@ Expected:
 ```
 
 Expected:
-- activation cadence and billing status are visible
+- current launch plan and billing status are visible
 - published horse usage is visible against total capacity
 - purchased/admin additional horse profiles are visible
 - `Manage Billing` opens Stripe portal once a Stripe customer exists
@@ -81,13 +85,13 @@ Expected:
 
 7. Try publishing horses beyond available capacity or without the required listing fields/image.
 Expected:
-- publish is blocked with a clear activation/capacity error message
+- publish is blocked with a clear billing-plan/capacity error message
 
-8. If activation becomes inactive, verify that public horse pages, barn pages, marketplace exposure, and EquiTag redirects are hidden until billing is active again.
+8. If billing becomes inactive, verify that public horse pages, barn pages, marketplace exposure, and EquiTag redirects are hidden until billing is active again.
 
 ## Notes
-- There is one activation product with two cadences: monthly and yearly.
-- Additional Horse Profile is a one-time purchase that adds reusable capacity whenever activation is active.
+- The launch plans are `Single Horse` (6 months), `Barn Starter` (monthly), `Barn Growth` (monthly), and `Barn Unlimited` (monthly).
+- Additional Horse Profile is a one-time purchase that adds reusable capacity whenever billing is active.
 - Stripe secrets remain env-only; the admin UI only manages non-secret billing configuration.
 - Trial is controlled globally by admin settings and only affects new barn onboardings after the setting changes.
-- Existing horses are not deleted when activation is inactive; public exposure is simply hidden until billing is active again.
+- Existing horses are not deleted when billing is inactive; public exposure is simply hidden until billing is active again.

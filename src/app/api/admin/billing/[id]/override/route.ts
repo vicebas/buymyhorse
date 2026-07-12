@@ -19,7 +19,7 @@ export async function POST(
   const { id } = await params;
   const body = (await req.json().catch(() => null)) as {
     clear?: boolean;
-    cadence?: "MONTHLY" | "YEARLY";
+    plan?: "SINGLE_HORSE" | "BARN_STARTER" | "BARN_GROWTH" | "BARN_UNLIMITED";
     status?: "TRIALING" | "ACTIVE" | "INCOMPLETE" | "PAST_DUE" | "CANCELED" | "EXPIRED";
     reason?: string;
     expiresAt?: string | null;
@@ -61,15 +61,17 @@ export async function POST(
     return NextResponse.json({ success: true });
   }
 
-  if (!body?.cadence || !body?.status || !reason) {
-    return NextResponse.json({ error: "Cadence, status, and reason are required." }, { status: 400 });
+  if (!body?.plan || !body?.status || !reason) {
+    return NextResponse.json({ error: "Plan, status, and reason are required." }, { status: 400 });
   }
+
+  const overrideCadence = body.plan === "SINGLE_HORSE" ? "SEMIANNUAL" : "MONTHLY";
 
   await prisma.sellerProfile.update({
     where: { id },
     data: {
-      adminPlanOverride: "ACTIVATION",
-      adminBillingCadenceOverride: body.cadence,
+      adminPlanOverride: body.plan,
+      adminBillingCadenceOverride: overrideCadence,
       adminBillingStatusOverride: body.status,
       adminBillingOverrideReason: reason,
       adminBillingOverrideExpiresAt: body.expiresAt ? new Date(body.expiresAt) : null,
@@ -85,8 +87,8 @@ export async function POST(
     targetId: id,
     reason,
     metadata: {
-      plan: "ACTIVATION",
-      cadence: body.cadence,
+      plan: body.plan,
+      cadence: overrideCadence,
       status: body.status,
       expiresAt: body.expiresAt || null,
     },

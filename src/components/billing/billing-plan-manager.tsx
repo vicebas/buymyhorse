@@ -2,54 +2,54 @@
 
 import { useState } from "react";
 
-import BarnPlanSelector, { type BillingCadence } from "@/components/billing/barn-plan-selector";
+import BarnPlanSelector, { type BillingPlanSelection } from "@/components/billing/barn-plan-selector";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
 type BillingStatus = "TRIALING" | "ACTIVE" | "INCOMPLETE" | "PAST_DUE" | "CANCELED" | "EXPIRED";
 
 export default function BillingPlanManager({
-  currentCadence,
+  currentPlan,
   currentStatus,
   billingActive,
   purchasedExtraHorseSlots,
   adminAdjustedExtraHorseSlots,
 }: {
-  currentCadence: BillingCadence;
+  currentPlan: BillingPlanSelection;
   currentStatus: BillingStatus;
   billingActive: boolean;
   purchasedExtraHorseSlots: number;
   adminAdjustedExtraHorseSlots: number;
 }) {
-  const [selectedCadence, setSelectedCadence] = useState<BillingCadence>(currentCadence);
+  const [selectedPlan, setSelectedPlan] = useState<BillingPlanSelection>(currentPlan);
   const [extraQuantity, setExtraQuantity] = useState("1");
-  const [activationLoading, setActivationLoading] = useState(false);
+  const [planLoading, setPlanLoading] = useState(false);
   const [extraLoading, setExtraLoading] = useState(false);
   const [error, setError] = useState("");
 
-  const canReuseCurrentActivation = currentCadence === selectedCadence && currentStatus !== "INCOMPLETE";
+  const canReuseCurrentPlan = currentPlan === selectedPlan && currentStatus !== "INCOMPLETE";
 
-  async function handleActivationCheckout() {
-    if (canReuseCurrentActivation) {
+  async function handlePlanCheckout() {
+    if (canReuseCurrentPlan) {
       return;
     }
 
     setError("");
-    setActivationLoading(true);
+    setPlanLoading(true);
 
     const res = await fetch("/api/billing/activation-checkout", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ cadence: selectedCadence }),
+      body: JSON.stringify({ planKey: selectedPlan }),
     });
 
     const data = await res.json().catch(() => null);
-    setActivationLoading(false);
+    setPlanLoading(false);
 
     if (!res.ok || !data?.url) {
-      setError(data?.error || "Unable to open activation checkout right now.");
+      setError(data?.error || "Unable to open plan checkout right now.");
       return;
     }
 
@@ -89,20 +89,20 @@ export default function BillingPlanManager({
   return (
     <div className="space-y-6">
       <BarnPlanSelector
-        selectedCadence={selectedCadence}
-        onCadenceChange={setSelectedCadence}
+        selectedPlan={selectedPlan}
+        onPlanChange={setSelectedPlan}
         actionLabel={
-          activationLoading
+          planLoading
             ? "Working..."
-            : canReuseCurrentActivation
-              ? "Current activation cadence selected"
-              : currentStatus === "INCOMPLETE" && currentCadence === selectedCadence
-                ? "Continue activation checkout"
-                : "Update activation cadence"
+            : canReuseCurrentPlan
+              ? "Current launch plan selected"
+              : currentStatus === "INCOMPLETE" && currentPlan === selectedPlan
+                ? "Continue checkout"
+                : "Switch launch plan"
         }
-        onAction={handleActivationCheckout}
-        currentCadence={currentCadence}
-        disabled={activationLoading || canReuseCurrentActivation}
+        onAction={handlePlanCheckout}
+        currentPlan={currentPlan}
+        disabled={planLoading || canReuseCurrentPlan}
       />
 
       <div className="rounded-[2rem] border border-[color:var(--border)] bg-[color:var(--background-elevated)] p-6 shadow-[var(--shadow-card)]">
@@ -112,7 +112,7 @@ export default function BillingPlanManager({
               BUY ADDITIONAL HORSE PROFILES
             </h3>
             <p className="mt-2 text-sm leading-6 text-[color:var(--foreground-soft)]">
-              Additional horse profiles are one-time purchases that expand your active public roster whenever your activation is active.
+              Additional horse profiles are one-time purchases that expand your active public roster whenever your plan is active.
             </p>
           </div>
           <div className="text-sm text-[color:var(--foreground-soft)]">
@@ -141,7 +141,7 @@ export default function BillingPlanManager({
 
         {!billingActive ? (
           <p className="mt-3 text-sm text-[color:var(--destructive)]">
-            MyBarn activation must be active before you can buy additional horse profiles.
+            Your launch plan must be active before you can buy additional horse profiles.
           </p>
         ) : null}
       </div>

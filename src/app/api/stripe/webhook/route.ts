@@ -3,7 +3,8 @@ import { NextResponse } from "next/server";
 import Stripe from "stripe";
 
 import prisma from "@/lib/db/prisma";
-import { getBillingProductFromPriceId, type BillingCadenceKey } from "@/lib/billing/plans";
+import { type BarnPlanKey, type BillingCadenceKey } from "@/lib/billing/catalog";
+import { getBillingProductFromPriceId } from "@/lib/billing/plans";
 import { getStripe } from "@/lib/stripe";
 
 export const runtime = "nodejs";
@@ -73,17 +74,26 @@ async function loadSubscriptionFromCheckoutSession(session: Stripe.Checkout.Sess
   return stripe.subscriptions.retrieve(String(session.subscription));
 }
 
-function getActivationProductFromSubscriptionMetadata(subscription: Stripe.Subscription) {
+function getPlanProductFromSubscriptionMetadata(subscription: Stripe.Subscription) {
   const billingKind = subscription.metadata?.billingKind;
+  const planKey = subscription.metadata?.planKey;
   const cadence = subscription.metadata?.cadence;
 
-  if (billingKind !== "ACTIVATION") {
+  if (billingKind !== "PLAN") {
     return null;
   }
 
-  if (cadence === "MONTHLY" || cadence === "YEARLY") {
+  const hasValidPlan =
+    planKey === "SINGLE_HORSE" ||
+    planKey === "BARN_STARTER" ||
+    planKey === "BARN_GROWTH" ||
+    planKey === "BARN_UNLIMITED";
+  const hasValidCadence = cadence === "MONTHLY" || cadence === "SEMIANNUAL";
+
+  if (hasValidPlan && hasValidCadence) {
     return {
-      kind: "ACTIVATION" as const,
+      kind: "PLAN" as const,
+      planKey: planKey as BarnPlanKey,
       cadence: cadence as BillingCadenceKey,
     };
   }
@@ -93,10 +103,10 @@ function getActivationProductFromSubscriptionMetadata(subscription: Stripe.Subsc
 
 async function syncSubscription(subscription: Stripe.Subscription) {
   const priceId = subscription.items.data[0]?.price.id || null;
-  const metadataProduct = getActivationProductFromSubscriptionMetadata(subscription);
+  const metadataProduct = getPlanProductFromSubscriptionMetadata(subscription);
   const product = metadataProduct || (await getBillingProductFromPriceId(priceId));
 
-  if (!product || product.kind !== "ACTIVATION") {
+  if (!product || product.kind !== "PLAN") {
     return;
   }
 
@@ -107,7 +117,7 @@ async function syncSubscription(subscription: Stripe.Subscription) {
       stripeCustomerId: customerId,
     },
     data: {
-      plan: "ACTIVATION",
+      plan: product.planKey,
       billingCadence: product.cadence,
       stripeSubscriptionId: subscription.id,
       stripePriceId: priceId,

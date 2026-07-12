@@ -7,16 +7,24 @@ import { useSession } from "next-auth/react";
 
 import AICopyGenerator from "@/components/ai/ai-copy-generator";
 
-import BarnPlanSelector, { type BillingCadence } from "@/components/billing/barn-plan-selector";
+import BarnPlanSelector, { type BillingPlanSelection } from "@/components/billing/barn-plan-selector";
 import LiveAppHeader from "@/components/layout/live-app-header";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { BILLING_PLANS } from "@/lib/billing/catalog";
 
-function getCadence(searchValue: string | null): BillingCadence {
-  return searchValue === "YEARLY" ? "YEARLY" : "MONTHLY";
+function getSelectedPlan(searchValue: string | null): BillingPlanSelection {
+  switch (searchValue) {
+    case "BARN_STARTER":
+    case "BARN_GROWTH":
+    case "BARN_UNLIMITED":
+      return searchValue;
+    default:
+      return "SINGLE_HORSE";
+  }
 }
 
 function getStep(searchValue: string | null) {
@@ -30,7 +38,7 @@ function SellerOnboardPageContent() {
   const { data: session } = useSession();
   const emailVerified = !session || session.user.emailVerified !== false;
 
-  const selectedCadence = getCadence(searchParams.get("cadence"));
+  const selectedPlan = getSelectedPlan(searchParams.get("plan"));
   const step = getStep(searchParams.get("step"));
 
   const [form, setForm] = useState({
@@ -50,7 +58,7 @@ function SellerOnboardPageContent() {
       .replace(/(^-|-$)+/g, "");
   }, [form.displayName]);
 
-  function updateQuery(next: Partial<Record<"cadence" | "step", string>>) {
+  function updateQuery(next: Partial<Record<"plan" | "step", string>>) {
     const params = new URLSearchParams(searchParams.toString());
 
     Object.entries(next).forEach(([key, value]) => {
@@ -92,7 +100,7 @@ function SellerOnboardPageContent() {
       },
       body: JSON.stringify({
         ...form,
-        cadence: selectedCadence,
+        planKey: selectedPlan,
       }),
     });
 
@@ -120,7 +128,7 @@ function SellerOnboardPageContent() {
             Create your barn
           </h1>
           <p className="mt-3 max-w-3xl text-lg text-[color:var(--foreground-soft)]">
-            Choose your activation cadence first, then complete your barn profile. If a trial is currently enabled by admin, it starts after you submit. Otherwise you continue straight to checkout.
+            Choose your launch plan first, then complete your barn profile. If a trial is currently enabled by admin, it starts after you submit. Otherwise you continue straight to checkout.
           </p>
         </div>
 
@@ -139,17 +147,17 @@ function SellerOnboardPageContent() {
             <Card className="rounded-[2rem] border-[color:var(--border)] bg-[color:var(--card)] shadow-[var(--shadow-card)]">
               <CardHeader>
                 <CardTitle className="text-2xl font-extrabold text-[color:var(--foreground-strong)]">
-                  Choose your activation cadence
+                  Choose your launch plan
                 </CardTitle>
                 <CardDescription className="text-[color:var(--foreground-soft)]">
-                  HorseRoster activation includes one active horse profile. Buy additional horse profiles later as your roster grows.
+                  Start with the plan that matches your roster now. You can still buy one-time additional horse profiles later.
                 </CardDescription>
               </CardHeader>
 
               <CardContent>
                 <BarnPlanSelector
-                  selectedCadence={selectedCadence}
-                  onCadenceChange={(cadence) => updateQuery({ cadence })}
+                  selectedPlan={selectedPlan}
+                  onPlanChange={(plan) => updateQuery({ plan })}
                   actionLabel="Continue to barn details"
                   onAction={() => updateQuery({ step: "details" })}
                   disabled={!emailVerified}
@@ -267,7 +275,7 @@ function SellerOnboardPageContent() {
                       onClick={() => updateQuery({ step: "plan" })}
                     >
                       <ArrowLeft className="mr-2 h-4 w-4" />
-                      Back to activation
+                      Back to plans
                     </Button>
 
                     <Button type="submit" className="btn-brand-green border-0" disabled={submitting || !emailVerified}>
@@ -289,20 +297,27 @@ function SellerOnboardPageContent() {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-2xl font-extrabold text-[color:var(--foreground-strong)]">
                   <BadgeDollarSign className="h-5 w-5 text-[color:var(--primary)]" />
-                  Activation summary
+                  Plan summary
                 </CardTitle>
               </CardHeader>
 
               <CardContent className="space-y-6 text-sm text-[color:var(--foreground-soft)]">
                 <div className="rounded-2xl bg-[color:var(--background-elevated)] p-5">
-                  <p className="text-xs font-semibold uppercase tracking-[0.14em]">Cadence</p>
+                  <p className="text-xs font-semibold uppercase tracking-[0.14em]">Selected plan</p>
                   <p className="mt-2 text-2xl font-extrabold text-[color:var(--foreground-strong)]">
-                    {selectedCadence === "MONTHLY" ? "$19.99 / month" : "$99.00 / year"}
+                    {BILLING_PLANS[selectedPlan].priceLabel} {BILLING_PLANS[selectedPlan].intervalLabel}
+                  </p>
+                  <p className="mt-2 text-sm leading-6 text-[color:var(--foreground-soft)]">
+                    {BILLING_PLANS[selectedPlan].name}
                   </p>
                 </div>
 
                 <ul className="space-y-3 leading-6">
-                  <li>Activation includes 1 active horse profile.</li>
+                  <li>
+                    {BILLING_PLANS[selectedPlan].includedHorseSlots === null
+                      ? "This plan includes unlimited active horse profiles."
+                      : `This plan includes ${BILLING_PLANS[selectedPlan].includedHorseSlots} active horse profile${BILLING_PLANS[selectedPlan].includedHorseSlots === 1 ? "" : "s"}.`}
+                  </li>
                   <li>Every horse gets its EquiTag automatically.</li>
                   <li>Additional horse profiles can be purchased later for $14.99 each.</li>
                   <li>Your account only becomes a barn after this form is submitted.</li>

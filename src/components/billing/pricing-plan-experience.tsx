@@ -3,46 +3,46 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
-import BarnPlanSelector, { type BillingCadence } from "@/components/billing/barn-plan-selector";
+import BarnPlanSelector, { type BillingPlanSelection } from "@/components/billing/barn-plan-selector";
 
 type BillingStatus = "TRIALING" | "ACTIVE" | "INCOMPLETE" | "PAST_DUE" | "CANCELED" | "EXPIRED";
 
 export default function PricingPlanExperience({
   hasSession,
   hasBarn,
-  currentCadence,
+  currentPlan,
   currentStatus,
-  initialCadence = "MONTHLY",
+  initialPlan = "SINGLE_HORSE",
   trialEnabled = false,
   trialDays = 7,
 }: {
   hasSession: boolean;
   hasBarn: boolean;
-  currentCadence?: BillingCadence | null;
+  currentPlan?: BillingPlanSelection | null;
   currentStatus?: BillingStatus | null;
-  initialCadence?: BillingCadence;
+  initialPlan?: BillingPlanSelection;
   trialEnabled?: boolean;
   trialDays?: number;
 }) {
   const router = useRouter();
-  const [cadence, setCadence] = useState<BillingCadence>(initialCadence);
+  const [planKey, setPlanKey] = useState<BillingPlanSelection>(initialPlan);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  const alreadyOnSelection = hasBarn && currentCadence === cadence;
+  const alreadyOnSelection = hasBarn && currentPlan === planKey;
   const canSkipCheckout = alreadyOnSelection && currentStatus !== "INCOMPLETE";
 
   async function handleAction() {
     setError("");
 
     if (!hasSession) {
-      const callbackUrl = `/mybarn/onboard?cadence=${cadence}`;
+      const callbackUrl = `/mybarn/onboard?plan=${planKey}`;
       router.push(`/register?callbackUrl=${encodeURIComponent(callbackUrl)}`);
       return;
     }
 
     if (!hasBarn) {
-      router.push(`/mybarn/onboard?cadence=${cadence}&step=details`);
+      router.push(`/mybarn/onboard?plan=${planKey}&step=details`);
       return;
     }
 
@@ -58,7 +58,7 @@ export default function PricingPlanExperience({
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ cadence }),
+      body: JSON.stringify({ planKey }),
     });
 
     const data = await res.json().catch(() => null);
@@ -76,20 +76,20 @@ export default function PricingPlanExperience({
     ? "Create account to continue"
     : !hasBarn
       ? "Continue to barn setup"
-      : canSkipCheckout
-        ? "Open billing dashboard"
-        : currentStatus === "INCOMPLETE" && alreadyOnSelection
-          ? "Continue checkout"
-          : "Continue to activation checkout";
+        : canSkipCheckout
+          ? "Open billing dashboard"
+          : currentStatus === "INCOMPLETE" && alreadyOnSelection
+            ? "Continue checkout"
+            : "Continue to plan checkout";
 
   return (
     <div className="space-y-4">
       <BarnPlanSelector
-        selectedCadence={cadence}
-        onCadenceChange={setCadence}
+        selectedPlan={planKey}
+        onPlanChange={setPlanKey}
         actionLabel={loading ? "Working..." : actionLabel}
         onAction={handleAction}
-        currentCadence={currentCadence ?? null}
+        currentPlan={currentPlan ?? null}
         disabled={loading}
         trialEnabled={trialEnabled}
         trialDays={trialDays}

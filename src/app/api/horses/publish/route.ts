@@ -124,12 +124,12 @@ export async function POST(req: Request) {
     });
 
     if (!canPublish) {
-      return NextResponse.json(
-        {
-          error: "Your current activation does not include another published horse profile. Buy additional horse profiles or keep this horse inactive.",
-        },
-        { status: 403 }
-      );
+        return NextResponse.json(
+          {
+          error: "Your current billing plan does not include another published horse profile. Buy additional horse profiles or keep this horse inactive.",
+          },
+          { status: 403 }
+        );
     }
   }
 

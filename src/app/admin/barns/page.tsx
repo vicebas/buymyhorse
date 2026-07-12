@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import AdminStatusToggleForm from "@/components/admin/admin-status-toggle-form";
+import { BILLING_PLANS } from "@/lib/billing/catalog";
 import { getBarnEntitlements } from "@/lib/billing/entitlements";
 import prisma from "@/lib/db/prisma";
 
@@ -34,6 +35,7 @@ export default async function AdminBarnsPage({
       id: true,
       displayName: true,
       slug: true,
+      plan: true,
       billingCadence: true,
       billingStatus: true,
       adminDisabledAt: true,
@@ -77,6 +79,7 @@ export default async function AdminBarnsPage({
       <div className="grid gap-5">
         {barns.map((barn) => {
           const entitlements = entitlementsByBarn.get(barn.id);
+          const plan = BILLING_PLANS[barn.plan as keyof typeof BILLING_PLANS];
 
           return (
             <article
@@ -90,7 +93,7 @@ export default async function AdminBarnsPage({
                       {barn.displayName}
                     </h2>
                     <span className="rounded-full bg-[color:var(--muted)] px-3 py-1 text-xs font-semibold uppercase tracking-[0.12em] text-[color:var(--foreground-soft)]">
-                      {barn.billingCadence}
+                      {plan.name}
                     </span>
                     <span
                       className={`rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-[0.12em] ${
@@ -108,7 +111,7 @@ export default async function AdminBarnsPage({
                   <div className="mt-4 flex flex-wrap gap-3 text-sm text-[color:var(--foreground-soft)]">
                     <span>Billing: {barn.billingStatus}</span>
                     {entitlements ? <span>Published horses: {entitlements.usage.publishedHorseCount}</span> : null}
-                    {entitlements ? <span>Total capacity: {entitlements.activation.totalHorseCapacity}</span> : null}
+                    {entitlements ? <span>Total capacity: {entitlements.activation.isUnlimited ? "Unlimited" : entitlements.activation.totalHorseCapacity}</span> : null}
                     {entitlements ? <span>Extra slots: {entitlements.usage.totalExtraHorseSlots}</span> : null}
                   </div>
 
