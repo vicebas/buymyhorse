@@ -1,6 +1,6 @@
 # HorseRoster Project Status
 
-Last updated: 2026-07-12
+Last updated: 2026-07-13
 
 ## Overall Summary
 - Project branding is in transition from the legacy brand to HorseRoster.
@@ -16,6 +16,9 @@ Last updated: 2026-07-12
 - Client-approved scope changes supersede parts of the older legacy project PDF: EquiTag scans may resolve to a barn or a horse, billing is the activation-plus-extra-profiles model, and public-endpoint rate limiting is not currently planned.
 
 ## Completed (most recent first)
+- **Stripe webhook signature handling was hardened.**
+  - `/api/stripe/webhook` now verifies against the byte-for-byte request body buffer, trims the configured webhook secret, avoids logging the signature header, and returns a generic invalid-signature response while logging server-side details.
+  - `docs/stripe-billing-setup.md` now calls out the separate local Stripe CLI and deployed Dashboard `whsec_...` secrets plus proxy/body-rewrite troubleshooting for webhook 400s.
 - **EquiVault positioning now reads as included across pricing, onboarding, and EquiVault entry surfaces.**
   - **No-barn EquiVault access**: `/mybarn/equivault` now uses a `Create Your Barn First` guard flow for users without a barn instead of exposing a working EquiVault screen.
   - **Onboarding/pricing flow**: plan selection now routes through an `Everything Included` step before barn creation, and pricing/no-barn entry points preserve that step in their callback/onboarding routing.

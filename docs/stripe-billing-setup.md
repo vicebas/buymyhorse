@@ -41,6 +41,12 @@ Copy the emitted webhook signing secret into:
 STRIPE_WEBHOOK_SECRET=whsec_...
 ```
 
+Use the exact signing secret for the sender:
+- For local `stripe listen`, use the `whsec_...` printed by that CLI process.
+- For a deployed Stripe Dashboard webhook endpoint, use that endpoint's Dashboard signing secret.
+
+If webhook delivery returns `400` with `Invalid webhook signature`, confirm the request is sent directly to `/api/stripe/webhook` without a tool or proxy rewriting the JSON body, and restart the app after changing `STRIPE_WEBHOOK_SECRET`.
+
 ## Manual Sanity Pass
 1. Start the app normally:
 
