@@ -5,16 +5,6 @@ export const horseListingInclude = {
     select: {
       displayName: true,
       slug: true,
-      plan: true,
-      billingCadence: true,
-      billingStatus: true,
-      adminPlanOverride: true,
-      adminBillingCadenceOverride: true,
-      adminBillingStatusOverride: true,
-      adminBillingOverrideReason: true,
-      adminBillingOverrideExpiresAt: true,
-      trialEndsAt: true,
-      currentPeriodEndsAt: true,
       adminDisabledAt: true,
     },
   },
@@ -54,6 +44,20 @@ export const horseListingInclude = {
     },
   },
 } as const;
+
+export function isHorseListingAvailable(horse: {
+  isPublished: boolean;
+  deletedAt?: Date | null;
+  adminDisabledAt?: Date | null;
+  sellerProfile: { adminDisabledAt?: Date | null };
+}) {
+  return (
+    horse.isPublished &&
+    !horse.deletedAt &&
+    !horse.adminDisabledAt &&
+    !horse.sellerProfile.adminDisabledAt
+  );
+}
 
 export function getHorseBreedLabel(horse: {
   breedOption?: { label: string } | null;

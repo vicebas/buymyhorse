@@ -1,6 +1,6 @@
 # HorseRoster Project Status
 
-Last updated: 2026-03-27
+Last updated: 2026-07-12
 
 ## Overall Summary
 - Project branding is in transition from the legacy brand to HorseRoster.
@@ -16,6 +16,10 @@ Last updated: 2026-03-27
 - Client-approved scope changes supersede parts of the older legacy project PDF: EquiTag scans may resolve to a barn or a horse, billing is the activation-plus-extra-profiles model, and public-endpoint rate limiting is not currently planned.
 
 ## Completed (most recent first)
+- **EquiVault positioning now reads as included across pricing, onboarding, and EquiVault entry surfaces.**
+  - **No-barn EquiVault access**: `/mybarn/equivault` now uses a `Create Your Barn First` guard flow for users without a barn instead of exposing a working EquiVault screen.
+  - **Onboarding/pricing flow**: plan selection now routes through an `Everything Included` step before barn creation, and pricing/no-barn entry points preserve that step in their callback/onboarding routing.
+  - **Plan messaging**: selector-side messaging, pricing page summaries, onboarding plan summary, and billing plan copy now explicitly position EquiVault secure document storage and transfer as included with paid plans rather than as a hidden or separate add-on, while no-barn CTA clicks open the pre-barn guard modal.
 - **Sale Type now follows the same multi-select taxonomy flow as the other horse listing metadata.**
   - **Schema/app model**: Replaced the single `Horse.saleTypeOptionId` relation with join-table-backed horse sale type selections, including migration backfill for existing horse records.
   - **Seller flow**: Horse create/edit now uses the shared searchable multi-select for sale types, and server-side create/update paths persist repeated `saleTypeIds` just like the other horse taxonomy arrays.

@@ -4,9 +4,11 @@ import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
 import { FileText, FolderOpen, Package, Plus } from "lucide-react";
 
-import SellerAppHeader from "@/components/layout/seller-app-header";
+import EquiVaultGuardModal from "@/components/billing/equivault-guard-modal";
+import ResolvedAppHeader from "@/components/layout/resolved-app-header";
 import { Button } from "@/components/ui/button";
 import { authOptions } from "@/lib/auth/options";
+import { getUserAppHeaderVariant } from "@/lib/auth/get-user-app-header-variant";
 import prisma from "@/lib/db/prisma";
 import { formatDateMDY } from "@/lib/formatting";
 import { formatDocumentCategory } from "@/lib/vault/document-categories";
@@ -18,6 +20,8 @@ export default async function MyBarnEquiVaultOverviewPage() {
   if (!session?.user?.id) {
     redirect("/login");
   }
+
+  const headerVariant = await getUserAppHeaderVariant(session.user.id);
 
   const seller = await prisma.sellerProfile.findUnique({
     where: { userId: session.user.id },
@@ -46,12 +50,38 @@ export default async function MyBarnEquiVaultOverviewPage() {
   });
 
   if (!seller) {
-    redirect("/mybarn/onboard");
+    return (
+      <main className="min-h-screen bg-[color:var(--background)] text-[color:var(--foreground)]">
+        <ResolvedAppHeader variant={headerVariant} />
+
+        <section className="border-b border-[color:var(--border)]">
+          <div className="mx-auto max-w-7xl px-6 py-10">
+            <p className="mono text-xs font-medium uppercase tracking-[0.24em] text-[color:var(--foreground-soft)]">
+              EquiVault
+            </p>
+            <h1 className="mt-3 text-5xl font-extrabold text-[color:var(--foreground-strong)]">
+              Create Your Barn First
+            </h1>
+            <p className="mt-3 max-w-3xl text-lg text-[color:var(--foreground-soft)]">
+              EquiVault is organized inside your Barn so every horse&apos;s documents stay connected.
+            </p>
+          </div>
+        </section>
+
+        <section className="mx-auto max-w-7xl px-6 py-8">
+          <EquiVaultGuardModal
+            onboardingHref="/mybarn/onboard?step=included"
+            defaultOpen
+            showStandaloneCard
+          />
+        </section>
+      </main>
+    );
   }
 
   return (
     <main className="min-h-screen bg-[color:var(--background)] text-[color:var(--foreground)]">
-      <SellerAppHeader />
+      <ResolvedAppHeader variant={headerVariant} />
 
       <section className="border-b border-[color:var(--border)]">
         <div className="mx-auto max-w-7xl px-6 py-10">

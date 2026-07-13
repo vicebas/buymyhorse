@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
-import { CreditCard, Package, Sparkles, Tags } from "lucide-react";
+import { CreditCard, Sparkles, Tags } from "lucide-react";
 
 import ResolvedAppHeader from "@/components/layout/resolved-app-header";
 import ShopEquiTagOrderModal from "@/components/shop/shop-equitag-order-modal";
@@ -34,19 +34,10 @@ const products: Array<{
     id: "mybarn-upgrades",
     title: "MyBarn Upgrades",
     price: "Included + add-ons",
-    description: "Keep your launch plan current, manage billing, and expand how many public horse profiles your barn can run.",
+    description: "Keep your launch plan current and manage the billing state tied to your barn.",
     href: "/mybarn/billing",
     cta: "Open Billing",
     icon: CreditCard,
-  },
-  {
-    id: "additional-horse-profiles",
-    title: "Additional Horse Profiles",
-    price: formatMoneyUsd(14.99),
-    description: "Add more active public horse profiles as your roster grows, without changing your selected launch plan.",
-    href: "/mybarn/billing",
-    cta: "Buy Profiles",
-    icon: Package,
   },
   {
     id: "starter-kits",
@@ -121,7 +112,7 @@ export default async function ShopPage() {
           </p>
           <h1 className="mt-3 text-5xl font-extrabold text-[color:var(--foreground-strong)]">Shop</h1>
           <p className="mt-3 max-w-3xl text-lg text-[color:var(--foreground-soft)]">
-            Access the premium operational products around HorseRoster: EquiTags, featured visibility, MyBarn upgrades, and additional horse profiles.
+            Access the premium operational products around HorseRoster: EquiTags, featured visibility, and MyBarn upgrades.
           </p>
         </div>
       </section>

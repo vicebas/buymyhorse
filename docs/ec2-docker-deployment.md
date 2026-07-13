@@ -6,7 +6,7 @@ Last updated: 2026-03-21
 
 HorseRoster can run as a single Dockerized Next.js app on one EC2 instance.
 
-- Neon remains the PostgreSQL database
+- PostgreSQL can be any managed provider, including Amazon RDS
 - S3/CloudFront remain the media layer
 - FFmpeg runs inside the main app container
 - Caddy handles HTTPS and reverse proxying on the EC2 host
@@ -32,9 +32,23 @@ HorseRoster can run as a single Dockerized Next.js app on one EC2 instance.
 
 Create `.env.production` on the EC2 instance in the project root.
 
-Include your normal app env vars, including:
+Include your normal app env vars.
 
-- `DATABASE_URL`
+For the database, choose one approach:
+
+- Static password: `DATABASE_URL`
+- RDS IAM auth:
+  - `DB_AUTH_MODE=rds-iam`
+  - `RDSHOST`
+  - `AWS_REGION`
+  - `PGPORT` (optional, defaults to `5432`)
+  - `PGDATABASE` (optional, defaults to `postgres`)
+  - `PGUSER` (optional, defaults to `postgres`)
+
+If you use RDS IAM auth, do not write the generated auth token into `.env.production`. The app generates a fresh token when it opens a new PostgreSQL connection.
+
+Include the rest of the normal app env vars, including:
+
 - `AUTH_SECRET`
 - `NEXTAUTH_URL`
 - `AWS_REGION`

@@ -6,10 +6,9 @@ import MainHeader from "@/components/layout/main-header";
 import { authOptions } from "@/lib/auth/options";
 import MarketplaceFilters from "@/components/marketplace/marketplace-filters";
 import HorseMarketplaceCard from "@/components/horses/horse-marketplace-card";
-import { isHorsePubliclyVisible } from "@/lib/billing/entitlements";
 import { featuredHorseInclude, sortHorsesByFeaturedPriority } from "@/lib/horses/featured";
 import { getActiveListingOptions } from "@/lib/horses/listing-options";
-import { mapHorseToCard } from "@/lib/horses/listing-data";
+import { isHorseListingAvailable, mapHorseToCard } from "@/lib/horses/listing-data";
 
 export default async function MarketplacePage({
   searchParams,
@@ -90,7 +89,7 @@ export default async function MarketplacePage({
   });
 
   const visibleHorses = sortHorsesByFeaturedPriority(
-    horses.filter((horse) => isHorsePubliclyVisible(horse))
+    horses.filter((horse) => isHorseListingAvailable(horse))
   );
 
   const horseCards = visibleHorses.map((horse) => ({

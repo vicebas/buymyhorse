@@ -36,13 +36,13 @@ export default function PricingPlanExperience({
     setError("");
 
     if (!hasSession) {
-      const callbackUrl = `/mybarn/onboard?plan=${planKey}`;
+      const callbackUrl = `/mybarn/onboard?plan=${planKey}&step=included`;
       router.push(`/register?callbackUrl=${encodeURIComponent(callbackUrl)}`);
       return;
     }
 
     if (!hasBarn) {
-      router.push(`/mybarn/onboard?plan=${planKey}&step=details`);
+      router.push(`/mybarn/onboard?plan=${planKey}&step=included`);
       return;
     }
 
@@ -93,6 +93,14 @@ export default function PricingPlanExperience({
         disabled={loading}
         trialEnabled={trialEnabled}
         trialDays={trialDays}
+        vaultHref="/mybarn/equivault"
+        vaultOnboardingHref={
+          hasBarn
+            ? null
+            : hasSession
+              ? `/mybarn/onboard?plan=${planKey}&step=included`
+              : `/register?callbackUrl=${encodeURIComponent(`/mybarn/onboard?plan=${planKey}&step=included`)}`
+        }
       />
 
       {error ? (

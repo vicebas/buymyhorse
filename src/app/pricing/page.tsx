@@ -65,11 +65,11 @@ export default async function PricingPage() {
             </div>
 
             <h1 className="mt-8 text-5xl font-extrabold tracking-tight text-[color:var(--foreground-strong)] md:text-6xl">
-              Aggressive launch pricing for every barn size
+              Promotional launch pricing for every barn size
             </h1>
 
             <p className="mt-5 text-lg leading-8 text-[color:var(--foreground-soft)]">
-              Choose the launch plan that fits your active horse count, then add one-time extra capacity whenever your roster needs more room.
+              Choose the launch plan that fits your active horse count. Every paid plan includes Horse Profiles, My Barn, EquiVault, and EquiTag from day one.
             </p>
           </div>
         </div>
@@ -101,20 +101,20 @@ export default async function PricingPage() {
           <article className="rounded-[2rem] border border-[color:var(--border)] bg-[color:var(--card)] p-6 shadow-[var(--shadow-card)]">
             <div className="flex items-center gap-3 text-[color:var(--foreground-strong)]">
               <CheckCircle2 className="h-5 w-5 text-[color:var(--primary)]" />
-              Extra horse add-on
+              EquiVault included
             </div>
             <p className="mt-3 text-sm leading-6 text-[color:var(--foreground-soft)]">
-              Additional horse profiles are one-time purchases for $14.99 each and become available again whenever your billing is active.
+              Secure document storage, organization, and buyer-ready transfer are built into every paid HorseRoster plan.
             </p>
           </article>
 
           <article className="rounded-[2rem] border border-[color:var(--border)] bg-[color:var(--card)] p-6 shadow-[var(--shadow-card)]">
             <div className="flex items-center gap-3 text-[color:var(--foreground-strong)]">
               <CreditCard className="h-5 w-5 text-[color:var(--primary)]" />
-              Stripe billing
+              Flexible billing
             </div>
             <p className="mt-3 text-sm leading-6 text-[color:var(--foreground-soft)]">
-              Start on any launch plan, then manage payment methods, invoices, and future plan changes through the Stripe billing portal.
+              Start on any launch plan, then manage payment methods, invoices, future plan changes, and extra profile purchases through the Stripe billing portal.
             </p>
           </article>
         </div>

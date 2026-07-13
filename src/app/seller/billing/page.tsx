@@ -81,7 +81,7 @@ export default async function SellerBillingPage() {
             Launch Plan Billing
           </h1>
           <p className="mt-3 max-w-3xl text-lg text-[color:var(--foreground-soft)]">
-            Manage your current launch plan, buy additional horse profiles, and see exactly how much public roster capacity your barn has right now.
+            Manage your current launch plan and see your included public roster capacity, EquiVault access, and billing state in one place.
           </p>
         </div>
       </section>
@@ -169,16 +169,13 @@ export default async function SellerBillingPage() {
               Launch plans
             </h2>
             <p className="mt-2 text-sm leading-6 text-[color:var(--foreground-soft)]">
-              Switch between launch plans, then buy one-time additional horse profiles whenever you need more public roster capacity.
+              Switch between launch plans and review the current billing state tied to your barn, including the EquiVault tools bundled with every plan.
             </p>
 
             <div className="mt-6">
               <BillingPlanManager
                 currentPlan={effectiveBilling.effectivePlan as "SINGLE_HORSE" | "BARN_STARTER" | "BARN_GROWTH" | "BARN_UNLIMITED"}
                 currentStatus={effectiveBilling.effectiveBillingStatus as "TRIALING" | "ACTIVE" | "INCOMPLETE" | "PAST_DUE" | "CANCELED" | "EXPIRED"}
-                billingActive={entitlements.billingActive}
-                purchasedExtraHorseSlots={entitlements.usage.purchasedExtraHorseSlots}
-                adminAdjustedExtraHorseSlots={entitlements.usage.adminAdjustedExtraHorseSlots}
               />
             </div>
           </div>
@@ -226,7 +223,8 @@ export default async function SellerBillingPage() {
               </h2>
               <ul className="mt-4 space-y-3 text-sm leading-6 text-[color:var(--foreground-soft)]">
                 <li>A horse must include required listing details and a main image before it can be published.</li>
-                <li>Your selected plan sets the included active horse capacity; additional horse profiles are additive.</li>
+                <li>Your selected plan sets the included active horse capacity for your barn.</li>
+                <li>EquiVault secure document storage and buyer document transfer are included with every active plan.</li>
                 <li>If billing is inactive, public horse pages, marketplace listings, and barn roster exposure are hidden until billing is active again.</li>
               </ul>
             </div>
