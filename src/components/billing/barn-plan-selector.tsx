@@ -1,15 +1,15 @@
 "use client";
 
-import { Check, Crown } from "lucide-react";
+import Link from "next/link";
+import { Check, Crown, FolderLock } from "lucide-react";
 
+import EquiVaultGuardModal from "@/components/billing/equivault-guard-modal";
 import { Button } from "@/components/ui/button";
 import {
   BILLING_PLAN_ORDER,
   BILLING_PLANS,
   type BarnPlanKey,
 } from "@/lib/billing/catalog";
-
-const ADD_ON_PRICE_LABEL = "$14.99";
 
 export type BillingPlanSelection = BarnPlanKey;
 
@@ -22,6 +22,8 @@ export default function BarnPlanSelector({
   disabled = false,
   trialEnabled = false,
   trialDays = 7,
+  vaultHref = "/mybarn/equivault",
+  vaultOnboardingHref,
 }: {
   selectedPlan: BillingPlanSelection;
   onPlanChange: (plan: BillingPlanSelection) => void;
@@ -31,6 +33,8 @@ export default function BarnPlanSelector({
   disabled?: boolean;
   trialEnabled?: boolean;
   trialDays?: number;
+  vaultHref?: string;
+  vaultOnboardingHref?: string | null;
 }) {
   return (
     <div className="space-y-6">
@@ -89,7 +93,7 @@ export default function BarnPlanSelector({
                   </li>
                   <li className="flex items-start gap-3 text-sm text-[color:var(--foreground)]">
                     <Check className="mt-0.5 h-4 w-4 text-[color:var(--primary)]" />
-                    <span>One-time extra horse capacity can be added whenever your barn is active</span>
+                    <span>EquiVault secure document storage and transfer included</span>
                   </li>
                   {trialEnabled ? (
                     <li className="flex items-start gap-3 text-sm text-[color:var(--foreground)]">
@@ -105,32 +109,55 @@ export default function BarnPlanSelector({
 
         <article className="rounded-[2rem] border border-[color:var(--border)] bg-[color:var(--card)] p-6 shadow-[var(--shadow-card)]">
           <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[color:var(--foreground-soft)]">
-            Capacity add-on
+            Included workspace
           </p>
           <h3 className="mt-3 text-2xl font-extrabold text-[color:var(--foreground-strong)]">
-            Additional Horse Profile
+            EquiVault
           </h3>
           <p className="mt-2 text-sm leading-6 text-[color:var(--foreground-soft)]">
-            Keep extra capacity available on top of your plan when you need more active public horses.
+            Secure Horse Document Vault
           </p>
 
-          <div className="mt-8 flex items-end gap-2">
-            <span className="text-4xl font-extrabold text-[color:var(--foreground-strong)]">
-              {ADD_ON_PRICE_LABEL}
-            </span>
-            <span className="pb-1 text-sm text-[color:var(--foreground-soft)]">one-time / horse</span>
-          </div>
+          <p className="mt-6 text-sm leading-6 text-[color:var(--foreground-soft)]">
+            Store, organize, and securely transfer all of your horse documents in one place.
+          </p>
 
           <ul className="mt-6 space-y-3 text-sm text-[color:var(--foreground)]">
             <li className="flex items-start gap-3">
               <Check className="mt-0.5 h-4 w-4 text-[color:var(--primary)]" />
-              <span>Adds reusable horse-profile capacity to your barn account</span>
+              <span>Health records, Coggins &amp; PPEs</span>
             </li>
             <li className="flex items-start gap-3">
               <Check className="mt-0.5 h-4 w-4 text-[color:var(--primary)]" />
-              <span>Stacks on top of Single Horse, Starter, and Growth. Unlimited ignores the cap.</span>
+              <span>Registrations &amp; contracts</span>
+            </li>
+            <li className="flex items-start gap-3">
+              <Check className="mt-0.5 h-4 w-4 text-[color:var(--primary)]" />
+              <span>Organize documents by horse</span>
+            </li>
+            <li className="flex items-start gap-3">
+              <Check className="mt-0.5 h-4 w-4 text-[color:var(--primary)]" />
+              <span>Securely transfer documents to buyers</span>
+            </li>
+            <li className="flex items-start gap-3">
+              <Check className="mt-0.5 h-4 w-4 text-[color:var(--primary)]" />
+              <span>Access anywhere</span>
             </li>
           </ul>
+
+          {vaultOnboardingHref ? (
+            <EquiVaultGuardModal
+              onboardingHref={vaultOnboardingHref}
+              triggerClassName="mt-8 w-full"
+            />
+          ) : (
+            <Button asChild variant="outline" className="mt-8 w-full">
+              <Link href={vaultHref}>
+                <FolderLock className="mr-2 h-4 w-4" />
+                Open EquiVault
+              </Link>
+            </Button>
+          )}
         </article>
       </div>
 

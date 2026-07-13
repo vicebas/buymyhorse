@@ -2,6 +2,7 @@ import { getServerSession } from "next-auth";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 
+import { getAppOrigin } from "@/lib/app-url";
 import { authOptions } from "@/lib/auth/options";
 import { isAdminRole, isSuperAdminRole } from "@/lib/admin/roles";
 import { getPlanCadence, type BarnPlanKey } from "@/lib/billing/catalog";
@@ -135,13 +136,12 @@ export async function POST(req: Request) {
       );
     }
 
-    const origin = new URL(req.url).origin;
     const checkoutSession = await createPlanCheckoutSession({
       sellerId: seller.id,
       userId: session.user.id,
       displayName: seller.displayName,
       planKey: parsed.data.planKey as BarnPlanKey,
-      origin,
+      origin: getAppOrigin(req),
     });
 
     return NextResponse.json(

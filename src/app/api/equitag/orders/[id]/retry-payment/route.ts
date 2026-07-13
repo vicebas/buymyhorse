@@ -1,13 +1,14 @@
 import { getServerSession } from "next-auth";
 import { NextResponse } from "next/server";
 
+import { getAppOrigin } from "@/lib/app-url";
 import { authOptions } from "@/lib/auth/options";
 import { createEquiTagCheckoutSession } from "@/lib/billing/stripe";
 import prisma from "@/lib/db/prisma";
 import { getStripe } from "@/lib/stripe";
 
 export async function POST(
-  _req: Request,
+  req: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
   const session = await getServerSession(authOptions);
@@ -54,7 +55,6 @@ export async function POST(
     }
   }
 
-  const origin = process.env.NEXTAUTH_URL || "http://localhost:3000";
   const checkoutSession = await createEquiTagCheckoutSession({
     sellerId: seller.id,
     userId: session.user.id,
@@ -62,7 +62,7 @@ export async function POST(
     equiTagId: order.equiTagId,
     equiTagOrderId: order.id,
     quantity: order.quantity,
-    origin,
+    origin: getAppOrigin(req),
   });
 
   await prisma.equiTagOrder.update({

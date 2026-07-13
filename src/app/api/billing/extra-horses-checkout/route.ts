@@ -2,6 +2,7 @@ import { getServerSession } from "next-auth";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 
+import { getAppOrigin } from "@/lib/app-url";
 import { authOptions } from "@/lib/auth/options";
 import { getBarnEntitlements } from "@/lib/billing/entitlements";
 import { createExtraHorseCheckoutSession } from "@/lib/billing/stripe";
@@ -54,7 +55,7 @@ export async function POST(req: Request) {
       userId: session.user.id,
       displayName: seller.displayName,
       quantity: parsed.data.quantity,
-      origin: new URL(req.url).origin,
+      origin: getAppOrigin(req),
     });
 
     return NextResponse.json({ url: checkoutSession.url });

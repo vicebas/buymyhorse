@@ -2,6 +2,18 @@ import prisma from "@/lib/db/prisma";
 
 export type BuyerHorseAccessStatus = "NONE" | "ACTIVE" | "EXPIRED" | "REVOKED";
 
+function getGrantStatus(grant: { revokedAt: Date | null; expiresAt: Date | null }): BuyerHorseAccessStatus {
+  if (grant.revokedAt) {
+    return "REVOKED";
+  }
+
+  if (grant.expiresAt && grant.expiresAt <= new Date()) {
+    return "EXPIRED";
+  }
+
+  return "ACTIVE";
+}
+
 async function loadAccessibleDocuments(horseId: string, fileScope: string[]) {
   if (fileScope.length === 0) {
     return [];
@@ -53,18 +65,20 @@ export async function getBuyerHorseAccess(buyerId: string, horseId: string) {
     };
   }
 
-  if (grant.revokedAt) {
+  const status = getGrantStatus(grant);
+
+  if (status === "REVOKED") {
     return {
-      status: "REVOKED" as BuyerHorseAccessStatus,
+      status,
       horse: grant.horse,
       grant,
       documents: [],
     };
   }
 
-  if (grant.expiresAt && grant.expiresAt <= new Date()) {
+  if (status === "EXPIRED") {
     return {
-      status: "EXPIRED" as BuyerHorseAccessStatus,
+      status,
       horse: grant.horse,
       grant,
       documents: [],
@@ -112,18 +126,20 @@ export async function getBuyerGrantAccess(grantId: string, buyerId: string) {
     return null;
   }
 
-  if (grant.revokedAt) {
+  const status = getGrantStatus(grant);
+
+  if (status === "REVOKED") {
     return {
-      status: "REVOKED" as BuyerHorseAccessStatus,
+      status,
       horse: grant.horse,
       grant,
       documents: [],
     };
   }
 
-  if (grant.expiresAt && grant.expiresAt <= new Date()) {
+  if (status === "EXPIRED") {
     return {
-      status: "EXPIRED" as BuyerHorseAccessStatus,
+      status,
       horse: grant.horse,
       grant,
       documents: [],

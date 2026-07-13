@@ -9,7 +9,6 @@ import SaveHorseButton from "@/components/horses/save-horse-button";
 import { authOptions } from "@/lib/auth/options";
 import { getUserAppHeaderVariant } from "@/lib/auth/get-user-app-header-variant";
 import { getBuyerHorseAccess } from "@/lib/vault/access";
-import { isHorsePubliclyVisible } from "@/lib/billing/entitlements";
 import {
   getHorseBestSuitedForLabel,
   getHorseBreedLabel,
@@ -18,6 +17,7 @@ import {
   getHorseSaleTypeLabels,
   getHorseSexLabel,
   horseListingInclude,
+  isHorseListingAvailable,
 } from "@/lib/horses/listing-data";
 
 export default async function HorsePage({
@@ -51,7 +51,7 @@ export default async function HorsePage({
     },
   });
 
-  if (!horse || !isHorsePubliclyVisible(horse)) {
+  if (!horse || !isHorseListingAvailable(horse)) {
     notFound();
   }
 

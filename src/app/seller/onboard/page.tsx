@@ -2,7 +2,18 @@
 
 import { Suspense, useMemo, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { AlertTriangle, Globe, Loader2, MapPin, Store, Text, ArrowLeft, BadgeDollarSign } from "lucide-react";
+import {
+  AlertTriangle,
+  ArrowLeft,
+  BadgeDollarSign,
+  FileText,
+  Globe,
+  Loader2,
+  MapPin,
+  Package,
+  Store,
+  Text,
+} from "lucide-react";
 import { useSession } from "next-auth/react";
 
 import AICopyGenerator from "@/components/ai/ai-copy-generator";
@@ -16,6 +27,31 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { BILLING_PLANS } from "@/lib/billing/catalog";
 
+const INCLUDED_FEATURES = [
+  {
+    title: "Horse Profiles",
+    description: "Create polished public profiles for every horse in your program.",
+    icon: FileText,
+  },
+  {
+    title: "My Barn",
+    description: "Present your horses together in one professional barn presence.",
+    icon: Store,
+  },
+  {
+    title: "EquiVault",
+    description: "Keep horse documents organized and connected to the right horse.",
+    icon: Globe,
+  },
+  {
+    title: "EquiTag",
+    description: "Use physical QR tools that link each horse directly to its profile.",
+    icon: Package,
+  },
+] as const;
+
+type OnboardStep = "plan" | "included" | "details";
+
 function getSelectedPlan(searchValue: string | null): BillingPlanSelection {
   switch (searchValue) {
     case "BARN_STARTER":
@@ -27,8 +63,15 @@ function getSelectedPlan(searchValue: string | null): BillingPlanSelection {
   }
 }
 
-function getStep(searchValue: string | null) {
-  return searchValue === "details" ? "details" : "plan";
+function getStep(searchValue: string | null): OnboardStep {
+  switch (searchValue) {
+    case "included":
+      return "included";
+    case "details":
+      return "details";
+    default:
+      return "plan";
+  }
 }
 
 function SellerOnboardPageContent() {
@@ -158,13 +201,68 @@ function SellerOnboardPageContent() {
                 <BarnPlanSelector
                   selectedPlan={selectedPlan}
                   onPlanChange={(plan) => updateQuery({ plan })}
-                  actionLabel="Continue to barn details"
-                  onAction={() => updateQuery({ step: "details" })}
+                  actionLabel="Continue to everything included"
+                  onAction={() => updateQuery({ step: "included" })}
                   disabled={!emailVerified}
+                  vaultHref="/mybarn/equivault"
+                  vaultOnboardingHref={`/mybarn/onboard?plan=${selectedPlan}&step=included`}
                 />
               </CardContent>
             </Card>
           </div>
+        ) : step === "included" ? (
+          <Card className="rounded-[2rem] border-[color:var(--border)] bg-[color:var(--card)] shadow-[var(--shadow-card)]">
+            <CardHeader className="items-center text-center">
+              <CardTitle className="text-4xl font-extrabold text-[color:var(--foreground-strong)]">
+                Everything Included
+              </CardTitle>
+              <CardDescription className="max-w-2xl text-base leading-7 text-[color:var(--foreground-soft)]">
+                Your HorseRoster plan includes the core tools you need to manage your horses, present your
+                barn, and keep documents connected from day one.
+              </CardDescription>
+            </CardHeader>
+
+            <CardContent className="space-y-8">
+              <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+                {INCLUDED_FEATURES.map((feature) => {
+                  const Icon = feature.icon;
+
+                  return (
+                    <div
+                      key={feature.title}
+                      className="rounded-[1.75rem] border border-[color:var(--border)] bg-[color:var(--background-elevated)] p-6 text-center"
+                    >
+                      <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-[color:var(--card)] text-[color:var(--primary)] shadow-[var(--shadow-card)]">
+                        <Icon className="h-6 w-6" />
+                      </div>
+                      <h2 className="mt-5 text-xl font-extrabold text-[color:var(--foreground-strong)]">
+                        {feature.title}
+                      </h2>
+                      <p className="mt-3 text-sm leading-6 text-[color:var(--foreground-soft)]">
+                        {feature.description}
+                      </p>
+                    </div>
+                  );
+                })}
+              </div>
+
+              <div className="flex flex-col gap-3 border-t border-[color:var(--border)] pt-6 md:flex-row md:items-center md:justify-between">
+                <Button type="button" variant="outline" onClick={() => updateQuery({ step: "plan" })}>
+                  <ArrowLeft className="mr-2 h-4 w-4" />
+                  Back to plans
+                </Button>
+
+                <Button
+                  type="button"
+                  className="btn-brand-green border-0"
+                  onClick={() => updateQuery({ step: "details" })}
+                  disabled={!emailVerified}
+                >
+                  Continue -&gt; Create My Barn
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
         ) : (
           <div className="grid gap-6 xl:grid-cols-[1.05fr_0.95fr]">
             <Card className="rounded-[2rem] border-[color:var(--border)] bg-[color:var(--card)] shadow-[var(--shadow-card)]">
@@ -318,6 +416,7 @@ function SellerOnboardPageContent() {
                       ? "This plan includes unlimited active horse profiles."
                       : `This plan includes ${BILLING_PLANS[selectedPlan].includedHorseSlots} active horse profile${BILLING_PLANS[selectedPlan].includedHorseSlots === 1 ? "" : "s"}.`}
                   </li>
+                  <li>EquiVault secure document storage and transfer is included with this plan.</li>
                   <li>Every horse gets its EquiTag automatically.</li>
                   <li>Additional horse profiles can be purchased later for $14.99 each.</li>
                   <li>Your account only becomes a barn after this form is submitted.</li>

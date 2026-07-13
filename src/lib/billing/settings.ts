@@ -12,10 +12,43 @@ export const DEFAULT_BILLING_SETTINGS = {
   equitagMaxBatchQuantity: 10,
 };
 
-export async function getBillingSettings() {
-  const settings = await prisma.billingSettings.findUnique({
-    where: { id: "default" },
-  });
+type BillingSettingsResult = {
+  id: string;
+  activationTrialEnabled: boolean;
+  activationTrialDays: number;
+  singleHorsePriceId: string;
+  barnStarterPriceId: string;
+  barnGrowthPriceId: string;
+  barnUnlimitedPriceId: string;
+  extraHorsePriceId: string;
+  equitagPhysicalPriceId: string;
+  equitagMaxBatchQuantity: number;
+  stripeSecretKeyConfigured: boolean;
+  stripeWebhookSecretConfigured: boolean;
+  updatedAt: Date | null;
+  updatedByUserId: string | null;
+};
+
+type BillingSettingsRow = {
+  id?: string | null;
+  activationTrialEnabled?: boolean | null;
+  activationTrialDays?: number | null;
+  singleHorsePriceId?: string | null;
+  barnStarterPriceId?: string | null;
+  barnGrowthPriceId?: string | null;
+  barnUnlimitedPriceId?: string | null;
+  activationMonthlyPriceId?: string | null;
+  activationYearlyPriceId?: string | null;
+  extraHorsePriceId?: string | null;
+  equitagPhysicalPriceId?: string | null;
+  equitagMaxBatchQuantity?: number | null;
+  updatedAt?: Date | null;
+  updatedByUserId?: string | null;
+};
+
+function mapBillingSettings(settings?: BillingSettingsRow | null): BillingSettingsResult {
+  const legacyMonthlyPriceId = settings?.activationMonthlyPriceId || "";
+  const legacyYearlyPriceId = settings?.activationYearlyPriceId || "";
 
   return {
     id: settings?.id || "default",
@@ -24,9 +57,9 @@ export async function getBillingSettings() {
     activationTrialDays:
       settings?.activationTrialDays ?? DEFAULT_BILLING_SETTINGS.activationTrialDays,
     singleHorsePriceId:
-      settings?.singleHorsePriceId || DEFAULT_BILLING_SETTINGS.singleHorsePriceId,
+      settings?.singleHorsePriceId || legacyYearlyPriceId || DEFAULT_BILLING_SETTINGS.singleHorsePriceId,
     barnStarterPriceId:
-      settings?.barnStarterPriceId || DEFAULT_BILLING_SETTINGS.barnStarterPriceId,
+      settings?.barnStarterPriceId || legacyMonthlyPriceId || DEFAULT_BILLING_SETTINGS.barnStarterPriceId,
     barnGrowthPriceId:
       settings?.barnGrowthPriceId || DEFAULT_BILLING_SETTINGS.barnGrowthPriceId,
     barnUnlimitedPriceId:
@@ -41,4 +74,59 @@ export async function getBillingSettings() {
     updatedAt: settings?.updatedAt ?? null,
     updatedByUserId: settings?.updatedByUserId ?? null,
   };
+}
+
+async function getLegacyCompatibleBillingSettings() {
+  const columns = await prisma.$queryRaw<{ column_name: string }[]>`
+    SELECT column_name
+    FROM information_schema.columns
+    WHERE table_schema = 'public'
+      AND table_name = 'BillingSettings'
+  `;
+  const availableColumns = new Set(columns.map((column) => column.column_name));
+  const candidateColumns = [
+    "id",
+    "activationTrialEnabled",
+    "activationTrialDays",
+    "singleHorsePriceId",
+    "barnStarterPriceId",
+    "barnGrowthPriceId",
+    "barnUnlimitedPriceId",
+    "activationMonthlyPriceId",
+    "activationYearlyPriceId",
+    "extraHorsePriceId",
+    "equitagPhysicalPriceId",
+    "equitagMaxBatchQuantity",
+    "updatedAt",
+    "updatedByUserId",
+  ];
+  const selectedColumns = candidateColumns.filter((column) => availableColumns.has(column));
+
+  if (selectedColumns.length === 0) {
+    return mapBillingSettings(null);
+  }
+
+  const selectList = selectedColumns.map((column) => `"${column}"`).join(", ");
+  const rows = await prisma.$queryRawUnsafe<BillingSettingsRow[]>(
+    `SELECT ${selectList} FROM "BillingSettings" WHERE "id" = $1 LIMIT 1`,
+    "default"
+  );
+
+  return mapBillingSettings(rows[0] ?? null);
+}
+
+export async function getBillingSettings() {
+  try {
+    const settings = await prisma.billingSettings.findUnique({
+      where: { id: "default" },
+    });
+
+    return mapBillingSettings(settings);
+  } catch (error) {
+    if (typeof error === "object" && error && "code" in error && error.code === "P2022") {
+      return getLegacyCompatibleBillingSettings();
+    }
+
+    throw error;
+  }
 }

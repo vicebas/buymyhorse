@@ -4,9 +4,8 @@ import { authOptions } from "@/lib/auth/options";
 import ResolvedAppHeader from "@/components/layout/resolved-app-header";
 import MainHeader from "@/components/layout/main-header";
 import DashboardExperience from "@/components/dashboard/dashboard-experience";
-import { isHorsePubliclyVisible } from "@/lib/billing/entitlements";
 import { featuredHorseInclude, getFeaturedHorses } from "@/lib/horses/featured";
-import { horseListingInclude, mapHorseToCard } from "@/lib/horses/listing-data";
+import { horseListingInclude, isHorseListingAvailable, mapHorseToCard } from "@/lib/horses/listing-data";
 import { getHeaderCTAs } from "@/lib/mybarn/primary-cta";
 
 export default async function UserDashboardPage() {
@@ -55,8 +54,8 @@ export default async function UserDashboardPage() {
             take: 48,
           });
 
-    const featuredVisibleHorses = getFeaturedHorses(featuredHorses.filter(isHorsePubliclyVisible), 6);
-    const contentVisible = contentHorsesRaw.filter(isHorsePubliclyVisible).slice(0, hasFollows ? 24 : 12);
+    const featuredVisibleHorses = getFeaturedHorses(featuredHorses.filter(isHorseListingAvailable), 6);
+    const contentVisible = contentHorsesRaw.filter(isHorseListingAvailable).slice(0, hasFollows ? 24 : 12);
 
     const featuredHorseCards = featuredVisibleHorses.map(mapHorseToCard);
     // followedBarnsHorses is non-null only when the user follows barns; null triggers fresh-listings fallback.

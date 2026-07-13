@@ -1,270 +1,205 @@
 # HorseRoster Next Steps
 
-Last updated: 2026-03-20
+Last updated: 2026-07-12
 
 ## Purpose
 
-This document groups the agreed remaining work into epics so it can be handed to AI assistants or engineers without re-explaining project context each time.
+This planning document is now focused on the approved EquiVault positioning work.
+
+The goal is to make every seller understand that EquiVault is a core included part of HorseRoster, not a hidden or secondary feature.
 
 Use this together with:
-- `AGENTS.md`
 - `docs/horseroster-spec.md`
 - `docs/project-status.md`
+- the client mock dated 2026-07-12
 
-## Current Assumptions
+## Primary Outcome
 
-- Client-approved scope changes override the older legacy project PDF where they conflict.
-- EquiTag routing may resolve to either a barn or a horse destination.
-- Billing scope is the activation-plus-extra-slots model.
-- Website remains optional on the seller profile.
-- Community features are not defined yet and should not be implemented without fresh client direction.
-- Basic public-endpoint rate limiting is not in current scope.
+By the end of this work:
+- every user sees EquiVault called out during plan selection and onboarding
+- Billing & Add-Ons positions EquiVault as an included core product
+- users are not dropped into a confusing EquiVault path before creating a barn
+- EquiVault remains organized per horse inside the existing horse document flow
 
-## Epic Backlog
+## Current Product Reality
 
-Completed epics:
-- `1. Vault Epic`
-- `2. Email Epic`
-- `3. Admin Epic`
-- `4. Seller Tools Epic`
-- `5. Buyer Tools Epic`
+These are the relevant touchpoints in the current codebase:
+- `src/components/billing/pricing-plan-experience.tsx`
+  Routes a non-barn user from pricing into `/mybarn/onboard?plan=...&step=included`
+- `src/app/seller/onboard/page.tsx`
+  Barn onboarding now includes `plan`, `included`, and `details`
+- `src/components/billing/barn-plan-selector.tsx`
+  Shows the plan cards plus the EquiVault side card
+- `src/components/billing/billing-plan-manager.tsx`
+  Still uses the shared selector while billing operations remain unchanged
+- `src/app/mybarn/equivault/page.tsx`
+  EquiVault overview exists for sellers with a barn and should show the no-barn guard flow otherwise
 
-Open epics:
-- `6. Dev / Platform Epic`
-- `7. Community Epic`
+## Approved Scope
 
-### 1. Vault Epic
-
-Status:
-- Completed in app code for the currently approved scope
-- Remaining vault work is limited to future scope changes such as authenticated share-link strategy or later file-specific requests if reintroduced
-
-Goal:
-- Bring buyer request and vault management flows closer to the intended product shape.
-
-Includes:
-- category-based buyer requests
-- intended-use capture in request flow
-- grant-scoped access pages
-- optional share-link support if scope changes later
-- seller-side file rename
-- seller-side move-between-categories
-- seller-side soft-delete for vault files
-- audit-log coverage for all vault actions
-
-Dependencies:
-- none required to start
-- email infrastructure will improve notifications around this flow, but is not required for core implementation
-
-Acceptance focus:
-- buyers can request explicit categories instead of only free-text
-- sellers can manage vault files after upload
-- approved access is grant-aware, not only horse-aware
-- revoke/expire behavior still works correctly
-
-AI kickoff prompt:
-```text
-Read AGENTS.md, docs/horseroster-spec.md, docs/project-status.md, and docs/next-steps.md.
-Work only on the Vault Epic.
-Goal: inspect the completed Vault Epic implementation and only extend it if the request is for a new scoped follow-up such as authenticated share links or later file-specific request selection.
-Do not re-implement the already completed category-request, grant-page, or vault-management work.
-Keep website optional and do not reintroduce stale PDF assumptions that conflict with current docs.
-Update docs/project-status.md after meaningful changes.
-```
-
-### 2. Email Epic
+### 1. Insert an "Everything Included" onboarding step
 
 Goal:
-- Add the auth and outbound email foundation the product still lacks.
+- after plan selection, but before barn creation, show one simple screen that introduces the four core HorseRoster parts
 
-Includes:
-- email verification
-- forgot password
-- reset password
-- base mail delivery integration
-- reusable email event plumbing for future notifications
+Required UI:
+- heading: `Everything Included`
+- items:
+  - `Horse Profiles`
+  - `My Barn`
+  - `EquiVault`
+  - `EquiTag`
+- primary CTA: `Continue -> Create My Barn`
 
-Dependencies:
-- should be treated as a platform dependency for other notification-heavy epics
+Implementation plan:
+- add a new onboarding step between `plan` and `details`
+- extend the onboarding query-state model in `src/app/seller/onboard/page.tsx`
+- likely step naming:
+  - `plan`
+  - `included`
+  - `details`
+- update plan-selection actions so they move to `step=included`, not directly to `step=details`
+- update pricing-entry routing in `src/components/billing/pricing-plan-experience.tsx` so non-barn users land on the new included step
+- keep the selected plan in the query string throughout the flow
+- include a back action from the included step to plan selection
 
-Acceptance focus:
-- auth flows work end to end
-- mail delivery is configurable by environment
-- later product notifications can reuse the same infrastructure
+Acceptance criteria:
+- a user who selects a plan always sees EquiVault before barn creation
+- the included step is visually simple and not a second pricing screen
+- continuing from the included step lands on barn creation details, not checkout
+- existing email-verification gating still works
 
-AI kickoff prompt:
-```text
-Read AGENTS.md, docs/horseroster-spec.md, docs/project-status.md, and docs/next-steps.md.
-Work only on the Email Epic.
-Goal: add email verification, forgot/reset password, and the base outbound email infrastructure needed by the rest of the product.
-Inspect the current auth stack and environment configuration first.
-Do not add unsupported product features outside this epic.
-Update docs/project-status.md after meaningful changes.
-```
-
-### 3. Admin Epic
-
-Status:
-- Completed in app code for the current agreed scope
-
-Goal:
-- Close the main admin tooling gaps around access control and reporting.
-
-Includes:
-- admin access-log UI
-- platform-wide active-grant revoke actions
-- featured-horse admin tool
-- analytics expansion for requests, approvals, and messages
-
-Dependencies:
-- Vault Epic informs some access-log and grant data requirements
-
-Acceptance focus:
-- admins can inspect and act on grant/access data without manual DB work
-- analytics cover the revised MVP reporting needs better
-- featured-horse tooling exists in admin rather than via paid sponsored products
-
-AI kickoff prompt:
-```text
-Read AGENTS.md, docs/horseroster-spec.md, docs/project-status.md, and docs/next-steps.md.
-Work only on the Admin Epic.
-Goal: inspect the completed Admin Epic implementation and only work on admin follow-ups that are not already shipped.
-Do not rebuild the existing access console, grant revoke tooling, featured-horse controls, or revised analytics surfaces.
-Inspect the current admin routes, analytics code, and grant/audit schema usage first.
-Do not implement community features.
-Update docs/project-status.md after meaningful changes.
-```
-
-### 4. Seller Tools Epic
+### 2. Replace the informational add-on card with an EquiVault card
 
 Goal:
-- Improve seller-side operational controls and profile completeness.
+- remove the `Additional Horse Profile` marketing card from the selector area and replace it with an EquiVault positioning card
 
-Includes:
-- mute buyer controls
-- block buyer controls
-- seller-facing notifications once email infrastructure exists
-- seller phone
-- primary notification email
-- seller-side soft-delete horse flow
+Required UI copy:
+- title: `EquiVault`
+- subtitle: `Secure Horse Document Vault`
+- description: `Store, organize, and securely transfer all of your horse documents in one place.`
+- bullets:
+  - `Health records, Coggins & PPEs`
+  - `Registrations & contracts`
+  - `Organize documents by horse`
+  - `Securely transfer documents to buyers`
+  - `Access anywhere`
+- button: `Open EquiVault`
 
-Dependencies:
-- Email Epic is a dependency for seller-facing email notifications
+Implementation plan:
+- replace the right-rail card in `src/components/billing/barn-plan-selector.tsx`
+- do not remove the real extra-horse purchase flow from `src/components/billing/billing-plan-manager.tsx` unless separately requested
+- treat this as a positioning change, not a billing-model change
 
-Acceptance focus:
-- sellers can manage difficult messaging situations
-- seller profile contains the missing contact fields
-- website remains optional
-- horses can be soft-deleted from seller tools without losing history
+Button behavior:
+- if the user already has a barn, open `/mybarn/equivault`
+- if the user does not have a barn, do not deep-link into a dead end
+- preferred behavior for parity with the mock:
+  - trigger a `Create Your Barn First` modal
+- acceptable fallback if speed matters:
+  - send the user into the new included/onboarding flow
 
-AI kickoff prompt:
-```text
-Read AGENTS.md, docs/horseroster-spec.md, docs/project-status.md, and docs/next-steps.md.
-Work only on the Seller Tools Epic.
-Goal: add seller mute/block controls, seller phone + primary notification email, and seller-side horse soft-delete flow.
-Treat website as optional.
-Email notifications should only be built if the email infrastructure already exists in the repo.
-Inspect current seller settings, messaging, and horse management flows first.
-Update docs/project-status.md after meaningful changes.
-```
+Acceptance criteria:
+- `Additional Horse Profile` no longer appears as the side card beside plan selection
+- EquiVault is clearly framed as included, not sold as a separate add-on
+- the extra-horse purchase control still exists where billing operations actually happen
 
-### 5. Buyer Tools Epic
-
-Goal:
-- Add the first buyer retention feature.
-
-Includes:
-- save/favorite horses
-- buyer-facing saved-horses surface
-- integration from marketplace and horse pages
-
-Dependencies:
-- none required to start
-
-Acceptance focus:
-- buyers can save and unsave horses
-- saved horses are visible in a coherent buyer flow
-- public browse surfaces expose the action consistently
-
-AI kickoff prompt:
-```text
-Read AGENTS.md, docs/horseroster-spec.md, docs/project-status.md, and docs/next-steps.md.
-Work only on the Buyer Tools Epic.
-Goal: add horse favorites/saved horses for buyers, including marketplace and horse-page actions plus a buyer-facing saved list.
-Inspect current buyer routes and horse card/detail components first.
-Update docs/project-status.md after meaningful changes.
-```
-
-### 6. Dev / Platform Epic
+### 3. Add a pre-barn EquiVault guard state
 
 Goal:
-- Finish core cleanup and production-readiness work already in progress.
+- if a user tries to open EquiVault before creating a barn, explain the dependency clearly
 
-Includes:
-- semantic token migration cleanup
-- remaining seller/barn wording cleanup
-- S3 upload/render/download verification
-- media pipeline hardening
+Required modal copy:
+- title: `Create Your Barn First`
+- body intent:
+  `EquiVault is organized inside your Barn so every horse's documents stay connected.`
+- CTA: `Create My Barn`
+- secondary action: `Maybe Later`
 
-Dependencies:
-- none required, but should stay coordinated with ongoing feature work
+Current product behavior:
+- direct `/mybarn/equivault` visits for no-barn users should use the same guard flow instead of exposing a working EquiVault view
 
-Acceptance focus:
-- fewer fixed-light surfaces remain
-- docs and UI wording match the current product language
-- S3-backed flows are reliable in realistic environments
+Implementation plan:
+- add the modal at the CTA level rather than relying only on a redirect
+- use the modal only in no-barn contexts
+- route the primary action into the onboarding flow with the selected plan preserved when possible
+- direct `/mybarn/equivault` visits for no-barn users should show the same `Create Your Barn First` explanation and route into onboarding
 
-AI kickoff prompt:
-```text
-Read AGENTS.md, docs/horseroster-spec.md, docs/project-status.md, and docs/next-steps.md.
-Work only on the Dev / Platform Epic.
-Goal: continue theme/copy cleanup and finish S3/media production-readiness work already in progress.
-Inspect the current token usage, storage code, and media flows first.
-Do not expand product scope while doing platform cleanup.
-Update docs/project-status.md after meaningful changes.
-```
+Acceptance criteria:
+- users understand why EquiVault is not standalone before barn creation
+- no confusing redirect happens after clicking an EquiVault CTA from plan-selection surfaces
 
-### 7. Community Epic
+### 4. Add EquiVault inclusion language anywhere plan value is summarized
 
 Goal:
-- Define future scope only. Do not implement yet.
+- reinforce that EquiVault is included in paid HorseRoster plans
 
-Includes:
-- clarify what "community interaction" means with the client
-- identify whether this is feed, comments, reactions, posts, or something else
-- decide whether it belongs in MVP follow-up or a separate roadmap track
+Likely touchpoints:
+- onboarding plan summary in `src/app/seller/onboard/page.tsx`
+- pricing-plan feature bullets in `src/components/billing/barn-plan-selector.tsx`
+- any pricing or billing summaries that currently mention only horse capacity and EquiTags
 
-Dependencies:
-- explicit client direction
+Implementation plan:
+- add a concise included-value bullet such as:
+  `EquiVault secure document storage and transfer is included`
+- keep copy consistent across pricing and onboarding surfaces
+- avoid creating a separate EquiVault upsell price
 
-Acceptance focus:
-- written scope definition exists before any implementation begins
+Acceptance criteria:
+- a user can understand from plan-related UI that EquiVault comes with the plan
+- no surface implies that EquiVault must be bought separately
 
-AI kickoff prompt:
+### 5. Keep EquiVault inside each horse
+
+Goal:
+- preserve the existing per-horse document model
+
+Decision:
+- no structural change is needed here
+- EquiVault should continue to live in each horse's document area and in the seller overview
+
+Notes:
+- the existing overview at `src/app/mybarn/equivault/page.tsx` already supports this direction
+- this item is a guardrail, not a new feature build
+
+## Explicit Non-Goals
+
+Do not do these as part of this scope unless requested separately:
+- remove or redesign the actual extra-horse billing purchase flow
+- change Stripe products or pricing model
+- redesign the per-horse EquiVault document manager
+- introduce public document-sharing scope changes beyond the existing product behavior
+- expand this work into a broader homepage or brand refresh
+
+## Recommended Delivery Order
+
+1. Add the new onboarding `included` step
+2. Replace the selector-side card with the EquiVault card
+3. Add the no-barn EquiVault modal behavior
+4. Sweep pricing and plan-summary copy for EquiVault inclusion language
+5. QA the full path from pricing -> onboarding -> barn creation -> billing -> EquiVault
+
+## QA Checklist
+
+- logged-out user selects a plan and is routed into account creation, then the included step
+- logged-in user without a barn sees the included step before barn details
+- logged-in user with a barn still gets correct billing behavior
+- EquiVault CTA opens the overview for existing barns
+- EquiVault CTA shows the pre-barn explanation for non-barn users
+- additional horse purchases still work from Billing & Add-Ons
+- no copy still suggests EquiVault is hidden or optional in a confusing way
+
+## AI Kickoff Prompt
+
 ```text
-Read AGENTS.md, docs/horseroster-spec.md, docs/project-status.md, and docs/next-steps.md.
-Work only on the Community Epic.
-Goal: define possible community scope without implementing any product changes.
-Summarize likely options, constraints, dependencies, and questions that need client answers.
-Do not write code unless explicitly asked after scope is clarified.
+Read docs/horseroster-spec.md, docs/project-status.md, and docs/next-steps.md.
+Work only on the EquiVault positioning plan in docs/next-steps.md.
+Implement the approved UX changes that make EquiVault visibly included in HorseRoster:
+1. Add an "Everything Included" step between plan selection and barn creation.
+2. Replace the informational "Additional Horse Profile" side card with an EquiVault card.
+3. Add a pre-barn guard/modal when an EquiVault CTA is clicked before barn creation.
+4. Update plan-summary and pricing-adjacent copy so EquiVault is clearly included.
+Do not remove the real extra-horse purchase flow unless explicitly asked.
+Do not change the underlying billing model.
+Update docs/project-status.md after meaningful product changes.
 ```
-
-## Suggested Delivery Order
-
-If no other business priority overrides it, the cleanest dependency-aware order is:
-1. Email Epic
-2. Seller Tools Epic
-3. Buyer Tools Epic
-4. Dev / Platform Epic
-5. Community Epic
-
-Completed already:
-- Vault Epic
-- Admin Epic
-
-## Notes For AI Use
-
-- Always ask the AI to inspect the existing implementation first.
-- Always include the current docs in the prompt so it does not follow stale legacy-brand assumptions.
-- Keep epic work scoped. Do not mix multiple epics in one implementation pass unless you explicitly want a larger refactor.
-- After each meaningful implementation, update `docs/project-status.md`.

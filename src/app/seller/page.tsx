@@ -321,10 +321,10 @@ export default async function SellerPage() {
                             Horse Profiles
                         </p>
                         <p className="mt-3 text-sm text-[color:var(--foreground-soft)]">
-                            Expand your public roster capacity with additional horse profiles when you need them.
+                            Review how many horse profiles your current plan supports and manage billing for your barn.
                         </p>
                         <Link href="/mybarn/billing" className="mt-4 inline-flex">
-                            <Button variant="outline">Buy Profiles</Button>
+                            <Button variant="outline">Open Billing</Button>
                         </Link>
                     </div>
                 </div>
