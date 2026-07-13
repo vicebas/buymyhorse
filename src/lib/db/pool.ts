@@ -7,6 +7,8 @@ import { Pool } from "pg"
 
 type DbAuthMode = "database-url" | "rds-iam"
 
+const BUILD_TIME_DATABASE_URL = "postgresql://postgres:postgres@127.0.0.1:5432/postgres"
+
 function getDbAuthMode(): DbAuthMode {
   return process.env.DB_AUTH_MODE === "rds-iam" ? "rds-iam" : "database-url"
 }
@@ -19,6 +21,10 @@ function requireEnv(name: string): string {
   }
 
   return value
+}
+
+function optionalEnv(name: string): string | null {
+  return process.env[name] || null
 }
 
 async function generateRdsIamToken({
@@ -61,13 +67,18 @@ async function generateRdsIamToken({
 
 function createDatabaseUrlPool() {
   return new Pool({
-    connectionString: requireEnv("DATABASE_URL")
+    connectionString: optionalEnv("DATABASE_URL") || BUILD_TIME_DATABASE_URL
   })
 }
 
 function createRdsIamPool() {
-  const hostname = requireEnv("RDSHOST")
-  const region = requireEnv("AWS_REGION")
+  const hostname = optionalEnv("RDSHOST")
+  const region = optionalEnv("AWS_REGION")
+
+  if (!hostname || !region) {
+    return createDatabaseUrlPool()
+  }
+
   const user = process.env.PGUSER || "postgres"
   const database = process.env.PGDATABASE || "postgres"
   const port = Number(process.env.PGPORT || "5432")
