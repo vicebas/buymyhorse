@@ -239,7 +239,7 @@ export default async function SellerPage() {
                                         <Button variant="outline">Edit Profile</Button>
                                     </Link>
 
-                                    <Link href={`/barn/${seller.slug}`}>
+                                    <Link href={`/sellers/${seller.slug}`}>
                                         <Button variant="outline">View Barn Profile</Button>
                                     </Link>
                                 </div>

@@ -46,30 +46,35 @@ export default function AICopyGenerator({
     setLoading(true);
     setError("");
 
-    const res = await fetch("/api/ai/copy/generate", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        entityType,
-        targetField,
-        scope,
-        mode,
-        horseId: horseId || null,
-        context: getContext(),
-      }),
-    });
+    try {
+      const res = await fetch("/api/ai/copy/generate", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          entityType,
+          targetField,
+          scope,
+          mode,
+          horseId: horseId || null,
+          context: getContext(),
+        }),
+      });
 
-    const data = await res.json().catch(() => null);
-    setLoading(false);
+      const data = await res.json().catch(() => null);
 
-    if (!res.ok) {
-      setError(data?.error || "Unable to generate copy right now.");
-      return;
+      if (!res.ok) {
+        setError(data?.error || "Unable to generate copy right now.");
+        return;
+      }
+
+      setDraft(data?.draft || "");
+    } catch {
+      setError("Unable to generate copy right now.");
+    } finally {
+      setLoading(false);
     }
-
-    setDraft(data?.draft || "");
   }
 
   async function handleOpen() {
@@ -97,12 +102,12 @@ export default function AICopyGenerator({
       </Button>
 
       {open ? (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4 py-8">
+        <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto overscroll-contain bg-black/50 px-4 py-4 sm:items-center sm:py-8">
           <div
             role="dialog"
             aria-modal="true"
             aria-label={title}
-            className="w-full max-w-3xl rounded-[2rem] border border-[color:var(--border)] bg-[color:var(--background-elevated)] p-6 shadow-[0_32px_80px_rgba(9,28,46,0.36)]"
+            className="max-h-[calc(100dvh-2rem)] w-full max-w-3xl overflow-y-auto rounded-[2rem] border border-[color:var(--border)] bg-[color:var(--background-elevated)] p-5 shadow-[0_32px_80px_rgba(9,28,46,0.36)] sm:max-h-[calc(100dvh-4rem)] sm:p-6"
           >
             <div className="flex items-start justify-between gap-4">
               <div>
