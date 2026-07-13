@@ -36,6 +36,33 @@ type ListingOptionDataset = {
   importStatuses: SimpleOptionRecord[];
 };
 
+type SimpleOptionModelName =
+  | "idealRiderOption"
+  | "horseTypeOption"
+  | "pricingVisibilityOption"
+  | "saleTypeOption"
+  | "breedOption"
+  | "sexOption"
+  | "colorOption"
+  | "importStatusOption";
+
+type TransactionClient = Parameters<Parameters<PrismaClient["$transaction"]>[0]>[0];
+
+type SimpleOptionDelegate = {
+  upsert(args: {
+    where: { label: string };
+    update: Omit<SimpleOptionRecord, "label">;
+    create: SimpleOptionRecord;
+  }): Promise<unknown>;
+  deleteMany(args: {
+    where: {
+      label: {
+        notIn: string[];
+      };
+    };
+  }): Promise<unknown>;
+};
+
 type AppendedDefaults = {
   disciplines: string[];
   divisionsByDiscipline: Record<string, string[]>;
@@ -373,21 +400,15 @@ async function syncDataset(prisma: PrismaClient, dataset: ListingOptionDataset) 
   });
 }
 
-async function syncSimpleOptions(
-  tx: Parameters<Parameters<PrismaClient["$transaction"]>[0]>[0],
-  modelName:
-    | "idealRiderOption"
-    | "horseTypeOption"
-    | "pricingVisibilityOption"
-    | "saleTypeOption"
-    | "breedOption"
-    | "sexOption"
-    | "colorOption"
-    | "importStatusOption",
-  options: SimpleOptionRecord[]
-) {
+function getSimpleOptionDelegate(tx: TransactionClient, modelName: SimpleOptionModelName): SimpleOptionDelegate {
+  return tx[modelName] as unknown as SimpleOptionDelegate;
+}
+
+async function syncSimpleOptions(tx: TransactionClient, modelName: SimpleOptionModelName, options: SimpleOptionRecord[]) {
+  const model = getSimpleOptionDelegate(tx, modelName);
+
   for (const option of options) {
-    await tx[modelName].upsert({
+    await model.upsert({
       where: { label: option.label },
       update: {
         sortOrder: option.sortOrder,
@@ -402,21 +423,11 @@ async function syncSimpleOptions(
   }
 }
 
-async function pruneSimpleOptions(
-  tx: Parameters<Parameters<PrismaClient["$transaction"]>[0]>[0],
-  modelName:
-    | "idealRiderOption"
-    | "horseTypeOption"
-    | "pricingVisibilityOption"
-    | "saleTypeOption"
-    | "breedOption"
-    | "sexOption"
-    | "colorOption"
-    | "importStatusOption",
-  options: SimpleOptionRecord[]
-) {
+async function pruneSimpleOptions(tx: TransactionClient, modelName: SimpleOptionModelName, options: SimpleOptionRecord[]) {
   const keepLabels = options.map((option) => option.label);
-  await tx[modelName].deleteMany({
+  const model = getSimpleOptionDelegate(tx, modelName);
+
+  await model.deleteMany({
     where: {
       label: {
         notIn: keepLabels,
