@@ -27,6 +27,7 @@ export default async function MyBarnEquiVaultOverviewPage() {
     where: { userId: session.user.id },
     select: {
       id: true,
+      displayName: true,
       horses: {
         orderBy: [{ name: "asc" }],
         select: {
@@ -86,13 +87,13 @@ export default async function MyBarnEquiVaultOverviewPage() {
       <section className="border-b border-[color:var(--border)]">
         <div className="mx-auto max-w-7xl px-6 py-10">
           <p className="mono text-xs font-medium uppercase tracking-[0.24em] text-[color:var(--foreground-soft)]">
-            MyBarn
+            {seller.displayName}
           </p>
           <h1 className="mt-3 text-5xl font-extrabold text-[color:var(--foreground-strong)]">
-            EquiVault Overview
+            EquiVault
           </h1>
           <p className="mt-3 max-w-3xl text-lg text-[color:var(--foreground-soft)]">
-            Review document coverage across every horse profile and jump into each horse&apos;s detailed EquiVault workspace.
+            Each horse has its own private EquiVault for veterinary records, Coggins, X-rays, videos, pedigrees, and other important documents.
           </p>
         </div>
       </section>
@@ -108,7 +109,7 @@ export default async function MyBarnEquiVaultOverviewPage() {
           </Link>
           <button className="inline-flex items-center gap-2 rounded-lg bg-[color:var(--background-elevated)] px-5 py-2 text-md font-medium text-[color:var(--foreground-strong)] shadow-[var(--shadow-card)]">
             <FileText className="h-4 w-4" />
-            EquiVault Overview
+            EquiVault
           </button>
           <Link
             href="/mybarn/requests"

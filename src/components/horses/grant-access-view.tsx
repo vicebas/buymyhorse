@@ -49,7 +49,7 @@ export default function GrantAccessView({
         <p className="text-sm font-medium uppercase tracking-[0.18em] text-stone-500">
           Document Access
         </p>
-        <h1 className="mt-2 font-serif text-4xl">{horseName ? `${horseName} Vault` : "Horse Vault"}</h1>
+        <h1 className="mt-2 font-serif text-4xl">{horseName ? `${horseName}'s EquiVault` : "EquiVault"}</h1>
         <p className="mt-3 max-w-2xl text-stone-600">
           Access is provided for convenience and does not replace due diligence.
         </p>
