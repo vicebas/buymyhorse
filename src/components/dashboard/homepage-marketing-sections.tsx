@@ -64,7 +64,7 @@ export default function HomepageMarketingSections() {
             </div>
             <p className="mt-4 text-base leading-7 text-[color:var(--foreground-soft)]">
               Create a professional roster, present horses with more clarity,
-              manage horse documents in EquiVault, and share each horse through
+              manage horse documents in HorseVault, and share each horse through
               the EquiTag system.
             </p>
           </div>
@@ -109,7 +109,7 @@ export default function HomepageMarketingSections() {
                 <FileText size={20} />
               </div>
               <h3 className="text-lg font-bold text-[color:var(--foreground-strong)]">
-                EquiVault
+                HorseVault
               </h3>
             </div>
             <p className="mt-4 text-base leading-7 text-[color:var(--foreground-soft)]">
@@ -207,7 +207,7 @@ export default function HomepageMarketingSections() {
               {[
                 "Create a professional presence",
                 "Organize horses in one roster",
-                "Manage horse documents in EquiVault",
+                "Manage horse documents in HorseVault",
                 "Share horses through EquiTag",
                 "Present each horse more clearly and professionally",
               ].map((item) => (

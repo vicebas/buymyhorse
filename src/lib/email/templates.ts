@@ -359,7 +359,7 @@ export function directVaultShareTemplate(params: {
     text: [
       `Hi ${toName},`,
       "",
-      `${senderName} from ${barnName} shared secure EquiVault access for ${horseName}.`,
+      `${senderName} from ${barnName} shared secure HorseVault access for ${horseName}.`,
       `Shared documents: ${documentSummary}.`,
       message ? `Message: ${message}` : null,
       "",
@@ -386,7 +386,7 @@ export function directVaultShareTemplate(params: {
             <h1 style="margin:0 0 16px;font-size:24px;font-weight:700;color:#1a1a1a;">${horseName} documents shared with you</h1>
             <p style="margin:0 0 8px;color:#555;font-size:15px;line-height:1.6;">Hi ${toName},</p>
             <p style="margin:0 0 16px;color:#555;font-size:15px;line-height:1.6;">
-              <strong>${senderName}</strong> from <strong>${barnName}</strong> shared secure EquiVault access for <strong>${horseName}</strong>.
+              <strong>${senderName}</strong> from <strong>${barnName}</strong> shared secure HorseVault access for <strong>${horseName}</strong>.
             </p>
             <p style="margin:0 0 24px;color:#555;font-size:15px;line-height:1.6;">
               Shared documents: <strong>${documentSummary}</strong>.

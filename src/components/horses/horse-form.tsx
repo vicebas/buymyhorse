@@ -394,7 +394,7 @@ export default function HorseForm({ mode, options, initialValues, horseId }: Hor
             </label>
             <label className="flex items-center gap-3 rounded-2xl border border-[color:var(--border)] bg-[color:var(--background-elevated)] p-4 text-sm text-[color:var(--foreground)]">
               <input type="checkbox" name="equiVaultAvailable" defaultChecked={values.equiVaultAvailable} className="h-4 w-4 rounded border-[color:var(--border)]" />
-              EquiVault Available
+              HorseVault Available
             </label>
           </div>
         </div>

@@ -36,7 +36,7 @@ export default function BuyerDashboardHero({
                 The modern horse marketplace.
               </p>
               <p className="mt-5 max-w-xl text-base leading-7 text-[color:var(--foreground-soft)] md:text-lg">
-                Browse quality horses, explore barn and trainer rosters, manage horse documents in your EquiVault, and share your horse through the EquiTag system.
+                Browse quality horses, explore barn and trainer rosters, manage horse documents in your HorseVault, and share your horse through the EquiTag system.
               </p>
 
               <div className="mt-8 flex flex-wrap gap-3">

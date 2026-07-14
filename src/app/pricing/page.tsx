@@ -69,7 +69,7 @@ export default async function PricingPage() {
             </h1>
 
             <p className="mt-5 text-lg leading-8 text-[color:var(--foreground-soft)]">
-              Choose the launch plan that fits your active horse count. Every paid plan includes Horse Profiles, My Barn, EquiVault, and EquiTag from day one.
+              Choose the launch plan that fits your active horse count. Every paid plan includes Horse Profiles, My Barn, HorseVault, and EquiTag from day one.
             </p>
           </div>
         </div>
@@ -101,7 +101,7 @@ export default async function PricingPage() {
           <article className="rounded-[2rem] border border-[color:var(--border)] bg-[color:var(--card)] p-6 shadow-[var(--shadow-card)]">
             <div className="flex items-center gap-3 text-[color:var(--foreground-strong)]">
               <CheckCircle2 className="h-5 w-5 text-[color:var(--primary)]" />
-              EquiVault included
+              HorseVault included
             </div>
             <p className="mt-3 text-sm leading-6 text-[color:var(--foreground-soft)]">
               Secure document storage, organization, and buyer-ready transfer are built into every paid HorseRoster plan.

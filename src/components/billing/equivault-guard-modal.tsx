@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 
 export default function EquiVaultGuardModal({
   onboardingHref,
-  triggerLabel = "Open EquiVault",
+  triggerLabel = "Open HorseVault",
   triggerClassName,
   defaultOpen = false,
   showStandaloneCard = false,
@@ -44,7 +44,7 @@ export default function EquiVaultGuardModal({
             Create Your Barn First
           </h2>
           <p className="mt-3 max-w-2xl text-sm leading-6 text-[color:var(--foreground-soft)] mx-auto">
-            EquiVault is organized inside your Barn so every horse&apos;s documents stay connected.
+            HorseVault is organized inside your Barn so every horse&apos;s documents stay connected.
           </p>
 
           <div className="mt-6 flex flex-col items-center justify-center gap-3 sm:flex-row">
@@ -69,13 +69,13 @@ export default function EquiVaultGuardModal({
             <div className="flex items-start justify-between gap-4">
               <div>
                 <p className="mono text-[11px] uppercase tracking-[0.2em] text-[color:var(--foreground-soft)]">
-                  EquiVault
+                  HorseVault
                 </p>
                 <h2 className="mt-3 text-3xl font-extrabold tracking-[-0.04em] text-[color:var(--foreground-strong)]">
                   Create Your Barn First
                 </h2>
                 <p className="mt-3 max-w-lg text-sm leading-6 text-[color:var(--foreground-soft)]">
-                  EquiVault is organized inside your Barn so every horse&apos;s documents stay connected.
+                  HorseVault is organized inside your Barn so every horse&apos;s documents stay connected.
                 </p>
               </div>
 
@@ -84,7 +84,7 @@ export default function EquiVaultGuardModal({
                 variant="outline"
                 size="icon"
                 onClick={() => setOpen(false)}
-                aria-label="Close EquiVault guard modal"
+                aria-label="Close HorseVault guard modal"
               >
                 <X className="h-4 w-4" />
               </Button>

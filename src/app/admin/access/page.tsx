@@ -81,7 +81,7 @@ export default async function AdminAccessPage({
             Access Console
           </p>
           <h2 className="mt-3 text-4xl font-extrabold text-[color:var(--foreground-strong)]">
-            Inspect live grants, request history, and vault access activity.
+            Inspect live grants, request history, and HorseVault access activity.
           </h2>
           <p className="mt-3 max-w-3xl text-base text-[color:var(--foreground-soft)]">
             This view centralizes access-control operations so admins can inspect history and revoke active grants without manual database work.
@@ -157,12 +157,12 @@ export default async function AdminAccessPage({
         <SummaryCard
           label="Requests In Range"
           value={data.summary.requestsCreatedCount.toLocaleString()}
-          description="Buyer vault requests created in the selected window."
+          description="Buyer HorseVault requests created in the selected window."
         />
         <SummaryCard
           label="Approvals In Range"
           value={data.summary.approvalsCount.toLocaleString()}
-          description="Vault approvals recorded in the activity log."
+          description="HorseVault approvals recorded in the activity log."
         />
         <SummaryCard
           label="Messages In Range"
@@ -294,7 +294,7 @@ export default async function AdminAccessPage({
             Access Log
           </p>
           <h3 className="mt-2 text-2xl font-extrabold text-[color:var(--foreground-strong)]">
-            Vault access activity
+            HorseVault access activity
           </h3>
         </div>
 

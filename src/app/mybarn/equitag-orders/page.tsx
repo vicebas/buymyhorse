@@ -102,18 +102,18 @@ export default async function EquiTagOrdersPage({
             My Horses
           </Link>
           <Link
-            href="/mybarn/equivault"
+            href="/mybarn/horsevault"
             className="inline-flex items-center gap-2 rounded-lg px-5 py-2 text-md font-medium text-[color:var(--foreground-soft)]"
           >
             <FileText className="h-4 w-4" />
-            EquiVault
+            HorseVault
           </Link>
           <Link
             href="/mybarn/requests"
             className="inline-flex items-center gap-2 rounded-lg px-5 py-2 text-md font-medium text-[color:var(--foreground-soft)]"
           >
             <FileText className="h-4 w-4" />
-            EquiVault Requests
+            HorseVault Requests
           </Link>
           <button className="inline-flex items-center gap-2 rounded-lg bg-[color:var(--background-elevated)] px-5 py-2 text-md font-medium text-[color:var(--foreground-strong)] shadow-[var(--shadow-card)]">
             <Package className="h-4 w-4" />

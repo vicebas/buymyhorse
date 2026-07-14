@@ -201,7 +201,7 @@ export default async function SellerPage() {
                     </p>
                     <h1 className="mt-3 text-5xl font-extrabold">MyBarn</h1>
                     <p className="mt-3 max-w-2xl text-lg text-[color:var(--foreground-soft)]">
-                        Manage your horse profiles, EquiVault documents, marketplace listings, and buyer inquiries.
+                        Manage your horse profiles, HorseVault documents, marketplace listings, and buyer inquiries.
                     </p>
                 </div>
             </section>
@@ -266,10 +266,10 @@ export default async function SellerPage() {
                                     Get EquiTags
                                 </Button>
                             </Link>
-                            <Link href="/mybarn/equivault">
+                            <Link href="/mybarn/horsevault">
                                 <Button variant="outline" className="inline-flex items-center gap-2">
                                     <FileText className="h-4 w-4" />
-                                    EquiVault
+                                    HorseVault
                                 </Button>
                             </Link>
                         </div>
@@ -448,11 +448,11 @@ export default async function SellerPage() {
                         </button>
 
                         <Link
-                            href="/mybarn/equivault"
+                            href="/mybarn/horsevault"
                             className="inline-flex items-center gap-2 rounded-lg px-5 py-2 text-md font-medium text-[color:var(--foreground-soft)]"
                         >
                             <FileText className="h-4 w-4" />
-                            EquiVault
+                            HorseVault
                         </Link>
 
                         <Link
@@ -460,7 +460,7 @@ export default async function SellerPage() {
                             className="inline-flex items-center gap-2 rounded-lg px-5 py-2 text-md font-medium text-[color:var(--foreground-soft)]"
                         >
                             <FileText className="h-4 w-4" />
-                            EquiVault Requests
+                            HorseVault Requests
                         </Link>
 
                         <Link

@@ -150,7 +150,7 @@ export default async function SellerRequestsPage() {
           <p className="mono text-sm font-medium uppercase tracking-[0.18em] text-[color:var(--foreground-soft)]">
             Barn Requests
           </p>
-          <h1 className="mt-2 text-4xl font-extrabold">Vault Access Requests</h1>
+          <h1 className="mt-2 text-4xl font-extrabold">HorseVault Access Requests</h1>
           <p className="mt-3 max-w-2xl text-[color:var(--foreground-soft)]">
             Review buyer requests for private horse documents and manage approvals from a single workspace.
           </p>
@@ -165,15 +165,15 @@ export default async function SellerRequestsPage() {
             My Horses
           </Link>
           <Link
-            href="/mybarn/equivault"
+            href="/mybarn/horsevault"
             className="inline-flex items-center gap-2 rounded-lg px-5 py-2 text-md font-medium text-[color:var(--foreground-soft)]"
           >
             <FileText className="h-4 w-4" />
-            EquiVault
+            HorseVault
           </Link>
           <button className="inline-flex items-center gap-2 rounded-lg bg-[color:var(--background-elevated)] px-5 py-2 text-md font-medium text-[color:var(--foreground-strong)] shadow-[var(--shadow-card)]">
             <FileText className="h-4 w-4" />
-            EquiVault Requests
+            HorseVault Requests
           </button>
           <Link
             href="/mybarn/equitag-orders"

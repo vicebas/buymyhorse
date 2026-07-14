@@ -56,32 +56,6 @@ function Toggle({
   );
 }
 
-function PrefRow({
-  label,
-  prefKey,
-  prefs,
-  onToggle,
-}: {
-  label: string;
-  prefKey: PrefKey;
-  prefs: NotificationPref;
-  onToggle: (key: PrefKey) => void;
-}) {
-  const id = `notif-${prefKey}`;
-  return (
-    <div className="flex items-center justify-between gap-4 py-3">
-      <Label htmlFor={id} className="cursor-pointer text-sm font-medium text-[color:var(--foreground-strong)]">
-        {label}
-      </Label>
-      <Toggle
-        id={id}
-        checked={prefs[prefKey]}
-        onChange={() => onToggle(prefKey)}
-      />
-    </div>
-  );
-}
-
 export default function NotificationPreferencesForm() {
   const [prefs, setPrefs] = useState<NotificationPref>(DEFAULT_PREFS);
   const [loading, setLoading] = useState(true);

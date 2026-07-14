@@ -61,9 +61,16 @@ export function NotificationBell({ userRole }: { userRole?: string }) {
   }
 
   useEffect(() => {
-    fetchNotifications()
-    const interval = setInterval(fetchNotifications, 60_000)
-    return () => clearInterval(interval)
+    const initialLoad = setTimeout(() => {
+      void fetchNotifications()
+    }, 0)
+    const interval = setInterval(() => {
+      void fetchNotifications()
+    }, 60_000)
+    return () => {
+      clearTimeout(initialLoad)
+      clearInterval(interval)
+    }
   }, [])
 
   useEffect(() => {

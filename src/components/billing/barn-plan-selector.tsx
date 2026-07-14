@@ -22,7 +22,7 @@ export default function BarnPlanSelector({
   disabled = false,
   trialEnabled = false,
   trialDays = 7,
-  vaultHref = "/mybarn/equivault",
+  vaultHref = "/mybarn/horsevault",
   vaultOnboardingHref,
 }: {
   selectedPlan: BillingPlanSelection;
@@ -93,7 +93,7 @@ export default function BarnPlanSelector({
                   </li>
                   <li className="flex items-start gap-3 text-sm text-[color:var(--foreground)]">
                     <Check className="mt-0.5 h-4 w-4 text-[color:var(--primary)]" />
-                    <span>EquiVault secure document storage and transfer included</span>
+                    <span>HorseVault secure document storage and transfer included</span>
                   </li>
                   {trialEnabled ? (
                     <li className="flex items-start gap-3 text-sm text-[color:var(--foreground)]">
@@ -112,7 +112,7 @@ export default function BarnPlanSelector({
             Included workspace
           </p>
           <h3 className="mt-3 text-2xl font-extrabold text-[color:var(--foreground-strong)]">
-            EquiVault
+            HorseVault
           </h3>
           <p className="mt-2 text-sm leading-6 text-[color:var(--foreground-soft)]">
             Secure Horse Document Vault
@@ -154,7 +154,7 @@ export default function BarnPlanSelector({
             <Button asChild variant="outline" className="mt-8 w-full">
               <Link href={vaultHref}>
                 <FolderLock className="mr-2 h-4 w-4" />
-                Open EquiVault
+                Open HorseVault
               </Link>
             </Button>
           )}

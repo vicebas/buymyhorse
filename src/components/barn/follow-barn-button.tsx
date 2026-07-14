@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
-import { Check, Bell, Heart, HeartMinus } from "lucide-react"
+import { Heart, HeartMinus } from "lucide-react"
 import { Button } from "@/components/ui/button"
 
 interface FollowBarnButtonProps {

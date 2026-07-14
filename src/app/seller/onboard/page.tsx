@@ -39,7 +39,7 @@ const INCLUDED_FEATURES = [
     icon: Store,
   },
   {
-    title: "EquiVault",
+    title: "HorseVault",
     description: "Keep horse documents organized and connected to the right horse.",
     icon: Globe,
   },
@@ -204,7 +204,7 @@ function SellerOnboardPageContent() {
                   actionLabel="Continue to everything included"
                   onAction={() => updateQuery({ step: "included" })}
                   disabled={!emailVerified}
-                  vaultHref="/mybarn/equivault"
+                  vaultHref="/mybarn/horsevault"
                   vaultOnboardingHref={`/mybarn/onboard?plan=${selectedPlan}&step=included`}
                 />
               </CardContent>
@@ -416,7 +416,7 @@ function SellerOnboardPageContent() {
                       ? "This plan includes unlimited active horse profiles."
                       : `This plan includes ${BILLING_PLANS[selectedPlan].includedHorseSlots} active horse profile${BILLING_PLANS[selectedPlan].includedHorseSlots === 1 ? "" : "s"}.`}
                   </li>
-                  <li>EquiVault secure document storage and transfer is included with this plan.</li>
+                  <li>HorseVault secure document storage and transfer is included with this plan.</li>
                   <li>Every horse gets its EquiTag automatically.</li>
                   <li>Additional horse profiles can be purchased later for $14.99 each.</li>
                   <li>Your account only becomes a barn after this form is submitted.</li>

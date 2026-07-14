@@ -93,7 +93,7 @@ export default function PricingPlanExperience({
         disabled={loading}
         trialEnabled={trialEnabled}
         trialDays={trialDays}
-        vaultHref="/mybarn/equivault"
+        vaultHref="/mybarn/horsevault"
         vaultOnboardingHref={
           hasBarn
             ? null

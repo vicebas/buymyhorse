@@ -44,7 +44,7 @@ export default function ConversationThread({
   try {
     // eslint-disable-next-line react-hooks/rules-of-hooks
     floatingMsgApi = useFloatingMessage();
-  } catch (err) {
+  } catch {
     floatingMsgApi = null;
   }
 
@@ -87,7 +87,6 @@ export default function ConversationThread({
         if (floatingMsgApi) {
           floatingMsgApi.showMessage("You are blocked from sending messages to this participant.", "error");
         } else {
-          // eslint-disable-next-line no-alert
           alert("You are blocked from sending messages to this participant.");
         }
       }

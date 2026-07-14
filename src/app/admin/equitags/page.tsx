@@ -1,7 +1,6 @@
 import Link from "next/link";
 import prisma from "@/lib/db/prisma";
 import { requireAdminPageSession } from "@/lib/auth/admin";
-import AdminSectionNav from "@/components/admin/admin-section-nav";
 import AdminEquiTagOrderForm from "@/components/admin/admin-equitag-order-form";
 
 const STATUS_BADGES: Record<string, { label: string; className: string }> = {

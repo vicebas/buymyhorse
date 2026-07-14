@@ -53,7 +53,7 @@ function ContactControls({ targetUserId }: { targetUserId: string }) {
         if (!mounted) return;
         setIsMuted(Boolean(data.isMuted));
         setIsBlocked(Boolean(data.isBlocked));
-      } catch (e) {
+      } catch {
         // ignore
       }
     }

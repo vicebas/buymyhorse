@@ -176,7 +176,7 @@ export default async function AdminIndexPage({
           Request flow, approvals, and conversation volume.
         </h2>
         <p className="mt-3 max-w-3xl text-base text-[color:var(--foreground-soft)]">
-          Track vault demand, approval decisions, and downstream messaging activity without leaving the overview.
+          Track HorseVault demand, approval decisions, and downstream messaging activity without leaving the overview.
         </p>
       </div>
 
@@ -196,13 +196,13 @@ export default async function AdminIndexPage({
         <MetricCard
           label="Requests Created"
           value={analytics.accessMessaging.range.requestsCreated.toLocaleString()}
-          description="Buyer vault requests created in the active range."
+          description="Buyer HorseVault requests created in the active range."
           href="/admin/access"
         />
         <MetricCard
           label="Approvals"
           value={analytics.accessMessaging.range.approvals.toLocaleString()}
-          description="Approvals recorded in the vault activity log."
+          description="Approvals recorded in the HorseVault activity log."
           href="/admin/access"
         />
       </div>
@@ -288,7 +288,7 @@ export default async function AdminIndexPage({
       <div className="grid gap-6 xl:grid-cols-2">
         <TrendCard
           title="Requests Created"
-          description="Daily buyer vault requests created over the selected date range."
+          description="Daily buyer HorseVault requests created over the selected date range."
           data={analytics.accessMessaging.series.requestsCreated}
           gradientId="admin-access-requests-chart"
           color="#1A3B5A"

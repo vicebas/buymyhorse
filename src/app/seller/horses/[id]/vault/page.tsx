@@ -99,15 +99,15 @@ export default async function SellerHorseVaultPage({ params }: PageProps) {
               {seller.displayName}
             </p>
             <h1 className="mt-2 text-4xl font-extrabold text-[color:var(--foreground-strong)]">
-              {horse.name}&rsquo;s EquiVault
+              {horse.name}&rsquo;s HorseVault
             </h1>
             <p className="mt-3 max-w-2xl text-[color:var(--foreground-soft)]">
               Upload private documents that buyers can access only after approval.
             </p>
           </div>
 
-          <Link href="/mybarn/equivault">
-            <Button variant="outline">Back to EquiVault</Button>
+          <Link href="/mybarn/horsevault">
+            <Button variant="outline">Back to HorseVault</Button>
           </Link>
         </div>
 
