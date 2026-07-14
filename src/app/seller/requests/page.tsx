@@ -169,7 +169,7 @@ export default async function SellerRequestsPage() {
             className="inline-flex items-center gap-2 rounded-lg px-5 py-2 text-md font-medium text-[color:var(--foreground-soft)]"
           >
             <FileText className="h-4 w-4" />
-            EquiVault Overview
+            EquiVault
           </Link>
           <button className="inline-flex items-center gap-2 rounded-lg bg-[color:var(--background-elevated)] px-5 py-2 text-md font-medium text-[color:var(--foreground-strong)] shadow-[var(--shadow-card)]">
             <FileText className="h-4 w-4" />

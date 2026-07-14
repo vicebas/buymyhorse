@@ -7,8 +7,9 @@ import { authOptions } from "@/lib/auth/options";
 import AdminBlockedNotice from "@/components/admin/admin-blocked-notice";
 import SellerAppHeader from "@/components/layout/seller-app-header";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardAction } from "@/components/ui/card";
 import UploadHorseDocumentForm from "@/components/horses/upload-horse-document-form";
+import ShareDocumentsButton from "@/components/horses/share-documents-button";
 import VaultDocumentActions from "@/components/horses/vault-document-actions";
 import { getHorseWriteBlockError } from "@/lib/admin/moderation";
 import { formatDocumentCategory } from "@/lib/vault/document-categories";
@@ -95,18 +96,18 @@ export default async function SellerHorseVaultPage({ params }: PageProps) {
         <div className="mb-8 flex items-start justify-between gap-4">
           <div>
             <p className="mono text-sm font-medium uppercase tracking-[0.18em] text-[color:var(--foreground-soft)]">
-              Horse Vault
+              {seller.displayName}
             </p>
             <h1 className="mt-2 text-4xl font-extrabold text-[color:var(--foreground-strong)]">
-              {horse.name}
+              {horse.name}&rsquo;s EquiVault
             </h1>
             <p className="mt-3 max-w-2xl text-[color:var(--foreground-soft)]">
               Upload private documents that buyers can access only after approval.
             </p>
           </div>
 
-          <Link href="/mybarn">
-            <Button variant="outline">Back to MyBarn</Button>
+          <Link href="/mybarn/equivault">
+            <Button variant="outline">Back to EquiVault</Button>
           </Link>
         </div>
 
@@ -139,6 +140,20 @@ export default async function SellerHorseVaultPage({ params }: PageProps) {
                 <CardDescription>
                   Documents currently stored for this horse.
                 </CardDescription>
+                {horse.documents.length > 0 ? (
+                  <CardAction>
+                    <ShareDocumentsButton
+                      horseId={horse.id}
+                      horseName={horse.name}
+                      documents={horse.documents.map((doc) => ({
+                        id: doc.id,
+                        title: doc.title,
+                        fileName: doc.fileName,
+                        category: doc.category,
+                      }))}
+                    />
+                  </CardAction>
+                ) : null}
               </CardHeader>
               <CardContent>
                 {horse.documents.length === 0 ? (

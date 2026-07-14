@@ -324,3 +324,102 @@ export function newMessageTemplate(params: {
 </html>`,
   }
 }
+
+export function directVaultShareTemplate(params: {
+  toName: string
+  toEmail: string
+  horseName: string
+  barnName: string
+  senderName: string
+  accessUrl: string
+  setupUrl?: string | null
+  message?: string | null
+  documentTitles: string[]
+}) {
+  const {
+    toName,
+    toEmail,
+    horseName,
+    barnName,
+    senderName,
+    accessUrl,
+    setupUrl,
+    message,
+    documentTitles,
+  } = params
+
+  const documentSummary =
+    documentTitles.length === 1
+      ? documentTitles[0]
+      : `${documentTitles.length} selected documents`
+
+  return {
+    to: toEmail,
+    subject: `${horseName} documents shared from ${barnName}`,
+    text: [
+      `Hi ${toName},`,
+      "",
+      `${senderName} from ${barnName} shared secure EquiVault access for ${horseName}.`,
+      `Shared documents: ${documentSummary}.`,
+      message ? `Message: ${message}` : null,
+      "",
+      setupUrl ? `Set up your access: ${setupUrl}` : null,
+      `Open shared documents: ${accessUrl}`,
+    ]
+      .filter(Boolean)
+      .join("\n"),
+    html: `
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" /></head>
+<body style="margin:0;padding:0;background-color:#f6f6f6;font-family:sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#f6f6f6;padding:40px 0;">
+    <tr><td align="center">
+      <table width="560" cellpadding="0" cellspacing="0" style="background-color:#ffffff;border-radius:12px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.08);">
+        <tr>
+          <td style="background-color:#1a1a1a;padding:28px 40px;">
+            <span style="color:#ffffff;font-size:20px;font-weight:700;letter-spacing:-0.02em;">${BRAND_NAME}</span>
+          </td>
+        </tr>
+        <tr>
+          <td style="padding:40px;">
+            <h1 style="margin:0 0 16px;font-size:24px;font-weight:700;color:#1a1a1a;">${horseName} documents shared with you</h1>
+            <p style="margin:0 0 8px;color:#555;font-size:15px;line-height:1.6;">Hi ${toName},</p>
+            <p style="margin:0 0 16px;color:#555;font-size:15px;line-height:1.6;">
+              <strong>${senderName}</strong> from <strong>${barnName}</strong> shared secure EquiVault access for <strong>${horseName}</strong>.
+            </p>
+            <p style="margin:0 0 24px;color:#555;font-size:15px;line-height:1.6;">
+              Shared documents: <strong>${documentSummary}</strong>.
+            </p>
+            ${
+              message
+                ? `<p style="margin:0 0 24px;color:#555;font-size:15px;line-height:1.6;"><strong>Message:</strong> ${message}</p>`
+                : ""
+            }
+            ${
+              setupUrl
+                ? `<a href="${setupUrl}" style="display:inline-block;background-color:#16a34a;color:#ffffff;text-decoration:none;padding:14px 28px;border-radius:8px;font-weight:600;font-size:15px;margin-right:12px;">
+              Set Up Access
+            </a>`
+                : ""
+            }
+            <a href="${accessUrl}" style="display:inline-block;background-color:#1f2937;color:#ffffff;text-decoration:none;padding:14px 28px;border-radius:8px;font-weight:600;font-size:15px;">
+              View Shared Documents
+            </a>
+            <p style="margin:24px 0 0;color:#999;font-size:13px;line-height:1.5;">
+              This link only opens the specific documents selected for ${horseName}.
+            </p>
+          </td>
+        </tr>
+        <tr>
+          <td style="padding:20px 40px;border-top:1px solid #f0f0f0;">
+            <p style="margin:0;color:#bbb;font-size:12px;">&copy; ${new Date().getFullYear()} ${BRAND_NAME}. All rights reserved.</p>
+          </td>
+        </tr>
+      </table>
+    </td></tr>
+  </table>
+</body>
+</html>`,
+  }
+}

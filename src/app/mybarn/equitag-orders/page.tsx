@@ -106,7 +106,7 @@ export default async function EquiTagOrdersPage({
             className="inline-flex items-center gap-2 rounded-lg px-5 py-2 text-md font-medium text-[color:var(--foreground-soft)]"
           >
             <FileText className="h-4 w-4" />
-            EquiVault Overview
+            EquiVault
           </Link>
           <Link
             href="/mybarn/requests"
