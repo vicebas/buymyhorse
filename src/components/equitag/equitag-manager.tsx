@@ -3,7 +3,7 @@
 import Image from "next/image";
 import { useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { Download, ExternalLink, Link2, Plus } from "lucide-react";
+import { Download, ExternalLink, Link2, Plus, Printer } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { formatDateMDY } from "@/lib/formatting";
@@ -255,6 +255,12 @@ export default function EquiTagManager({
                       <Button variant="outline">
                         <Download className="mr-2 h-4 w-4" />
                         PNG
+                      </Button>
+                    </a>
+                    <a href={`/equitag/${tag.id}/print`}>
+                      <Button variant="outline">
+                        <Printer className="mr-2 h-4 w-4" />
+                        Print preview
                       </Button>
                     </a>
                     <a href={`/eq/${tag.code}`}>

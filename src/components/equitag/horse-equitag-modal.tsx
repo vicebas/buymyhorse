@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
-import { AlertCircle, QrCode, X, ShoppingCart, Minus, Plus, Loader2 } from "lucide-react";
+import { AlertCircle, QrCode, X, ShoppingCart, Minus, Plus, Loader2, Printer } from "lucide-react";
 
 import { resolvePublicAssetUrl } from "@/lib/storage/public-assets";
 import { Button } from "@/components/ui/button";
@@ -142,12 +142,23 @@ export default function HorseEquiTagModal({
                         {tag.code}
                       </span>
 
-                      <Link
-                        href={`/eq/${tag.code}`}
-                        className="rounded-full border border-[color:var(--border)] px-3 py-1.5 text-xs font-semibold text-[color:var(--foreground-strong)]"
-                      >
-                        Open
-                      </Link>
+                      <div className="flex items-center gap-2">
+                        {sellerProfileId ? (
+                          <Link
+                            href={`/equitag/${tag.id}/print`}
+                            className="inline-flex items-center gap-1.5 rounded-full border border-[color:var(--border)] px-3 py-1.5 text-xs font-semibold text-[color:var(--foreground-strong)]"
+                          >
+                            <Printer className="h-3.5 w-3.5" />
+                            Preview
+                          </Link>
+                        ) : null}
+                        <Link
+                          href={`/eq/${tag.code}`}
+                          className="rounded-full border border-[color:var(--border)] px-3 py-1.5 text-xs font-semibold text-[color:var(--foreground-strong)]"
+                        >
+                          Open
+                        </Link>
+                      </div>
                     </div>
 
                     {sellerProfileId && (
