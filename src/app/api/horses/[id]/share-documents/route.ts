@@ -7,6 +7,7 @@ import { createPasswordResetToken } from "@/lib/auth/tokens";
 import { authOptions } from "@/lib/auth/options";
 import { ensureHorseConversation } from "@/lib/conversations/horse-conversation";
 import prisma from "@/lib/db/prisma";
+import { getAppOrigin } from "@/lib/app-url";
 import { sendDirectVaultShareEmail } from "@/lib/email/mailer";
 
 interface RouteContext {
@@ -117,6 +118,7 @@ export async function POST(req: Request, { params }: RouteContext) {
       },
     });
 
+    const appOrigin = getAppOrigin(req);
     let setupUrl: string | null = null;
     let needsSetup = false;
 
@@ -142,11 +144,6 @@ export async function POST(req: Request, { params }: RouteContext) {
 
     if (!recipient.password) {
       needsSetup = true;
-    }
-
-    if (needsSetup) {
-      const resetToken = await createPasswordResetToken(recipient.id);
-      setupUrl = `${process.env.NEXTAUTH_URL || "http://localhost:3000"}/reset-password?token=${encodeURIComponent(resetToken)}`;
     }
 
     const conversation = await ensureHorseConversation(horse.id, recipient.id, seller.id);
@@ -230,7 +227,12 @@ export async function POST(req: Request, { params }: RouteContext) {
       return upsertedGrant;
     });
 
-    const accessUrl = `${process.env.NEXTAUTH_URL || "http://localhost:3000"}/access/grants/${grant.id}`;
+    const accessUrl = `${appOrigin}/access/grants/${grant.id}`;
+
+    if (needsSetup) {
+      const resetToken = await createPasswordResetToken(recipient.id);
+      setupUrl = `${appOrigin}/reset-password?token=${encodeURIComponent(resetToken)}&callbackUrl=${encodeURIComponent(accessUrl)}`;
+    }
 
     let warning: string | null = null;
 

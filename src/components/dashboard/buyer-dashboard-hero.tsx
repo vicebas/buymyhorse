@@ -69,7 +69,7 @@ export default function BuyerDashboardHero({
                       href="/register"
                       className="inline-flex items-center rounded-full border border-[color:var(--border)] bg-[color:var(--background-elevated)] px-5 py-3 text-sm font-semibold text-[color:var(--foreground)] transition hover:bg-[color:var(--muted)]"
                     >
-                      Join as a Trainer or Barn
+                      Join HorseRoster
                     </Link>
                   </>
                 )}

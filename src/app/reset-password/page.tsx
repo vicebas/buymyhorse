@@ -15,6 +15,7 @@ function ResetPasswordContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const token = searchParams.get("token") ?? ""
+  const callbackUrl = searchParams.get("callbackUrl") || "/dashboard"
 
   const [password, setPassword] = useState("")
   const [confirm, setConfirm] = useState("")
@@ -61,7 +62,7 @@ function ResetPasswordContent() {
         return
       }
 
-      router.push("/login?reset=1")
+      router.push(`/login?reset=1&callbackUrl=${encodeURIComponent(callbackUrl)}`)
     } catch {
       setError("Something went wrong. Please try again.")
     } finally {
@@ -130,7 +131,7 @@ function ResetPasswordContent() {
           </Button>
 
           <Link
-            href="/login"
+            href={`/login?callbackUrl=${encodeURIComponent(callbackUrl)}`}
             className="flex items-center justify-center gap-2 text-sm text-[color:var(--foreground-soft)] hover:text-[color:var(--foreground)]"
           >
             <ArrowLeft className="h-4 w-4" />
