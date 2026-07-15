@@ -1,16 +1,21 @@
 "use client";
 
+import Link from "next/link";
 import { useMemo, useState } from "react";
-import { Loader2, Minus, Package, Plus, QrCode, X } from "lucide-react";
+import { AlertCircle, Loader2, Minus, Package, Plus, QrCode, X } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import {
+  EQUITAG_ORDER_STATUS_LABELS,
+  getEquiTagOpenOrderMessage,
+} from "@/lib/equitag/order-status";
 
 type HorseOption = {
   id: string;
   name: string;
   equiTagId: string | null;
   equiTagCode: string | null;
-  hasActiveOrder: boolean;
+  latestOpenOrderStatus: string | null;
 };
 
 export default function ShopEquiTagOrderModal({
@@ -30,6 +35,9 @@ export default function ShopEquiTagOrderModal({
     () => horses.find((horse) => horse.id === selectedHorseId) ?? null,
     [horses, selectedHorseId]
   );
+  const openOrderStatus = selectedHorse?.latestOpenOrderStatus ?? null;
+  const openOrderLabel = openOrderStatus ? EQUITAG_ORDER_STATUS_LABELS[openOrderStatus] : null;
+  const openOrderMessage = getEquiTagOpenOrderMessage(openOrderStatus);
 
   async function handleOrder() {
     if (!selectedHorse?.equiTagId) {
@@ -146,14 +154,32 @@ export default function ShopEquiTagOrderModal({
                       <p className="mt-1 text-sm text-[color:var(--foreground-soft)]">
                         Attached EquiTag: {selectedHorse?.equiTagCode || "No EquiTag attached yet"}
                       </p>
-                      {selectedHorse?.hasActiveOrder ? (
-                        <p className="mt-2 text-sm text-[color:var(--foreground-soft)]">
-                          This horse already has an active EquiTag order. You can still place another order.
-                        </p>
-                      ) : null}
                     </div>
                   </div>
                 </div>
+
+                {openOrderStatus && openOrderLabel && openOrderMessage ? (
+                  <div className="rounded-[1.5rem] border border-amber-200 bg-amber-50 p-4 text-amber-950">
+                    <div className="flex items-start gap-3">
+                      <AlertCircle className="mt-0.5 h-5 w-5 shrink-0" />
+                      <div>
+                        <div className="flex flex-wrap items-center gap-2">
+                          <p className="text-sm font-semibold">Open EquiTag order</p>
+                          <span className={`rounded-full px-3 py-1 text-xs font-semibold ${openOrderLabel.className}`}>
+                            {openOrderLabel.label}
+                          </span>
+                        </div>
+                        <p className="mt-2 text-sm leading-6">{openOrderMessage}</p>
+                        <Link
+                          href="/mybarn/equitag-orders"
+                          className="mt-3 inline-flex text-sm font-semibold underline underline-offset-4"
+                        >
+                          View EquiTag Orders
+                        </Link>
+                      </div>
+                    </div>
+                  </div>
+                ) : null}
 
                 <div className="space-y-2">
                   <p className="text-sm font-semibold text-[color:var(--foreground-strong)]">Quantity</p>

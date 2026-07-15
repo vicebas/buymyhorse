@@ -93,7 +93,7 @@ export default async function MyBarnHorseVaultOverviewPage() {
             HorseVault
           </h1>
           <p className="mt-3 max-w-3xl text-lg text-[color:var(--foreground-soft)]">
-            Each horse has its own private HorseVault for veterinary records, Coggins, X-rays, videos, pedigrees, and other important documents.
+            Each horse has its own private vault for veterinary records, Coggins, X-rays, videos, pedigrees, and other important documents.
           </p>
         </div>
       </section>

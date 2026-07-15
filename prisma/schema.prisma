@@ -600,6 +600,7 @@ model BillingSettings {
   extraHorsePriceId       String?
   equitagPhysicalPriceId  String?
   equitagMaxBatchQuantity Int      @default(10)
+  equitagFulfillmentEmails String[]
   updatedByUserId         String?
   createdAt               DateTime @default(now())
   updatedAt               DateTime @updatedAt
@@ -879,6 +880,7 @@ enum NotificationType {
   NEW_HORSE_FROM_FOLLOWED_BARN
   HORSE_UPDATED_FROM_FOLLOWED_BARN
   NEW_MESSAGE
+  EQUITAG_FULFILLMENT_NEEDED
 }
 
 model BarnFollow {

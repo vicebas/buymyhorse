@@ -7,6 +7,8 @@ import {
   sendHorseUpdatedNotification,
   sendNewMessageNotification,
 } from "@/lib/email/mailer"
+import { getBillingSettings } from "@/lib/billing/settings"
+import prisma from "@/lib/db/prisma"
 
 export async function dispatchHorseNotification({
   type,
@@ -148,6 +150,89 @@ export async function dispatchMessageNotification({
         isSellerRecipient,
       })
     }
+  } catch {
+    // swallow all errors — never break the main request
+  }
+}
+
+export async function dispatchEquiTagFulfillmentNotification({
+  orderId,
+  sellerProfileId,
+  sellerDisplayName,
+  horseId,
+  horseName,
+  equiTagCode,
+  quantity,
+}: {
+  orderId: string
+  sellerProfileId: string
+  sellerDisplayName: string
+  horseId: string | null
+  horseName: string | null
+  equiTagCode: string
+  quantity: number
+}) {
+  try {
+    const settings = await getBillingSettings()
+
+    if (settings.equitagFulfillmentEmails.length === 0) {
+      return
+    }
+
+    const configuredEmails = new Set(settings.equitagFulfillmentEmails.map((email) => email.toLowerCase()))
+    const recipients = await prisma.user.findMany({
+      where: {
+        role: {
+          in: ["ADMIN", "SUPER_ADMIN"],
+        },
+      },
+      select: {
+        id: true,
+        email: true,
+      },
+    })
+    const matchedRecipients = recipients.filter(
+      (recipient) => recipient.email && configuredEmails.has(recipient.email.toLowerCase())
+    )
+
+    if (matchedRecipients.length === 0) {
+      return
+    }
+
+    const title = `EquiTag fulfillment needed: ${equiTagCode}`
+    const body = `${sellerDisplayName}${horseName ? ` · ${horseName}` : ""} · Qty ${quantity}`
+    const metadata = {
+      orderId,
+      sellerProfileId,
+      horseId,
+      equiTagCode,
+      quantity,
+      href: "/admin/equitags",
+    }
+
+    await Promise.allSettled(
+      matchedRecipients.map(async (recipient) => {
+        const recent = await getRecentNotificationOfType(
+          recipient.id,
+          NotificationType.EQUITAG_FULFILLMENT_NEEDED,
+          7 * 24 * 60 * 60 * 1000,
+          "orderId",
+          orderId
+        )
+
+        if (recent) {
+          return
+        }
+
+        await createNotification({
+          userId: recipient.id,
+          type: NotificationType.EQUITAG_FULFILLMENT_NEEDED,
+          title,
+          body,
+          metadata,
+        })
+      })
+    )
   } catch {
     // swallow all errors — never break the main request
   }

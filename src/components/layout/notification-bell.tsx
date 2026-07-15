@@ -39,6 +39,9 @@ function getNotificationHref(item: NotificationItem, userRole?: string): string 
     if (item.metadata?.horseId) return `/horses/${item.metadata.horseId}`
     if (item.metadata?.barnSlug) return `/barn/${item.metadata.barnSlug}`
   }
+  if (item.type === "EQUITAG_FULFILLMENT_NEEDED") {
+    return "/admin/equitags"
+  }
   return "/notifications"
 }
 

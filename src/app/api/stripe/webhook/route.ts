@@ -4,6 +4,7 @@ import Stripe from "stripe";
 import prisma from "@/lib/db/prisma";
 import { type BarnPlanKey, type BillingCadenceKey } from "@/lib/billing/catalog";
 import { getBillingProductFromPriceId } from "@/lib/billing/plans";
+import { dispatchEquiTagFulfillmentNotification } from "@/lib/notifications/dispatch";
 import { getStripe } from "@/lib/stripe";
 
 export const runtime = "nodejs";
@@ -194,7 +195,7 @@ async function syncEquiTagOrderPayment(session: Stripe.Checkout.Session) {
 
   const shipping = session.collected_information?.shipping_details;
 
-  await prisma.equiTagOrder.update({
+  const order = await prisma.equiTagOrder.update({
     where: { id: equiTagOrderId },
     data: {
       canceledBySellerAt: null,
@@ -210,5 +211,34 @@ async function syncEquiTagOrderPayment(session: Stripe.Checkout.Session) {
       shippingPostalCode: shipping?.address?.postal_code || null,
       shippingCountry: shipping?.address?.country || null,
     },
+    include: {
+      sellerProfile: {
+        select: {
+          id: true,
+          displayName: true,
+        },
+      },
+      equiTag: {
+        select: {
+          code: true,
+          attachedHorse: {
+            select: {
+              id: true,
+              name: true,
+            },
+          },
+        },
+      },
+    },
+  });
+
+  await dispatchEquiTagFulfillmentNotification({
+    orderId: order.id,
+    sellerProfileId: order.sellerProfile.id,
+    sellerDisplayName: order.sellerProfile.displayName,
+    horseId: order.equiTag.attachedHorse?.id ?? null,
+    horseName: order.equiTag.attachedHorse?.name ?? null,
+    equiTagCode: order.equiTag.code,
+    quantity: order.quantity,
   });
 }

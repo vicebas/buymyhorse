@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
-import { CreditCard, Sparkles, Tags } from "lucide-react";
+import { CreditCard, PackageOpen, Tags } from "lucide-react";
 
 import ResolvedAppHeader from "@/components/layout/resolved-app-header";
 import ShopEquiTagOrderModal from "@/components/shop/shop-equitag-order-modal";
@@ -40,13 +40,14 @@ const products: Array<{
     icon: CreditCard,
   },
   {
-    id: "starter-kits",
-    title: "Starter Kits & Bundles",
+    id: "equitag-products",
+    title: "EquiTag Products",
     price: "Coming soon",
-    description: "Placeholder bundle packaging for launch promotions, onboarding kits, and future bundled operational products.",
+    description:
+      "Shop smart products designed to feature an EquiTag QR code, including saddle pad display holders, stall holders, document organizers, and other barn-ready accessories.",
     href: "/shop",
     cta: "Check Back Soon",
-    icon: Sparkles,
+    icon: PackageOpen,
   },
 ];
 
@@ -87,9 +88,12 @@ export default async function ShopPage() {
                     },
                   },
                   select: {
-                    id: true,
+                    status: true,
                   },
                   take: 1,
+                  orderBy: {
+                    createdAt: "desc",
+                  },
                 },
               },
             },
@@ -142,7 +146,7 @@ export default async function ShopPage() {
                         name: horse.name,
                         equiTagId: horse.attachedEquiTags[0]?.id ?? null,
                         equiTagCode: horse.attachedEquiTags[0]?.code ?? null,
-                        hasActiveOrder: Boolean(horse.attachedEquiTags[0]?.orders.length),
+                        latestOpenOrderStatus: horse.attachedEquiTags[0]?.orders[0]?.status ?? null,
                       }))}
                       maxBatchQuantity={billingSettings.equitagMaxBatchQuantity}
                     />

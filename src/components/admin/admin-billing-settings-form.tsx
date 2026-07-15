@@ -5,6 +5,7 @@ import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 
 export default function AdminBillingSettingsForm({
   activationTrialEnabled,
@@ -16,6 +17,7 @@ export default function AdminBillingSettingsForm({
   extraHorsePriceId,
   equitagPhysicalPriceId,
   equitagMaxBatchQuantity,
+  equitagFulfillmentEmails,
   stripeSecretKeyConfigured,
   stripeWebhookSecretConfigured,
 }: {
@@ -28,6 +30,7 @@ export default function AdminBillingSettingsForm({
   extraHorsePriceId: string;
   equitagPhysicalPriceId: string;
   equitagMaxBatchQuantity: number;
+  equitagFulfillmentEmails: string[];
   stripeSecretKeyConfigured: boolean;
   stripeWebhookSecretConfigured: boolean;
 }) {
@@ -41,6 +44,7 @@ export default function AdminBillingSettingsForm({
   const [extraPriceId, setExtraPriceId] = useState(extraHorsePriceId);
   const [eqPhysicalPriceId, setEqPhysicalPriceId] = useState(equitagPhysicalPriceId);
   const [eqMaxBatch, setEqMaxBatch] = useState(String(equitagMaxBatchQuantity));
+  const [eqFulfillmentEmails, setEqFulfillmentEmails] = useState(equitagFulfillmentEmails.join("\n"));
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -63,6 +67,7 @@ export default function AdminBillingSettingsForm({
         extraHorsePriceId: extraPriceId.trim(),
         equitagPhysicalPriceId: eqPhysicalPriceId.trim(),
         equitagMaxBatchQuantity: Number(eqMaxBatch),
+        equitagFulfillmentEmails: eqFulfillmentEmails,
       }),
     });
 
@@ -177,7 +182,7 @@ export default function AdminBillingSettingsForm({
               EquiTag settings
             </p>
             <p className="mt-2 text-sm leading-6 text-[color:var(--foreground-soft)]">
-              Maximum batch quantity sellers can order at once.
+              Maximum batch quantity sellers can order at once, plus the fulfillment recipients who should be notified after payment.
             </p>
           </div>
 
@@ -186,6 +191,21 @@ export default function AdminBillingSettingsForm({
               Max batch qty
             </p>
             <Input type="number" min="1" max="100" value={eqMaxBatch} onChange={(event) => setEqMaxBatch(event.target.value)} />
+          </div>
+
+          <div className="space-y-2">
+            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[color:var(--foreground-soft)]">
+              Fulfillment emails
+            </p>
+            <Textarea
+              value={eqFulfillmentEmails}
+              onChange={(event) => setEqFulfillmentEmails(event.target.value)}
+              placeholder={"ops@example.com\nshipping@example.com"}
+              className="min-h-32"
+            />
+            <p className="text-xs text-[color:var(--foreground-soft)]">
+              One email per line. Matching admin users will receive in-app fulfillment notifications.
+            </p>
           </div>
         </div>
       </div>

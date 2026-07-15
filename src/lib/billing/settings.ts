@@ -10,6 +10,7 @@ export const DEFAULT_BILLING_SETTINGS = {
   extraHorsePriceId: process.env.STRIPE_PRICE_EXTRA_HORSE || "",
   equitagPhysicalPriceId: process.env.STRIPE_PRICE_EQUITAG_PHYSICAL || "",
   equitagMaxBatchQuantity: 10,
+  equitagFulfillmentEmails: [] as string[],
 };
 
 type BillingSettingsResult = {
@@ -23,6 +24,7 @@ type BillingSettingsResult = {
   extraHorsePriceId: string;
   equitagPhysicalPriceId: string;
   equitagMaxBatchQuantity: number;
+  equitagFulfillmentEmails: string[];
   stripeSecretKeyConfigured: boolean;
   stripeWebhookSecretConfigured: boolean;
   updatedAt: Date | null;
@@ -42,6 +44,7 @@ type BillingSettingsRow = {
   extraHorsePriceId?: string | null;
   equitagPhysicalPriceId?: string | null;
   equitagMaxBatchQuantity?: number | null;
+  equitagFulfillmentEmails?: string[] | null;
   updatedAt?: Date | null;
   updatedByUserId?: string | null;
 };
@@ -69,6 +72,8 @@ function mapBillingSettings(settings?: BillingSettingsRow | null): BillingSettin
       settings?.equitagPhysicalPriceId || DEFAULT_BILLING_SETTINGS.equitagPhysicalPriceId,
     equitagMaxBatchQuantity:
       settings?.equitagMaxBatchQuantity ?? DEFAULT_BILLING_SETTINGS.equitagMaxBatchQuantity,
+    equitagFulfillmentEmails:
+      settings?.equitagFulfillmentEmails ?? DEFAULT_BILLING_SETTINGS.equitagFulfillmentEmails,
     stripeSecretKeyConfigured: Boolean(process.env.STRIPE_SECRET_KEY),
     stripeWebhookSecretConfigured: Boolean(process.env.STRIPE_WEBHOOK_SECRET),
     updatedAt: settings?.updatedAt ?? null,
@@ -97,6 +102,7 @@ async function getLegacyCompatibleBillingSettings() {
     "extraHorsePriceId",
     "equitagPhysicalPriceId",
     "equitagMaxBatchQuantity",
+    "equitagFulfillmentEmails",
     "updatedAt",
     "updatedByUserId",
   ];

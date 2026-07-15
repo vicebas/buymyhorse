@@ -3,10 +3,14 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
-import { QrCode, X, ShoppingCart, Minus, Plus, Loader2 } from "lucide-react";
+import { AlertCircle, QrCode, X, ShoppingCart, Minus, Plus, Loader2 } from "lucide-react";
 
 import { resolvePublicAssetUrl } from "@/lib/storage/public-assets";
 import { Button } from "@/components/ui/button";
+import {
+  EQUITAG_ORDER_STATUS_LABELS,
+  getEquiTagOpenOrderMessage,
+} from "@/lib/equitag/order-status";
 
 type HorseEquiTag = {
   id: string;
@@ -17,15 +21,6 @@ type HorseEquiTag = {
 type EquiTagOrderInfo = {
   equiTagId: string;
   status: string;
-};
-
-const ORDER_STATUS_LABELS: Record<string, { label: string; className: string }> = {
-  PENDING_PAYMENT: { label: "Pending Payment", className: "bg-amber-100 text-amber-800" },
-  CONFIRMED: { label: "Confirmed", className: "bg-blue-100 text-blue-800" },
-  PRINTING: { label: "Printing", className: "bg-purple-100 text-purple-800" },
-  SHIPPED: { label: "Shipped", className: "bg-indigo-100 text-indigo-800" },
-  DELIVERED: { label: "Delivered", className: "bg-emerald-100 text-emerald-800" },
-  CANCELLED: { label: "Cancelled", className: "bg-gray-100 text-gray-600" },
 };
 
 export default function HorseEquiTagModal({
@@ -123,7 +118,8 @@ export default function HorseEquiTagModal({
             <div className="mt-6 grid gap-4 sm:grid-cols-2">
               {equiTags.map((tag) => {
                 const activeOrder = getActiveOrder(tag.id);
-                const statusInfo = activeOrder ? ORDER_STATUS_LABELS[activeOrder.status] : null;
+                const statusInfo = activeOrder ? EQUITAG_ORDER_STATUS_LABELS[activeOrder.status] : null;
+                const openOrderMessage = getEquiTagOpenOrderMessage(activeOrder?.status ?? null);
 
                 return (
                   <div
@@ -158,14 +154,28 @@ export default function HorseEquiTagModal({
                       <div className="mt-4 border-t border-[color:var(--border)] pt-4">
                         {orderingTagId === tag.id ? (
                           <div className="space-y-3">
-                            {activeOrder && statusInfo ? (
-                              <div className="flex items-center gap-2">
-                                <span className={`rounded-full px-3 py-1 text-xs font-semibold ${statusInfo.className}`}>
-                                  {statusInfo.label}
-                                </span>
-                                <span className="text-xs text-[color:var(--foreground-soft)]">
-                                  Active order exists. You can still place another order.
-                                </span>
+                            {activeOrder && statusInfo && openOrderMessage ? (
+                              <div className="rounded-2xl border border-amber-200 bg-amber-50 p-3 text-amber-950">
+                                <div className="flex items-start gap-2">
+                                  <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
+                                  <div>
+                                    <div className="flex flex-wrap items-center gap-2">
+                                      <p className="text-xs font-semibold uppercase tracking-[0.12em]">
+                                        Open order
+                                      </p>
+                                      <span className={`rounded-full px-3 py-1 text-xs font-semibold ${statusInfo.className}`}>
+                                        {statusInfo.label}
+                                      </span>
+                                    </div>
+                                    <p className="mt-2 text-xs leading-5">{openOrderMessage}</p>
+                                    <Link
+                                      href="/mybarn/equitag-orders"
+                                      className="mt-2 inline-flex text-xs font-semibold underline underline-offset-4"
+                                    >
+                                      View EquiTag Orders
+                                    </Link>
+                                  </div>
+                                </div>
                               </div>
                             ) : null}
                             <p className="text-xs font-semibold text-[color:var(--foreground-soft)]">Quantity</p>
@@ -213,12 +223,28 @@ export default function HorseEquiTagModal({
                           </div>
                         ) : (
                           <div className="space-y-3">
-                            {activeOrder && statusInfo ? (
-                              <div className="flex items-center gap-2">
-                                <span className={`rounded-full px-3 py-1 text-xs font-semibold ${statusInfo.className}`}>
-                                  {statusInfo.label}
-                                </span>
-                                <span className="text-xs text-[color:var(--foreground-soft)]">Physical order</span>
+                            {activeOrder && statusInfo && openOrderMessage ? (
+                              <div className="rounded-2xl border border-amber-200 bg-amber-50 p-3 text-amber-950">
+                                <div className="flex items-start gap-2">
+                                  <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
+                                  <div>
+                                    <div className="flex flex-wrap items-center gap-2">
+                                      <p className="text-xs font-semibold uppercase tracking-[0.12em]">
+                                        Open order
+                                      </p>
+                                      <span className={`rounded-full px-3 py-1 text-xs font-semibold ${statusInfo.className}`}>
+                                        {statusInfo.label}
+                                      </span>
+                                    </div>
+                                    <p className="mt-2 text-xs leading-5">{openOrderMessage}</p>
+                                    <Link
+                                      href="/mybarn/equitag-orders"
+                                      className="mt-2 inline-flex text-xs font-semibold underline underline-offset-4"
+                                    >
+                                      View EquiTag Orders
+                                    </Link>
+                                  </div>
+                                </div>
                               </div>
                             ) : null}
                             <Button

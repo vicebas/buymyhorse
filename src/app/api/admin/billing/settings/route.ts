@@ -6,6 +6,21 @@ import { isAdminRole } from "@/lib/admin/roles";
 import { authOptions } from "@/lib/auth/options";
 import prisma from "@/lib/db/prisma";
 
+function normalizeEquiTagFulfillmentEmails(input: unknown) {
+  if (typeof input !== "string") {
+    return [];
+  }
+
+  return Array.from(
+    new Set(
+      input
+        .split(/\r?\n/)
+        .map((value) => value.trim().toLowerCase())
+        .filter(Boolean)
+    )
+  );
+}
+
 export async function POST(req: Request) {
   const session = await getServerSession(authOptions);
 
@@ -23,6 +38,7 @@ export async function POST(req: Request) {
     extraHorsePriceId?: string;
     equitagPhysicalPriceId?: string;
     equitagMaxBatchQuantity?: number;
+    equitagFulfillmentEmails?: string;
   } | null;
 
   const singleHorsePriceId = body?.singleHorsePriceId?.trim() || "";
@@ -32,6 +48,7 @@ export async function POST(req: Request) {
   const extraHorsePriceId = body?.extraHorsePriceId?.trim() || "";
   const equitagPhysicalPriceId = body?.equitagPhysicalPriceId?.trim() || "";
   const equitagMaxBatchQuantity = body?.equitagMaxBatchQuantity;
+  const equitagFulfillmentEmails = normalizeEquiTagFulfillmentEmails(body?.equitagFulfillmentEmails);
   const hasValidBatchQty =
     equitagMaxBatchQuantity === undefined ||
     (Number.isInteger(equitagMaxBatchQuantity) && equitagMaxBatchQuantity >= 1 && equitagMaxBatchQuantity <= 100);
@@ -70,6 +87,7 @@ export async function POST(req: Request) {
       extraHorsePriceId,
       equitagPhysicalPriceId,
       equitagMaxBatchQuantity: safeBatchQty,
+      equitagFulfillmentEmails,
       updatedByUserId: session.user.id,
     },
     create: {
@@ -83,6 +101,7 @@ export async function POST(req: Request) {
       extraHorsePriceId,
       equitagPhysicalPriceId,
       equitagMaxBatchQuantity: safeBatchQty,
+      equitagFulfillmentEmails,
       updatedByUserId: session.user.id,
     },
   });
@@ -103,6 +122,7 @@ export async function POST(req: Request) {
       extraHorsePriceId,
       equitagPhysicalPriceId,
       equitagMaxBatchQuantity: safeBatchQty,
+      equitagFulfillmentEmails,
     },
   });
 
