@@ -392,7 +392,7 @@ export default function AppHeader({
                     </div>
                   ) : null}
 
-                  {(isBuyer || isAdmin) ? (
+                  {(isBuyer || isSeller || isAdmin) ? (
                     <div className="mt-3 border-t border-[color:var(--border)] pt-3">
                       <LogoutButton
                         className="w-full justify-start"

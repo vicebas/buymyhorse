@@ -4,7 +4,6 @@ import { z } from "zod";
 
 import { getAppOrigin } from "@/lib/app-url";
 import { authOptions } from "@/lib/auth/options";
-import { isAdminRole, isSuperAdminRole } from "@/lib/admin/roles";
 import { getPlanCadence, type BarnPlanKey } from "@/lib/billing/catalog";
 import { getBillingSettings } from "@/lib/billing/settings";
 import { createPlanCheckoutSession } from "@/lib/billing/stripe";
@@ -50,18 +49,6 @@ export async function POST(req: Request) {
 
     if (!session?.user?.id) {
       return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
-    }
-
-    const currentUser = await prisma.user.findUnique({
-      where: { id: session.user.id },
-      select: { role: true },
-    });
-
-    if (isAdminRole(currentUser?.role) && !isSuperAdminRole(currentUser?.role)) {
-      return NextResponse.json(
-        { error: "Internal staff accounts cannot create barn profiles." },
-        { status: 403 }
-      );
     }
 
     const body = await req.json();
@@ -117,14 +104,21 @@ export async function POST(req: Request) {
       },
     });
 
-    await prisma.user.update({
-      where: {
-        id: session.user.id,
-      },
-      data: {
-        role: "SELLER",
-      },
+    const currentUser = await prisma.user.findUnique({
+      where: { id: session.user.id },
+      select: { role: true },
     });
+
+    if (currentUser?.role === "BUYER") {
+      await prisma.user.update({
+        where: {
+          id: session.user.id,
+        },
+        data: {
+          role: "SELLER",
+        },
+      });
+    }
 
     if (hasTrial) {
       return NextResponse.json(

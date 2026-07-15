@@ -1,12 +1,10 @@
 import { CheckCircle2, CreditCard, Sparkles } from "lucide-react";
 import { getServerSession } from "next-auth";
-import { redirect } from "next/navigation";
 
 import PricingPlanExperience from "@/components/billing/pricing-plan-experience";
 import MainHeader from "@/components/layout/main-header";
 import { authOptions } from "@/lib/auth/options";
 import prisma from "@/lib/db/prisma";
-import { isAdminRole } from "@/lib/admin/roles";
 import { getBillingSettings } from "@/lib/billing/settings";
 
 export default async function PricingPage() {
@@ -26,23 +24,13 @@ export default async function PricingPage() {
   };
 
   if (session?.user?.id) {
-    const [user, sellerProfile] = await Promise.all([
-      prisma.user.findUnique({
-        where: { id: session.user.id },
-        select: { role: true },
-      }),
-      prisma.sellerProfile.findUnique({
+    const sellerProfile = await prisma.sellerProfile.findUnique({
         where: { userId: session.user.id },
         select: {
           plan: true,
           billingStatus: true,
         },
-      }),
-    ]);
-
-    if (isAdminRole(user?.role)) {
-      redirect("/admin");
-    }
+      });
 
     userState = {
       hasSession: true,
