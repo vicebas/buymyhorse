@@ -18,7 +18,7 @@ export async function POST(
 
   const { id } = await params;
   const body = (await req.json().catch(() => null)) as {
-    role?: "BUYER" | "ADMIN" | "SUPER_ADMIN";
+    role?: "BUYER" | "SELLER" | "ADMIN" | "SUPER_ADMIN";
   } | null;
 
   if (!body?.role) {
@@ -40,13 +40,6 @@ export async function POST(
 
   if (!targetUser) {
     return NextResponse.json({ error: "User not found." }, { status: 404 });
-  }
-
-  if (targetUser.sellerProfile?.id && (body.role === "ADMIN" || body.role === "SUPER_ADMIN")) {
-    return NextResponse.json(
-      { error: "Barn accounts cannot be promoted to admin roles in this version." },
-      { status: 400 }
-    );
   }
 
   await prisma.user.update({

@@ -15,9 +15,7 @@ export default function AdminUserRoleForm({
   disabled?: boolean;
 }) {
   const router = useRouter();
-  const [role, setRole] = useState<"BUYER" | "ADMIN" | "SUPER_ADMIN">(
-    currentRole === "SUPER_ADMIN" ? "SUPER_ADMIN" : currentRole === "ADMIN" ? "ADMIN" : "BUYER"
-  );
+  const [role, setRole] = useState<"BUYER" | "SELLER" | "ADMIN" | "SUPER_ADMIN">(currentRole);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -53,6 +51,7 @@ export default function AdminUserRoleForm({
         className="flex h-10 w-full rounded-lg border border-input bg-[color:var(--background-elevated)] px-3 py-2 text-sm"
       >
         <option value="BUYER">Buyer</option>
+        <option value="SELLER">Seller</option>
         <option value="ADMIN">Admin</option>
         <option value="SUPER_ADMIN">Super Admin</option>
       </select>

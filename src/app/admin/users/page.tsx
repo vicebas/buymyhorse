@@ -60,8 +60,7 @@ export default async function AdminUsersPage({
 
       <div className="grid gap-5">
         {users.map((user) => {
-          const hasBarnProfile = Boolean(user.sellerProfile?.id);
-          const roleFormDisabled = !canManageRoles || (hasBarnProfile && user.role === "SELLER");
+          const roleFormDisabled = !canManageRoles;
 
           return (
             <article
@@ -88,11 +87,6 @@ export default async function AdminUsersPage({
                     {!canManageRoles ? (
                       <p className="text-[color:var(--foreground)]">
                         Only SuperAdmin can promote or demote privileged users.
-                      </p>
-                    ) : null}
-                    {hasBarnProfile ? (
-                      <p className="text-[color:var(--foreground)]">
-                        Barn accounts are not promotable to admin roles in this version.
                       </p>
                     ) : null}
                   </div>
