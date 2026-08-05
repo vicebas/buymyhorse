@@ -1,6 +1,7 @@
 import prisma from "@/lib/db/prisma";
 import { getServerSession } from "next-auth";
 import { notFound } from "next/navigation";
+import Link from "next/link";
 import ResolvedAppHeader from "@/components/layout/resolved-app-header";
 import HorseMediaGallery from "@/components/horses/horse-media-gallery";
 import HorsePrimaryActions from "@/components/horses/horse-primary-actions";
@@ -12,13 +13,18 @@ import { getBuyerHorseAccess } from "@/lib/vault/access";
 import {
   getHorseBestSuitedForLabel,
   getHorseBreedLabel,
+  getHorseDamLabel,
+  getHorseDamSireLabel,
+  getHorseDivisionLabelsByContext,
   getHorsePrimaryDisciplineLabel,
   getHorsePricingVisibilityLabel,
   getHorseSaleTypeLabels,
   getHorseSexLabel,
+  getHorseSireLabel,
   horseListingInclude,
   isHorseListingAvailable,
 } from "@/lib/horses/listing-data";
+import { HorseDivisionContext } from "@/generated/prisma/enums";
 
 export default async function HorsePage({
   params,
@@ -106,11 +112,26 @@ export default async function HorsePage({
   const keyDetailItems = horse.keyDetails
     ? horse.keyDetails.split("\n").map((item) => item.trim()).filter(Boolean)
     : [];
+  const bloodlineItems = [
+    { label: "Sire", value: getHorseSireLabel(horse) },
+    { label: "Dam", value: getHorseDamLabel(horse) },
+    { label: "Dam Sire", value: getHorseDamSireLabel(horse) },
+  ].filter((item) => Boolean(item.value));
+  const currentlyShowingLabels = getHorseDivisionLabelsByContext(
+    horse,
+    HorseDivisionContext.CURRENTLY_COMPETING_IN
+  );
+  const experiencedThroughLabels = getHorseDivisionLabelsByContext(
+    horse,
+    HorseDivisionContext.EXPERIENCED_THROUGH
+  );
   const infoItems = [
     { label: "Breed", value: getHorseBreedLabel(horse) || "Not specified" },
     { label: "Age", value: horse.age ? `${horse.age} years` : "Not specified" },
     { label: "Discipline", value: getHorsePrimaryDisciplineLabel(horse) || "Not specified" },
     { label: "Best Suited For", value: getHorseBestSuitedForLabel(horse) || "Not specified" },
+    { label: "Currently Showing", value: currentlyShowingLabels.join(", ") || "Not specified" },
+    { label: "Experienced Through", value: experiencedThroughLabels.join(", ") || "Not specified" },
     { label: "Sale Type", value: getHorseSaleTypeLabels(horse).join(", ") || "Not specified" },
     { label: "Height", value: horse.height ? `${horse.height} hh` : "Not specified" },
     { label: "Sex", value: getHorseSexLabel(horse) || "Not specified" },
@@ -184,9 +205,14 @@ export default async function HorsePage({
                 <p className="mt-2 text-sm font-semibold text-[color:var(--foreground-strong)]">
                   {horse.sellerProfile.displayName}
                 </p>
-                <a href={`/barn/${horse.sellerProfile.slug}`} className="btn btn-primary mt-2 text-sm font-semibold text-[color:var(--foreground-strong)] underline">
-                  View Barn
-                </a>
+                {horse.sellerProfile.slug ? (
+                  <Link
+                    href={`/barn/${horse.sellerProfile.slug}`}
+                    className="btn btn-primary mt-2 text-sm font-semibold text-[color:var(--foreground-strong)] underline"
+                  >
+                    View Barn
+                  </Link>
+                ) : null}
               </div>
             </div>
           </div>
@@ -259,6 +285,22 @@ export default async function HorsePage({
                   ))}
                 </div>
               ) : null}
+
+              {bloodlineItems.length > 0 ? (
+                <div className="mt-6 rounded-2xl border border-[color:var(--border)] bg-[color:var(--background-elevated)] p-4">
+                  <p className="text-[11px] font-medium uppercase tracking-[0.12em] text-[color:var(--foreground-soft)]">
+                    Bloodlines
+                  </p>
+                  <div className="mt-3 grid gap-3">
+                    {bloodlineItems.map((item) => (
+                      <div key={item.label} className="flex items-center justify-between gap-4">
+                        <p className="text-sm text-[color:var(--foreground-soft)]">{item.label}</p>
+                        <p className="text-sm font-semibold text-[color:var(--foreground-strong)]">{item.value}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ) : null}
             </div>
 
             <div className="mt-8 rounded-2xl border border-[color:var(--border)] bg-[color:var(--background-elevated)] p-5">
@@ -266,9 +308,14 @@ export default async function HorsePage({
               <p className="mt-1 text-base font-medium text-[color:var(--foreground-strong)]">
                 {horse.sellerProfile.displayName}
               </p>
-              <a href={`/barn/${horse.sellerProfile.slug}`} className=" mt-1 text-sm font-medium text-[color:var(--foreground-strong)] underline">
-                View Barn
-              </a>
+              {horse.sellerProfile.slug ? (
+                <Link
+                  href={`/barn/${horse.sellerProfile.slug}`}
+                  className=" mt-1 text-sm font-medium text-[color:var(--foreground-strong)] underline"
+                >
+                  View Barn
+                </Link>
+              ) : null}
             </div>
 
             <div className="mt-6 hidden lg:block">

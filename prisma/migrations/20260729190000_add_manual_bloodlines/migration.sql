@@ -1,0 +1,4 @@
+ALTER TABLE "Horse"
+ADD COLUMN "sire" TEXT,
+ADD COLUMN "dam" TEXT,
+ADD COLUMN "damSire" TEXT;

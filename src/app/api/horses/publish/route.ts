@@ -60,11 +60,6 @@ export async function POST(req: Request) {
       sexOptionId: true,
       primaryDisciplineId: true,
       pricingVisibilityOptionId: true,
-      idealRiders: {
-        select: {
-          idealRiderOptionId: true,
-        },
-      },
       horseTypes: {
         select: {
           horseTypeOptionId: true,
@@ -105,7 +100,6 @@ export async function POST(req: Request) {
     const publishValidation = validateHorseForPublishing({
       ...existingHorse,
       bestSuitedForIds: existingHorse.divisionTags.map((item) => item.divisionOptionId),
-      idealRiderIds: existingHorse.idealRiders.map((item) => item.idealRiderOptionId),
       horseTypeIds: existingHorse.horseTypes.map((item) => item.horseTypeOptionId),
     });
 

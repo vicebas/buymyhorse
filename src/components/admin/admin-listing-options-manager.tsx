@@ -107,6 +107,9 @@ export default function AdminListingOptionsManager({
       <ListingOptionSection title="Pricing Visibility" resource="pricingVisibility" options={data.pricingVisibility} savingKey={savingKey} onSubmit={submit} />
       <ListingOptionSection title="Sale Type" resource="saleType" options={data.saleTypes} savingKey={savingKey} onSubmit={submit} />
       <ListingOptionSection title="Breed" resource="breed" options={data.breeds} savingKey={savingKey} onSubmit={submit} />
+      <ListingOptionSection title="Sire" resource="sire" options={data.sires} savingKey={savingKey} onSubmit={submit} />
+      <ListingOptionSection title="Dam" resource="dam" options={data.dams} savingKey={savingKey} onSubmit={submit} />
+      <ListingOptionSection title="Dam Sire" resource="damSire" options={data.damSires} savingKey={savingKey} onSubmit={submit} />
       <ListingOptionSection title="Sex" resource="sex" options={data.sexes} savingKey={savingKey} onSubmit={submit} />
       <ListingOptionSection title="Color" resource="color" options={data.colors} savingKey={savingKey} onSubmit={submit} />
       <ListingOptionSection title="Import Status" resource="importStatus" options={data.importStatuses} savingKey={savingKey} onSubmit={submit} />

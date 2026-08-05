@@ -82,19 +82,6 @@ export default async function SellerHorseVaultPage({ params }: PageProps) {
         },
       },
       accessGrants: {
-        where: {
-          revokedAt: null,
-          OR: [
-            {
-              expiresAt: null,
-            },
-            {
-              expiresAt: {
-                gt: new Date(),
-              },
-            },
-          ],
-        },
         orderBy: {
           updatedAt: "desc",
         },
@@ -104,6 +91,7 @@ export default async function SellerHorseVaultPage({ params }: PageProps) {
           createdAt: true,
           updatedAt: true,
           expiresAt: true,
+          revokedAt: true,
           buyer: {
             select: {
               id: true,

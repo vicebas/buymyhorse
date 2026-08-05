@@ -14,6 +14,9 @@ type ResourceName =
   | "pricingVisibility"
   | "saleType"
   | "breed"
+  | "sire"
+  | "dam"
+  | "damSire"
   | "sex"
   | "color"
   | "importStatus";
@@ -180,6 +183,12 @@ async function createSimpleOption(resource: Exclude<ResourceName, "discipline" |
       return prisma.saleTypeOption.create({ data: { label, sortOrder } });
     case "breed":
       return prisma.breedOption.create({ data: { label, sortOrder } });
+    case "sire":
+      return prisma.sireOption.create({ data: { label, sortOrder } });
+    case "dam":
+      return prisma.damOption.create({ data: { label, sortOrder } });
+    case "damSire":
+      return prisma.damSireOption.create({ data: { label, sortOrder } });
     case "sex":
       return prisma.sexOption.create({ data: { label, sortOrder } });
     case "color":
@@ -207,6 +216,12 @@ async function updateSimpleOption(
       return prisma.saleTypeOption.update({ where: { id }, data: { label, sortOrder, isActive } });
     case "breed":
       return prisma.breedOption.update({ where: { id }, data: { label, sortOrder, isActive } });
+    case "sire":
+      return prisma.sireOption.update({ where: { id }, data: { label, sortOrder, isActive } });
+    case "dam":
+      return prisma.damOption.update({ where: { id }, data: { label, sortOrder, isActive } });
+    case "damSire":
+      return prisma.damSireOption.update({ where: { id }, data: { label, sortOrder, isActive } });
     case "sex":
       return prisma.sexOption.update({ where: { id }, data: { label, sortOrder, isActive } });
     case "color":

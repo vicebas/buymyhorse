@@ -219,6 +219,12 @@ enum HorseDivisionContext {
   SCHOOLING_THROUGH
 }
 
+enum VaultAccessStatus {
+  ACTIVE
+  EXPIRED
+  REVOKED
+}
+
 enum DocumentCategory {
   XRAYS
   PPE
@@ -264,6 +270,9 @@ model Horse {
   pricingVisibilityOptionId String?
   colorOptionId             String?
   importStatusOptionId      String?
+  sireOptionId              String?
+  damOptionId               String?
+  damSireOptionId           String?
   feiPassport               Boolean @default(false)
   equiVaultAvailable        Boolean @default(false)
   registrationStatus        String?
@@ -290,6 +299,9 @@ model Horse {
   pricingVisibilityOption PricingVisibilityOption? @relation(fields: [pricingVisibilityOptionId], references: [id], onDelete: SetNull)
   colorOption             ColorOption?             @relation(fields: [colorOptionId], references: [id], onDelete: SetNull)
   importStatusOption      ImportStatusOption?      @relation(fields: [importStatusOptionId], references: [id], onDelete: SetNull)
+  sireOption              SireOption?              @relation("HorseSireOption", fields: [sireOptionId], references: [id], onDelete: SetNull)
+  damOption               DamOption?               @relation("HorseDamOption", fields: [damOptionId], references: [id], onDelete: SetNull)
+  damSireOption           DamSireOption?           @relation("HorseDamSireOption", fields: [damSireOptionId], references: [id], onDelete: SetNull)
 
   documents            HorseDocument[]
   accessRequests       AccessRequest[]
@@ -316,6 +328,9 @@ model Horse {
   @@index([pricingVisibilityOptionId])
   @@index([colorOptionId])
   @@index([importStatusOptionId])
+  @@index([sireOptionId])
+  @@index([damOptionId])
+  @@index([damSireOptionId])
 }
 
 model HorseFeatureMetrics {
@@ -412,6 +427,39 @@ model BreedOption {
   updatedAt DateTime @updatedAt
 
   horses Horse[]
+}
+
+model SireOption {
+  id        String   @id @default(cuid())
+  label     String   @unique
+  sortOrder Int      @default(0)
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  horses Horse[] @relation("HorseSireOption")
+}
+
+model DamOption {
+  id        String   @id @default(cuid())
+  label     String   @unique
+  sortOrder Int      @default(0)
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  horses Horse[] @relation("HorseDamOption")
+}
+
+model DamSireOption {
+  id        String   @id @default(cuid())
+  label     String   @unique
+  sortOrder Int      @default(0)
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  horses Horse[] @relation("HorseDamSireOption")
 }
 
 model SexOption {

@@ -1,13 +1,15 @@
 "use client";
 
 import type { FormEvent, ReactNode } from "react";
-import { useRouter } from "next/navigation";
 import { useMemo, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 import { Loader2, Megaphone, NotebookPen } from "lucide-react";
 
 import AICopyGenerator from "@/components/ai/ai-copy-generator";
-import HorseImageUploader from "@/components/horses/horse-image-uploader";
 import HorseMultiSelect from "@/components/horses/horse-multi-select";
+import HorsePhotoManager, {
+  type HorsePhotoPlan,
+} from "@/components/horses/horse-photo-manager";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -45,13 +47,19 @@ type HorseFormValues = {
   bestSuitedForIds: string[];
   currentlyCompetingInIds: string[];
   experiencedThroughIds: string[];
-  schoolingThroughIds: string[];
-  idealRiderIds: string[];
   horseTypeIds: string[];
   feiPassport: boolean;
   equiVaultAvailable: boolean;
-  registrationStatus: string;
+  sireOptionId: string;
+  damOptionId: string;
+  damSireOptionId: string;
   showHighlights: string;
+};
+
+type ExistingGalleryImage = {
+  id: string;
+  processedPath: string | null;
+  fileName: string;
 };
 
 interface HorseFormProps {
@@ -63,12 +71,16 @@ interface HorseFormProps {
     pricingVisibility: SelectOption[];
     saleTypes: SelectOption[];
     breeds: SelectOption[];
+    sires: SelectOption[];
+    dams: SelectOption[];
+    damSires: SelectOption[];
     sexes: SelectOption[];
     colors: SelectOption[];
     importStatuses: SelectOption[];
   };
   initialValues?: Partial<HorseFormValues>;
   horseId?: string;
+  existingGalleryImages?: ExistingGalleryImage[];
 }
 
 const defaultValues: HorseFormValues = {
@@ -91,12 +103,12 @@ const defaultValues: HorseFormValues = {
   bestSuitedForIds: [],
   currentlyCompetingInIds: [],
   experiencedThroughIds: [],
-  schoolingThroughIds: [],
-  idealRiderIds: [],
   horseTypeIds: [],
   feiPassport: false,
   equiVaultAvailable: false,
-  registrationStatus: "",
+  sireOptionId: "",
+  damOptionId: "",
+  damSireOptionId: "",
   showHighlights: "",
 };
 
@@ -134,12 +146,17 @@ function FormSection({
   );
 }
 
-export default function HorseForm({ mode, options, initialValues, horseId }: HorseFormProps) {
+export default function HorseForm({
+  mode,
+  options,
+  initialValues,
+  horseId,
+  existingGalleryImages = [],
+}: HorseFormProps) {
   const router = useRouter();
   const formRef = useRef<HTMLFormElement>(null);
   const [loading, setLoading] = useState(false);
   const [submitError, setSubmitError] = useState("");
-  const [imageFile, setImageFile] = useState<File | null>(null);
 
   const values: HorseFormValues = {
     ...defaultValues,
@@ -152,10 +169,9 @@ export default function HorseForm({ mode, options, initialValues, horseId }: Hor
   const [bestSuitedForIds, setBestSuitedForIds] = useState(values.bestSuitedForIds);
   const [currentlyCompetingInIds, setCurrentlyCompetingInIds] = useState(values.currentlyCompetingInIds);
   const [experiencedThroughIds, setExperiencedThroughIds] = useState(values.experiencedThroughIds);
-  const [schoolingThroughIds, setSchoolingThroughIds] = useState(values.schoolingThroughIds);
-  const [idealRiderIds, setIdealRiderIds] = useState(values.idealRiderIds);
   const [saleTypeIds, setSaleTypeIds] = useState(values.saleTypeIds);
   const [horseTypeIds, setHorseTypeIds] = useState(values.horseTypeIds);
+  const [photoPlan, setPhotoPlan] = useState<HorsePhotoPlan>({ items: [] });
 
   const visibleDivisionOptions = useMemo(() => {
     const activeDisciplineIds = new Set([primaryDisciplineId, ...secondaryDisciplineIds].filter(Boolean));
@@ -169,8 +185,18 @@ export default function HorseForm({ mode, options, initialValues, horseId }: Hor
     );
   }, [options.disciplines, primaryDisciplineId, secondaryDisciplineIds]);
 
+  function getContextLabels(ids: string[]) {
+    return ids
+      .map((id) => visibleDivisionOptions.find((option) => option.id === id)?.label || "")
+      .filter(Boolean)
+      .join(", ");
+  }
+
   function getDescriptionContext() {
     const formData = formRef.current ? new FormData(formRef.current) : new FormData();
+    const selectedBestSuitedFor = formData.getAll("bestSuitedForIds").map(String);
+    const selectedCurrentlyShowing = formData.getAll("currentlyCompetingInIds").map(String);
+    const selectedExperiencedThrough = formData.getAll("experiencedThroughIds").map(String);
 
     return {
       name: String(formData.get("name") || "").trim(),
@@ -179,9 +205,9 @@ export default function HorseForm({ mode, options, initialValues, horseId }: Hor
       discipline: String(
         options.disciplines.find((option) => option.id === String(formData.get("primaryDisciplineId") || ""))?.label || ""
       ),
-      level: String(
-        visibleDivisionOptions.find((option) => option.id === String(formData.getAll("bestSuitedForIds")[0] || ""))?.label || ""
-      ),
+      currentlyShowing: getContextLabels(selectedCurrentlyShowing),
+      experiencedThrough: getContextLabels(selectedExperiencedThrough),
+      bestSuitedFor: getContextLabels(selectedBestSuitedFor),
       height: String(formData.get("height") || "").trim(),
       gender: String(options.sexes.find((option) => option.id === String(formData.get("sexOptionId") || ""))?.label || ""),
       location: String(formData.get("location") || "").trim(),
@@ -197,10 +223,33 @@ export default function HorseForm({ mode, options, initialValues, horseId }: Hor
     e.preventDefault();
 
     const form = new FormData(e.currentTarget);
+    const serializablePhotoPlan = photoPlan.items.map((item) => {
+      if (item.source === "new") {
+        form.append("newPhotoFiles", item.file);
+        return {
+          id: item.id,
+          source: item.source,
+          isPrimary: item.isPrimary,
+        };
+      }
 
-    if (imageFile) {
-      form.set("image", imageFile);
-    }
+      if (item.source === "existing-gallery") {
+        return {
+          id: item.id,
+          source: item.source,
+          existingMediaId: item.existingMediaId,
+          isPrimary: item.isPrimary,
+        };
+      }
+
+      return {
+        id: item.id,
+        source: item.source,
+        isPrimary: item.isPrimary,
+      };
+    });
+
+    form.set("photoPlan", JSON.stringify(serializablePhotoPlan));
 
     setSubmitError("");
     setLoading(true);
@@ -227,10 +276,15 @@ export default function HorseForm({ mode, options, initialValues, horseId }: Hor
     <form ref={formRef} onSubmit={handleSubmit} className="space-y-8">
       <FormSection
         icon={<Megaphone className="h-5 w-5" />}
-        title="Horse Photo"
-        description="Lead with a strong primary image. You can drag in a photo, crop it before upload, and replace the draft before saving."
+        title="Horse Photos"
+        description="Build the photo order here, choose the primary image buyers will see first, and save the whole listing in one pass."
       >
-        <HorseImageUploader initialImage={values.image} horseName={values.name} onImageChange={setImageFile} />
+        <HorsePhotoManager
+          initialPrimaryImage={values.image}
+          initialGalleryImages={existingGalleryImages}
+          horseName={values.name}
+          onChange={setPhotoPlan}
+        />
       </FormSection>
 
       <FormSection
@@ -254,6 +308,7 @@ export default function HorseForm({ mode, options, initialValues, horseId }: Hor
               placeholder="Select sale type"
             />
           </div>
+
           <SelectField id="pricingVisibilityOptionId" label="Pricing Visibility" defaultValue={values.pricingVisibilityOptionId} options={options.pricingVisibility} placeholder="Select pricing visibility" />
           <SelectField id="breedOptionId" label="Breed" defaultValue={values.breedOptionId} options={options.breeds} placeholder="Select breed" />
           <SelectField id="sexOptionId" label="Sex" defaultValue={values.sexOptionId} options={options.sexes} placeholder="Select sex" />
@@ -274,15 +329,22 @@ export default function HorseForm({ mode, options, initialValues, horseId }: Hor
             <Label htmlFor="location">Location</Label>
             <Input id="location" name="location" placeholder="e.g. Wellington, FL" defaultValue={values.location} />
           </div>
+        </div>
+      </FormSection>
 
-          <div className="md:col-span-2">
-            <Label htmlFor="registrationStatus">Registration Status</Label>
-            <Input
-              id="registrationStatus"
-              name="registrationStatus"
-              placeholder="Optional registration details"
-              defaultValue={values.registrationStatus}
-            />
+      <FormSection
+        title="Bloodlines"
+        description="Optional bloodline details for the completed horse profile."
+      >
+        <div className="grid gap-5 md:grid-cols-3">
+          <div>
+            <SelectField id="sireOptionId" label="Sire" defaultValue={values.sireOptionId} options={options.sires} placeholder="Select sire" />
+          </div>
+          <div>
+            <SelectField id="damOptionId" label="Dam" defaultValue={values.damOptionId} options={options.dams} placeholder="Select dam" />
+          </div>
+          <div>
+            <SelectField id="damSireOptionId" label="Dam Sire" defaultValue={values.damSireOptionId} options={options.damSires} placeholder="Select dam sire" />
           </div>
         </div>
       </FormSection>
@@ -320,18 +382,16 @@ export default function HorseForm({ mode, options, initialValues, horseId }: Hor
                 bestSuitedForIds,
                 currentlyCompetingInIds,
                 experiencedThroughIds,
-                schoolingThroughIds,
               })}
               onChange={getDivisionSetter(context.formKey, {
                 setBestSuitedForIds,
                 setCurrentlyCompetingInIds,
                 setExperiencedThroughIds,
-                setSchoolingThroughIds,
               })}
               helperText={
                 context.required
                   ? "At least one selection is required before publishing."
-                  : "Optional. Use these to show current record, experience, or schooling scope."
+                  : "Optional. Use these to show current record or highest experience level."
               }
               placeholder={`Select ${context.label.toLowerCase()}`}
             />
@@ -340,27 +400,17 @@ export default function HorseForm({ mode, options, initialValues, horseId }: Hor
       </FormSection>
 
       <FormSection
-        title="Rider Fit"
-        description="Show who this horse suits best and what job it is intended to do in the marketplace."
+        title="Horse Type"
+        description="Use Horse Type / Intended Use to describe where this horse fits in the market."
       >
-        <div className="space-y-6">
-          <HorseMultiSelect
-            label="Ideal Rider"
-            name="idealRiderIds"
-            options={options.idealRiders}
-            selected={idealRiderIds}
-            onChange={setIdealRiderIds}
-            placeholder="Select ideal rider options"
-          />
-          <HorseMultiSelect
-            label="Horse Type / Intended Use"
-            name="horseTypeIds"
-            options={options.horseTypes}
-            selected={horseTypeIds}
-            onChange={setHorseTypeIds}
-            placeholder="Select horse type and intended use"
-          />
-        </div>
+        <HorseMultiSelect
+          label="Horse Type / Intended Use"
+          name="horseTypeIds"
+          options={options.horseTypes}
+          selected={horseTypeIds}
+          onChange={setHorseTypeIds}
+          placeholder="Select horse type and intended use"
+        />
       </FormSection>
 
       <FormSection title="Key Info" description="Add quick facts buyers can scan fast on the public profile. Use one line per highlight.">
@@ -371,7 +421,7 @@ export default function HorseForm({ mode, options, initialValues, horseId }: Hor
               id="keyDetails"
               name="keyDetails"
               className="mt-2 min-h-32"
-              placeholder={"One detail per line\nSmooth, comfortable gait\nSuitable for amateur and junior riders\nRecent show mileage"}
+              placeholder={"One detail per line\nSmooth, comfortable gait\nRecent show mileage\nAmateur friendly"}
               defaultValue={values.keyDetails}
             />
           </div>
@@ -513,7 +563,6 @@ function getSelectedValues(
     bestSuitedForIds: string[];
     currentlyCompetingInIds: string[];
     experiencedThroughIds: string[];
-    schoolingThroughIds: string[];
   }
 ) {
   switch (formKey) {
@@ -523,8 +572,6 @@ function getSelectedValues(
       return values.currentlyCompetingInIds;
     case "experiencedThroughIds":
       return values.experiencedThroughIds;
-    case "schoolingThroughIds":
-      return values.schoolingThroughIds;
     default:
       return [];
   }
@@ -536,7 +583,6 @@ function getDivisionSetter(
     setBestSuitedForIds: (values: string[]) => void;
     setCurrentlyCompetingInIds: (values: string[]) => void;
     setExperiencedThroughIds: (values: string[]) => void;
-    setSchoolingThroughIds: (values: string[]) => void;
   }
 ) {
   switch (formKey) {
@@ -546,8 +592,6 @@ function getDivisionSetter(
       return setters.setCurrentlyCompetingInIds;
     case "experiencedThroughIds":
       return setters.setExperiencedThroughIds;
-    case "schoolingThroughIds":
-      return setters.setSchoolingThroughIds;
     default:
       return () => undefined;
   }

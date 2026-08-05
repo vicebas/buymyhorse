@@ -64,7 +64,9 @@ function getHorseDescriptionPrompt(input: CopyGenerationRequest) {
     breed: input.context.breed || "",
     age: input.context.age || "",
     discipline: input.context.discipline || "",
-    level: input.context.level || "",
+    currentlyShowing: input.context.currentlyShowing || "",
+    experiencedThrough: input.context.experiencedThrough || "",
+    bestSuitedFor: input.context.bestSuitedFor || "",
     height: input.context.height || "",
     gender: input.context.gender || "",
     location: input.context.location || "",
@@ -84,6 +86,7 @@ function getHorseDescriptionPrompt(input: CopyGenerationRequest) {
       existingDraft
         ? "Refine and strengthen the existing draft while keeping it grounded in the supplied facts."
         : "Create fresh listing copy from the provided facts.",
+      "Treat 'Currently Showing' as the horse's current job now, 'Experienced Through' as the highest level reached, and 'Best Suited For' as rider or program fit.",
       "Use key details when relevant, but do not simply restate them as a list.",
       "If information is limited, keep the description useful and elegant without inventing specifics.",
       "Context:",

@@ -12,6 +12,7 @@ import { deletePublicAsset, uploadPublicAsset } from "@/lib/storage/public-asset
 import { NotificationType } from "@/generated/prisma/client";
 import { dispatchHorseNotification } from "@/lib/notifications/dispatch";
 import { trackProductEventSafely } from "@/lib/product-events/track";
+import { hasHorsePhotoSelection, parseHorsePhotoPlan, syncHorsePhotoPlan } from "@/lib/media/horse-photo-plan";
 
 function safeFileName(name: string) {
   return name.replace(/[^a-zA-Z0-9._-]/g, "_");
@@ -53,39 +54,25 @@ export async function POST(req: Request) {
   const pricingVisibilityOptionId = String(formData.get("pricingVisibilityOptionId") || "").trim() || null;
   const colorOptionId = String(formData.get("colorOptionId") || "").trim() || null;
   const importStatusOptionId = String(formData.get("importStatusOptionId") || "").trim() || null;
+  const sireOptionId = String(formData.get("sireOptionId") || "").trim() || null;
+  const damOptionId = String(formData.get("damOptionId") || "").trim() || null;
+  const damSireOptionId = String(formData.get("damSireOptionId") || "").trim() || null;
   const saleTypeIds = parseStringList(formData.getAll("saleTypeIds"));
   const secondaryDisciplineIds = parseStringList(formData.getAll("secondaryDisciplineIds"));
   const bestSuitedForIds = parseStringList(formData.getAll("bestSuitedForIds"));
   const currentlyCompetingInIds = parseStringList(formData.getAll("currentlyCompetingInIds"));
   const experiencedThroughIds = parseStringList(formData.getAll("experiencedThroughIds"));
-  const schoolingThroughIds = parseStringList(formData.getAll("schoolingThroughIds"));
-  const idealRiderIds = parseStringList(formData.getAll("idealRiderIds"));
   const horseTypeIds = parseStringList(formData.getAll("horseTypeIds"));
   const feiPassport = formData.get("feiPassport") === "on";
   const equiVaultAvailable = formData.get("equiVaultAvailable") === "on";
-  const registrationStatus = String(formData.get("registrationStatus") || "").trim();
   const showHighlights = String(formData.get("showHighlights") || "").trim();
+  const photoPlan = parseHorsePhotoPlan(formData.get("photoPlan"));
+  const newPhotoFiles = formData
+    .getAll("newPhotoFiles")
+    .filter((value): value is File => value instanceof File && value.size > 0);
 
   if (!name) {
     return NextResponse.json({ error: "Name is required" }, { status: 400 });
-  }
-
-  const file = formData.get("image") as File | null;
-  let imagePath: string | null = null;
-
-  if (file && file.size > 0) {
-    const bytes = await file.arrayBuffer();
-    const buffer = Buffer.from(bytes);
-    const filename = `${Date.now()}-${safeFileName(file.name)}`;
-    const key = `horses/main/${seller.id}/${filename}`;
-
-    await uploadPublicAsset({
-      key,
-      body: buffer,
-      contentType: file.type || "application/octet-stream",
-      cacheControl: "public, max-age=31536000, immutable",
-    });
-    imagePath = key;
   }
 
   if (publishToMarketplace) {
@@ -95,13 +82,12 @@ export async function POST(req: Request) {
       height,
       location,
       description,
-      image: imagePath,
+      image: hasHorsePhotoSelection(photoPlan) ? "planned-photo" : null,
       breedOptionId,
       sexOptionId,
       primaryDisciplineId,
       pricingVisibilityOptionId,
       bestSuitedForIds,
-      idealRiderIds,
       horseTypeIds,
     });
 
@@ -137,24 +123,24 @@ export async function POST(req: Request) {
         description: description || null,
         keyDetails: keyDetails || null,
         isPublished: publishToMarketplace,
-        image: imagePath,
+        image: null,
         breedOptionId,
         sexOptionId,
         primaryDisciplineId,
         pricingVisibilityOptionId,
         colorOptionId,
         importStatusOptionId,
+        sireOptionId,
+        damOptionId,
+        damSireOptionId,
         saleTypeIds,
         secondaryDisciplineIds,
         bestSuitedForIds,
         currentlyCompetingInIds,
         experiencedThroughIds,
-        schoolingThroughIds,
-        idealRiderIds,
         horseTypeIds,
         feiPassport,
         equiVaultAvailable,
-        registrationStatus: registrationStatus || null,
         showHighlights: showHighlights || null,
       }),
       ...buildHorseListingRelationWrites({
@@ -165,35 +151,45 @@ export async function POST(req: Request) {
         description: description || null,
         keyDetails: keyDetails || null,
         isPublished: publishToMarketplace,
-        image: imagePath,
+        image: null,
         breedOptionId,
         sexOptionId,
         primaryDisciplineId,
         pricingVisibilityOptionId,
         colorOptionId,
         importStatusOptionId,
+        sireOptionId,
+        damOptionId,
+        damSireOptionId,
         saleTypeIds,
         secondaryDisciplineIds,
         bestSuitedForIds,
         currentlyCompetingInIds,
         experiencedThroughIds,
-        schoolingThroughIds,
-        idealRiderIds,
         horseTypeIds,
         feiPassport,
         equiVaultAvailable,
-        registrationStatus: registrationStatus || null,
         showHighlights: showHighlights || null,
       }),
     },
   });
+
+  if (photoPlan.length > 0) {
+    await syncHorsePhotoPlan({
+      horseId: horse.id,
+      currentImagePath: horse.image,
+      existingImageMedia: [],
+      plan: photoPlan,
+      newPhotoFiles,
+    });
+  }
 
   try {
     await createHorseEquiTag(seller.id, horse.id);
   } catch (error) {
     console.error('Failed to create horse EquiTag', error);
     await prisma.horse.delete({ where: { id: horse.id } }).catch(() => null);
-    await deletePublicAsset(imagePath).catch(() => null);
+    await deletePublicAsset(horse.image).catch(() => null);
 
     return NextResponse.json(
       {
@@ -220,5 +216,9 @@ export async function POST(req: Request) {
     }).catch(() => {})
   }
 
-  return NextResponse.json(horse);
+  return NextResponse.json(
+    await prisma.horse.findUnique({
+      where: { id: horse.id },
+    })
+  );
 }

@@ -287,7 +287,6 @@ export function validateHorseForPublishing(horse: {
   pricingVisibilityOptionId?: string | null;
   primaryDisciplineId?: string | null;
   bestSuitedForIds?: string[] | null;
-  idealRiderIds?: string[] | null;
   horseTypeIds?: string[] | null;
 }) {
   const missing: string[] = [];
@@ -301,7 +300,6 @@ export function validateHorseForPublishing(horse: {
   if (!horse.pricingVisibilityOptionId) missing.push("pricing visibility");
   if (!horse.primaryDisciplineId) missing.push("primary discipline");
   if (!horse.bestSuitedForIds?.length) missing.push("best suited for");
-  if (!horse.idealRiderIds?.length) missing.push("ideal rider");
   if (!horse.horseTypeIds?.length) missing.push("horse type");
 
   return {

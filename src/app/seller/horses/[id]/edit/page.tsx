@@ -54,11 +54,25 @@ export default async function EditHorsePage({
       pricingVisibilityOption: true,
       colorOption: true,
       importStatusOption: true,
+      sireOption: true,
+      damOption: true,
+      damSireOption: true,
       secondaryDisciplines: true,
       divisionTags: true,
-      idealRiders: true,
       saleTypes: true,
       horseTypes: true,
+      media: {
+        where: {
+          type: "IMAGE",
+          status: "READY",
+        },
+        orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }],
+        select: {
+          id: true,
+          processedPath: true,
+          fileName: true,
+        },
+      },
     },
   });
 
@@ -122,16 +136,15 @@ export default async function EditHorsePage({
               experiencedThroughIds: horse.divisionTags
                 .filter((item) => item.context === HorseDivisionContext.EXPERIENCED_THROUGH)
                 .map((item) => item.divisionOptionId),
-              schoolingThroughIds: horse.divisionTags
-                .filter((item) => item.context === HorseDivisionContext.SCHOOLING_THROUGH)
-                .map((item) => item.divisionOptionId),
-              idealRiderIds: horse.idealRiders.map((item) => item.idealRiderOptionId),
               horseTypeIds: horse.horseTypes.map((item) => item.horseTypeOptionId),
               feiPassport: horse.feiPassport,
               equiVaultAvailable: horse.equiVaultAvailable,
-              registrationStatus: horse.registrationStatus ?? "",
+              sireOptionId: horse.sireOptionId ?? "",
+              damOptionId: horse.damOptionId ?? "",
+              damSireOptionId: horse.damSireOptionId ?? "",
               showHighlights: horse.showHighlights ?? "",
             }}
+            existingGalleryImages={horse.media}
           />
         )}
       </section>

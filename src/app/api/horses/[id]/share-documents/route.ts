@@ -227,7 +227,7 @@ export async function POST(req: Request, { params }: RouteContext) {
       return upsertedGrant;
     });
 
-    const accessUrl = `${appOrigin}/access/grants/${grant.id}`;
+    const accessUrl = `${appOrigin}/horses/${horse.id}/access`;
 
     if (needsSetup) {
       const resetToken = await createPasswordResetToken(recipient.id);

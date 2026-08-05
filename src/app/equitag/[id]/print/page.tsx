@@ -104,19 +104,21 @@ export default async function EquiTagPrintPage({
 
   const qrCodeSrc = resolvePublicAssetUrl(equiTag.svgPath) || "/img/default-horse.png";
   const destinationHref = buildTagDestination(equiTag);
-  const isHorseTag = equiTag.attachedEntityType === "HORSE" && equiTag.attachedHorse;
-  const isBarnTag = equiTag.attachedEntityType === "BARN" && equiTag.attachedBarn;
+  const attachedHorse = equiTag.attachedEntityType === "HORSE" ? equiTag.attachedHorse : null;
+  const attachedBarn = equiTag.attachedEntityType === "BARN" ? equiTag.attachedBarn : null;
+  const isHorseTag = attachedHorse !== null;
+  const isBarnTag = attachedBarn !== null;
 
   const title = isHorseTag
-    ? equiTag.attachedHorse.name
+    ? attachedHorse.name
     : isBarnTag
-      ? equiTag.attachedBarn.displayName
+      ? attachedBarn.displayName
       : "Unassigned EquiTag";
 
   const metaLine = isHorseTag
-    ? buildHorseMetaLine(equiTag.attachedHorse)
+    ? buildHorseMetaLine(attachedHorse)
     : isBarnTag
-      ? equiTag.attachedBarn.location?.trim().toUpperCase() || "BARN PROFILE"
+      ? attachedBarn.location?.trim().toUpperCase() || "BARN PROFILE"
       : "ATTACH TO A HORSE OR BARN";
 
   return (

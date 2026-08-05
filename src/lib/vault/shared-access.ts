@@ -10,6 +10,7 @@ type SharedAccessGrantRecord = {
   createdAt: Date;
   updatedAt: Date;
   expiresAt: Date | null;
+  revokedAt: Date | null;
   buyer: {
     id: string;
     name: string | null;
@@ -42,8 +43,9 @@ export type SellerHorseVaultSharedAccessItem = {
     email: string | null;
     label: string;
   };
-  status: "ACTIVE";
+  status: "ACTIVE" | "EXPIRED" | "REVOKED";
   sharedAt: string;
+  expiresAt: string | null;
   note: string | null;
   origin: SharedAccessOrigin;
   originLabel: string;
@@ -109,7 +111,7 @@ export function mapSellerHorseVaultSharedAccess(
         (
           document
         ): document is NonNullable<SharedAccessGrantRecord["grantedFiles"][number]["horseDocument"]> =>
-          Boolean(document) && !document.deletedAt
+          document != null && document.deletedAt == null
       )
       .map((document) => ({
         id: document.id,
@@ -123,8 +125,9 @@ export function mapSellerHorseVaultSharedAccess(
         ...grant.buyer,
         label: getBuyerLabel(grant.buyer),
       },
-      status: "ACTIVE",
+      status: grant.revokedAt ? "REVOKED" : grant.expiresAt && grant.expiresAt <= new Date() ? "EXPIRED" : "ACTIVE",
       sharedAt: grant.updatedAt.toISOString(),
+      expiresAt: grant.expiresAt?.toISOString() ?? null,
       note: grant.note,
       origin,
       originLabel: getOriginLabel(origin),

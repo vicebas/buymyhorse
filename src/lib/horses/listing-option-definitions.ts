@@ -280,6 +280,9 @@ export type ListingOptionCategory =
   | "pricingVisibility"
   | "saleTypes"
   | "breeds"
+  | "sires"
+  | "dams"
+  | "damSires"
   | "sexes"
   | "colors"
   | "importStatuses";
@@ -291,6 +294,9 @@ export const LISTING_OPTION_LABELS: Record<ListingOptionCategory, string> = {
   pricingVisibility: "Pricing Visibility",
   saleTypes: "Sale Type",
   breeds: "Breed",
+  sires: "Sire",
+  dams: "Dam",
+  damSires: "Dam Sire",
   sexes: "Sex",
   colors: "Color",
   importStatuses: "Import Status",
@@ -325,12 +331,6 @@ export const HORSE_DIVISION_CONTEXTS: Array<{
     key: HorseDivisionContext.EXPERIENCED_THROUGH,
     formKey: "experiencedThroughIds",
     label: "Experienced Through",
-    required: false,
-  },
-  {
-    key: HorseDivisionContext.SCHOOLING_THROUGH,
-    formKey: "schoolingThroughIds",
-    label: "Schooling Through",
     required: false,
   },
 ];

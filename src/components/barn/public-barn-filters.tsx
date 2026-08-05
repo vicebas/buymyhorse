@@ -10,6 +10,7 @@ import { cn } from "@/lib/utils";
 
 type FilterValues = {
   discipline: string;
+  horseTypes: string[];
   ageMin: string;
   ageMax: string;
   heightMin: string;
@@ -26,9 +27,11 @@ const sortOptions = [
 export default function PublicBarnFilters({
   defaultValues,
   disciplineOptions,
+  horseTypeOptions,
 }: {
   defaultValues: FilterValues;
   disciplineOptions: string[];
+  horseTypeOptions: string[];
 }) {
   const router = useRouter();
   const pathname = usePathname();
@@ -40,6 +43,7 @@ export default function PublicBarnFilters({
     () =>
       [
         values.discipline,
+        ...values.horseTypes,
         values.ageMin,
         values.ageMax,
         values.heightMin,
@@ -60,6 +64,7 @@ export default function PublicBarnFilters({
     const params = new URLSearchParams(searchParams.toString());
 
     setOrDelete(params, "discipline", values.discipline);
+    setListOrDelete(params, "horseType", values.horseTypes);
     setOrDelete(params, "ageMin", values.ageMin);
     setOrDelete(params, "ageMax", values.ageMax);
     setOrDelete(params, "heightMin", values.heightMin);
@@ -79,6 +84,7 @@ export default function PublicBarnFilters({
   function clearFilters() {
     const resetValues = {
       discipline: "",
+      horseTypes: [],
       ageMin: "",
       ageMax: "",
       heightMin: "",
@@ -168,6 +174,40 @@ export default function PublicBarnFilters({
             </label>
           </div>
 
+          <div className="mt-4">
+            <span className="mb-2 block text-sm font-medium text-[color:var(--foreground-soft)]">
+              Horse Type / Intended Use
+            </span>
+            <div className="flex flex-wrap gap-2">
+              {horseTypeOptions.map((horseType) => {
+                const selected = values.horseTypes.includes(horseType);
+
+                return (
+                  <button
+                    key={horseType}
+                    type="button"
+                    onClick={() =>
+                      updateValue(
+                        "horseTypes",
+                        selected
+                          ? values.horseTypes.filter((value) => value !== horseType)
+                          : [...values.horseTypes, horseType]
+                      )
+                    }
+                    className={cn(
+                      "rounded-full border px-3 py-1.5 text-sm transition",
+                      selected
+                        ? "border-[color:var(--accent)] bg-[color:var(--accent)] text-[color:var(--accent-foreground)]"
+                        : "border-[color:var(--border)] bg-[color:var(--background-elevated)] text-[color:var(--foreground)]"
+                    )}
+                  >
+                    {horseType}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
           <div className="mt-4 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
             <label className="block">
               <span className="mb-2 block text-sm font-medium text-[color:var(--foreground-soft)]">
@@ -246,9 +286,19 @@ function setOrDelete(params: URLSearchParams, key: string, value: string) {
   }
 }
 
+function setListOrDelete(params: URLSearchParams, key: string, values: string[]) {
+  params.delete(key);
+
+  values
+    .map((value) => value.trim())
+    .filter(Boolean)
+    .forEach((value) => params.append(key, value));
+}
+
 function hasActiveFilters(values: FilterValues) {
   return Boolean(
     values.discipline ||
+      values.horseTypes.length > 0 ||
       values.ageMin ||
       values.ageMax ||
       values.heightMin ||

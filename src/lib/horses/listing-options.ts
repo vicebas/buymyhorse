@@ -11,6 +11,9 @@ export async function getListingOptionsForAdmin() {
     pricingVisibility,
     saleTypes,
     breeds,
+    sires,
+    dams,
+    damSires,
     sexes,
     colors,
     importStatuses,
@@ -28,6 +31,9 @@ export async function getListingOptionsForAdmin() {
     prisma.pricingVisibilityOption.findMany({ orderBy: [{ sortOrder: "asc" }, { label: "asc" }] }),
     prisma.saleTypeOption.findMany({ orderBy: [{ sortOrder: "asc" }, { label: "asc" }] }),
     prisma.breedOption.findMany({ orderBy: [{ sortOrder: "asc" }, { label: "asc" }] }),
+    prisma.sireOption.findMany({ orderBy: [{ sortOrder: "asc" }, { label: "asc" }] }),
+    prisma.damOption.findMany({ orderBy: [{ sortOrder: "asc" }, { label: "asc" }] }),
+    prisma.damSireOption.findMany({ orderBy: [{ sortOrder: "asc" }, { label: "asc" }] }),
     prisma.sexOption.findMany({ orderBy: [{ sortOrder: "asc" }, { label: "asc" }] }),
     prisma.colorOption.findMany({ orderBy: [{ sortOrder: "asc" }, { label: "asc" }] }),
     prisma.importStatusOption.findMany({ orderBy: [{ sortOrder: "asc" }, { label: "asc" }] }),
@@ -40,6 +46,9 @@ export async function getListingOptionsForAdmin() {
     pricingVisibility,
     saleTypes,
     breeds,
+    sires,
+    dams,
+    damSires,
     sexes,
     colors,
     importStatuses,
@@ -61,6 +70,9 @@ export async function getActiveListingOptions() {
     pricingVisibility: data.pricingVisibility.filter((option) => option.isActive),
     saleTypes: data.saleTypes.filter((option) => option.isActive),
     breeds: data.breeds.filter((option) => option.isActive),
+    sires: data.sires.filter((option) => option.isActive),
+    dams: data.dams.filter((option) => option.isActive),
+    damSires: data.damSires.filter((option) => option.isActive),
     sexes: data.sexes.filter((option) => option.isActive),
     colors: data.colors.filter((option) => option.isActive),
     importStatuses: data.importStatuses.filter((option) => option.isActive),
@@ -106,6 +118,9 @@ export async function seedListingOptions() {
   await upsertSimpleOptions("pricingVisibilityOption", LISTING_OPTION_DEFAULTS.pricingVisibility);
   await upsertSimpleOptions("saleTypeOption", LISTING_OPTION_DEFAULTS.saleTypes);
   await upsertSimpleOptions("breedOption", LISTING_OPTION_DEFAULTS.breeds);
+  await upsertSimpleOptions("sireOption", []);
+  await upsertSimpleOptions("damOption", []);
+  await upsertSimpleOptions("damSireOption", []);
   await upsertSimpleOptions("sexOption", LISTING_OPTION_DEFAULTS.sexes);
   await upsertSimpleOptions("colorOption", LISTING_OPTION_DEFAULTS.colors);
   await upsertSimpleOptions("importStatusOption", LISTING_OPTION_DEFAULTS.importStatuses);
@@ -118,6 +133,9 @@ async function upsertSimpleOptions(
     | "pricingVisibilityOption"
     | "saleTypeOption"
     | "breedOption"
+    | "sireOption"
+    | "damOption"
+    | "damSireOption"
     | "sexOption"
     | "colorOption"
     | "importStatusOption",
@@ -155,6 +173,27 @@ async function upsertSimpleOptions(
         break;
       case "breedOption":
         await prisma.breedOption.upsert({
+          where: { label },
+          update: { sortOrder: index },
+          create: { label, sortOrder: index },
+        });
+        break;
+      case "sireOption":
+        await prisma.sireOption.upsert({
+          where: { label },
+          update: { sortOrder: index },
+          create: { label, sortOrder: index },
+        });
+        break;
+      case "damOption":
+        await prisma.damOption.upsert({
+          where: { label },
+          update: { sortOrder: index },
+          create: { label, sortOrder: index },
+        });
+        break;
+      case "damSireOption":
+        await prisma.damSireOption.upsert({
           where: { label },
           update: { sortOrder: index },
           create: { label, sortOrder: index },

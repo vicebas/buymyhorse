@@ -16,6 +16,7 @@ import {
   getHorseBreedLabel,
   getHorsePricingVisibilityLabel,
   getHorsePrimaryDisciplineLabel,
+  getHorseTypeLabels,
 } from "@/lib/horses/listing-data";
 import { resolvePublicAssetUrl } from "@/lib/storage/public-assets";
 
@@ -26,6 +27,7 @@ export default async function PublicSellerPage({
   params: Promise<{ slug: string }>;
   searchParams: Promise<{
     discipline?: string;
+    horseType?: string | string[];
     ageMin?: string;
     ageMax?: string;
     heightMin?: string;
@@ -56,6 +58,11 @@ export default async function PublicSellerPage({
           breedOption: true,
           primaryDiscipline: true,
           pricingVisibilityOption: true,
+          horseTypes: {
+            include: {
+              horseTypeOption: true,
+            },
+          },
           divisionTags: {
             include: {
               divisionOption: true,
@@ -76,6 +83,7 @@ export default async function PublicSellerPage({
   }
 
   const discipline = filters.discipline?.trim() || "";
+  const selectedHorseTypes = parseMultiStringParam(filters.horseType);
   const ageMin = parseOptionalNumber(filters.ageMin);
   const ageMax = parseOptionalNumber(filters.ageMax);
   const heightMin = parseOptionalNumber(filters.heightMin);
@@ -92,6 +100,13 @@ export default async function PublicSellerPage({
 
       if (location && !horse.location?.toLowerCase().includes(location)) {
         return false;
+      }
+
+      if (selectedHorseTypes.length > 0) {
+        const horseTypeLabels = new Set(getHorseTypeLabels(horse));
+        if (!selectedHorseTypes.some((value) => horseTypeLabels.has(value))) {
+          return false;
+        }
       }
 
       if (ageMin !== null && (horse.age === null || horse.age === undefined || horse.age < ageMin)) {
@@ -147,13 +162,18 @@ export default async function PublicSellerPage({
       : false;
   const hasPublishedHorses = seller.horses.length > 0;
   const hasActiveFilters = Boolean(
-    discipline || ageMin !== null || ageMax !== null || heightMin !== null || heightMax !== null || location
+    discipline || selectedHorseTypes.length > 0 || ageMin !== null || ageMax !== null || heightMin !== null || heightMax !== null || location
   );
   const disciplineOptions = Array.from(
     new Set(
       seller.horses
         .map((horse) => getHorsePrimaryDisciplineLabel(horse)?.trim())
         .filter((value): value is string => Boolean(value))
+    )
+  ).sort((a, b) => a.localeCompare(b));
+  const horseTypeOptions = Array.from(
+    new Set(
+      seller.horses.flatMap((horse) => getHorseTypeLabels(horse).map((label) => label.trim())).filter(Boolean)
     )
   ).sort((a, b) => a.localeCompare(b));
 
@@ -308,6 +328,7 @@ export default async function PublicSellerPage({
             <PublicBarnFilters
               defaultValues={{
                 discipline,
+                horseTypes: selectedHorseTypes,
                 ageMin: filters.ageMin?.trim() || "",
                 ageMax: filters.ageMax?.trim() || "",
                 heightMin: filters.heightMin?.trim() || "",
@@ -316,6 +337,7 @@ export default async function PublicSellerPage({
                 sort,
               }}
               disciplineOptions={disciplineOptions}
+              horseTypeOptions={horseTypeOptions}
             />
           ) : null}
 
@@ -377,6 +399,17 @@ function parseOptionalNumber(value?: string) {
 
   const parsed = Number(value);
   return Number.isFinite(parsed) ? parsed : null;
+}
+
+function parseMultiStringParam(value?: string | string[]) {
+  const list = Array.isArray(value) ? value : value ? [value] : [];
+
+  return [...new Set(
+    list
+      .flatMap((entry) => entry.split(","))
+      .map((entry) => entry.trim())
+      .filter(Boolean)
+  )];
 }
 
 function parseHorseHeight(value?: string | null) {

@@ -16,17 +16,17 @@ export type HorseListingPayload = {
   pricingVisibilityOptionId: string | null;
   colorOptionId: string | null;
   importStatusOptionId: string | null;
+  sireOptionId: string | null;
+  damOptionId: string | null;
+  damSireOptionId: string | null;
   saleTypeIds: string[];
   secondaryDisciplineIds: string[];
   bestSuitedForIds: string[];
   currentlyCompetingInIds: string[];
   experiencedThroughIds: string[];
-  schoolingThroughIds: string[];
-  idealRiderIds: string[];
   horseTypeIds: string[];
   feiPassport: boolean;
   equiVaultAvailable: boolean;
-  registrationStatus: string | null;
   showHighlights: string | null;
 };
 
@@ -47,9 +47,11 @@ export function buildHorseListingMutation(payload: HorseListingPayload) {
     pricingVisibilityOptionId: payload.pricingVisibilityOptionId,
     colorOptionId: payload.colorOptionId,
     importStatusOptionId: payload.importStatusOptionId,
+    sireOptionId: payload.sireOptionId,
+    damOptionId: payload.damOptionId,
+    damSireOptionId: payload.damSireOptionId,
     feiPassport: payload.feiPassport,
     equiVaultAvailable: payload.equiVaultAvailable,
-    registrationStatus: payload.registrationStatus,
     showHighlights: payload.showHighlights,
   };
 }
@@ -72,11 +74,6 @@ export function buildHorseListingRelationWrites(payload: HorseListingPayload) {
     },
     divisionTags: {
       create: divisionTags,
-    },
-    idealRiders: {
-      create: payload.idealRiderIds.map((idealRiderOptionId) => ({
-        idealRiderOptionId,
-      })),
     },
     saleTypes: {
       create: payload.saleTypeIds.map((saleTypeOptionId) => ({
@@ -103,10 +100,6 @@ export function buildHorseListingRelationUpdateWrites(payload: HorseListingPaylo
       deleteMany: {},
       create: relationCreates.divisionTags.create,
     },
-    idealRiders: {
-      deleteMany: {},
-      create: relationCreates.idealRiders.create,
-    },
     saleTypes: {
       deleteMany: {},
       create: relationCreates.saleTypes.create,
@@ -131,7 +124,6 @@ export function validateHorseListingPayload(payload: HorseListingPayload) {
   if (!payload.sexOptionId) missing.push("sex");
   if (!payload.primaryDisciplineId) missing.push("primary discipline");
   if (!payload.bestSuitedForIds.length) missing.push("best suited for");
-  if (!payload.idealRiderIds.length) missing.push("ideal rider");
   if (!payload.horseTypeIds.length) missing.push("horse type / intended use");
   if (!payload.pricingVisibilityOptionId) missing.push("pricing visibility");
 
@@ -146,6 +138,5 @@ export function getDivisionSelectionsByContext(payload: HorseListingPayload) {
     [HorseDivisionContext.BEST_SUITED_FOR, payload.bestSuitedForIds],
     [HorseDivisionContext.CURRENTLY_COMPETING_IN, payload.currentlyCompetingInIds],
     [HorseDivisionContext.EXPERIENCED_THROUGH, payload.experiencedThroughIds],
-    [HorseDivisionContext.SCHOOLING_THROUGH, payload.schoolingThroughIds],
   ]);
 }

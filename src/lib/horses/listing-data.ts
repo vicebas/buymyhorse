@@ -14,6 +14,9 @@ export const horseListingInclude = {
   pricingVisibilityOption: true,
   colorOption: true,
   importStatusOption: true,
+  sireOption: true,
+  damOption: true,
+  damSireOption: true,
   secondaryDisciplines: {
     include: {
       discipline: true,
@@ -98,6 +101,60 @@ export function getHorsePricingVisibilityLabel(horse: {
   pricingVisibilityOption?: { label: string } | null;
 }) {
   return horse.pricingVisibilityOption?.label || "Contact for Price";
+}
+
+export function getHorseSireLabel(horse: {
+  sireOption?: { label: string } | null;
+}) {
+  return horse.sireOption?.label || null;
+}
+
+export function getHorseDamLabel(horse: {
+  damOption?: { label: string } | null;
+}) {
+  return horse.damOption?.label || null;
+}
+
+export function getHorseDamSireLabel(horse: {
+  damSireOption?: { label: string } | null;
+}) {
+  return horse.damSireOption?.label || null;
+}
+
+export function getHorseDivisionLabelsByContext(horse: {
+  divisionTags?: Array<{
+    context: HorseDivisionContext;
+    divisionOption: { label: string; sortOrder?: number };
+  }>;
+}, context: HorseDivisionContext) {
+  return (
+    horse.divisionTags
+      ?.filter((item) => item.context === context)
+      .slice()
+      .sort(
+        (a, b) =>
+          (a.divisionOption.sortOrder ?? 0) - (b.divisionOption.sortOrder ?? 0) ||
+          a.divisionOption.label.localeCompare(b.divisionOption.label)
+      )
+      .map((item) => item.divisionOption.label) ?? []
+  );
+}
+
+export function getHorseTypeLabels(horse: {
+  horseTypes?: Array<{
+    horseTypeOption: { label: string; sortOrder?: number };
+  }>;
+}) {
+  return (
+    horse.horseTypes
+      ?.slice()
+      .sort(
+        (a, b) =>
+          (a.horseTypeOption.sortOrder ?? 0) - (b.horseTypeOption.sortOrder ?? 0) ||
+          a.horseTypeOption.label.localeCompare(b.horseTypeOption.label)
+      )
+      .map((item) => item.horseTypeOption.label) ?? []
+  );
 }
 
 export function getHorseSaleTypeLabels(horse: {

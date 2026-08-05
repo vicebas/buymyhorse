@@ -53,10 +53,16 @@ export default function HorseMediaGallery({
 
     media.forEach((item, index) => {
       if (item.type === "IMAGE") {
+        const resolvedImagePath = resolvePublicAssetUrl(item.processedPath) || "/img/default-horse.png";
+
+        if (primaryImage && resolvedImagePath === (resolvePublicAssetUrl(primaryImage) || "/img/default-horse.png")) {
+          return;
+        }
+
         output.push({
           id: item.id,
           type: "image",
-          src: resolvePublicAssetUrl(item.processedPath) || "/img/default-horse.png",
+          src: resolvedImagePath,
           alt: `${horseName} gallery image ${index + 1}`,
         });
       } else {
