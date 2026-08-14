@@ -6,7 +6,7 @@ import MainHeader from "@/components/layout/main-header";
 import { authOptions } from "@/lib/auth/options";
 import MarketplaceFilters from "@/components/marketplace/marketplace-filters";
 import HorseMarketplaceCard from "@/components/horses/horse-marketplace-card";
-import { featuredHorseInclude, sortHorsesByFeaturedPriority } from "@/lib/horses/featured";
+import { featuredHorseSelect, sortHorsesByFeaturedPriority } from "@/lib/horses/featured";
 import { getActiveListingOptions } from "@/lib/horses/listing-options";
 import { isHorseListingAvailable, mapHorseToCard } from "@/lib/horses/listing-data";
 
@@ -84,7 +84,7 @@ export default async function MarketplacePage({
           }
         : {}),
     },
-    include: featuredHorseInclude,
+    select: featuredHorseSelect,
     orderBy: [{ updatedAt: "desc" }],
   });
 

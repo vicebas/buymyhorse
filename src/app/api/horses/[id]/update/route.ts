@@ -34,6 +34,13 @@ export async function POST(
 
   const seller = await prisma.sellerProfile.findUnique({
     where: { userId: session.user.id },
+    select: {
+      id: true,
+      adminDisabledAt: true,
+      adminDisableReason: true,
+      displayName: true,
+      slug: true,
+    },
   });
 
   if (!seller) {
@@ -91,9 +98,9 @@ export async function POST(
   const pricingVisibilityOptionId = String(formData.get("pricingVisibilityOptionId") || "").trim() || null;
   const colorOptionId = String(formData.get("colorOptionId") || "").trim() || null;
   const importStatusOptionId = String(formData.get("importStatusOptionId") || "").trim() || null;
-  const sireOptionId = String(formData.get("sireOptionId") || "").trim() || null;
-  const damOptionId = String(formData.get("damOptionId") || "").trim() || null;
-  const damSireOptionId = String(formData.get("damSireOptionId") || "").trim() || null;
+  const sire = String(formData.get("sire") || "").trim() || null;
+  const dam = String(formData.get("dam") || "").trim() || null;
+  const damSire = String(formData.get("damSire") || "").trim() || null;
   const saleTypeIds = parseStringList(formData.getAll("saleTypeIds"));
   const secondaryDisciplineIds = parseStringList(formData.getAll("secondaryDisciplineIds"));
   const bestSuitedForIds = parseStringList(formData.getAll("bestSuitedForIds"));
@@ -172,9 +179,12 @@ export async function POST(
         pricingVisibilityOptionId,
         colorOptionId,
         importStatusOptionId,
-        sireOptionId,
-        damOptionId,
-        damSireOptionId,
+        sire,
+        dam,
+        damSire,
+        sireOptionId: null,
+        damOptionId: null,
+        damSireOptionId: null,
         saleTypeIds,
         secondaryDisciplineIds,
         bestSuitedForIds,
@@ -200,9 +210,12 @@ export async function POST(
         pricingVisibilityOptionId,
         colorOptionId,
         importStatusOptionId,
-        sireOptionId,
-        damOptionId,
-        damSireOptionId,
+        sire,
+        dam,
+        damSire,
+        sireOptionId: null,
+        damOptionId: null,
+        damSireOptionId: null,
         saleTypeIds,
         secondaryDisciplineIds,
         bestSuitedForIds,

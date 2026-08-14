@@ -50,9 +50,9 @@ type HorseFormValues = {
   horseTypeIds: string[];
   feiPassport: boolean;
   equiVaultAvailable: boolean;
-  sireOptionId: string;
-  damOptionId: string;
-  damSireOptionId: string;
+  sire: string;
+  dam: string;
+  damSire: string;
   showHighlights: string;
 };
 
@@ -106,9 +106,9 @@ const defaultValues: HorseFormValues = {
   horseTypeIds: [],
   feiPassport: false,
   equiVaultAvailable: false,
-  sireOptionId: "",
-  damOptionId: "",
-  damSireOptionId: "",
+  sire: "",
+  dam: "",
+  damSire: "",
   showHighlights: "",
 };
 
@@ -338,13 +338,16 @@ export default function HorseForm({
       >
         <div className="grid gap-5 md:grid-cols-3">
           <div>
-            <SelectField id="sireOptionId" label="Sire" defaultValue={values.sireOptionId} options={options.sires} placeholder="Select sire" />
+            <Label htmlFor="sire">Sire</Label>
+            <Input id="sire" name="sire" placeholder="Enter sire" defaultValue={values.sire} />
           </div>
           <div>
-            <SelectField id="damOptionId" label="Dam" defaultValue={values.damOptionId} options={options.dams} placeholder="Select dam" />
+            <Label htmlFor="dam">Dam</Label>
+            <Input id="dam" name="dam" placeholder="Enter dam" defaultValue={values.dam} />
           </div>
           <div>
-            <SelectField id="damSireOptionId" label="Dam Sire" defaultValue={values.damSireOptionId} options={options.damSires} placeholder="Select dam sire" />
+            <Label htmlFor="damSire">Dam Sire</Label>
+            <Input id="damSire" name="damSire" placeholder="Enter dam sire" defaultValue={values.damSire} />
           </div>
         </div>
       </FormSection>

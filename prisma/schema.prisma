@@ -270,6 +270,9 @@ model Horse {
   pricingVisibilityOptionId String?
   colorOptionId             String?
   importStatusOptionId      String?
+  sire                      String?
+  dam                       String?
+  damSire                   String?
   sireOptionId              String?
   damOptionId               String?
   damSireOptionId           String?

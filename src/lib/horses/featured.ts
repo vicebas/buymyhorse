@@ -1,8 +1,15 @@
-import { horseListingInclude } from "@/lib/horses/listing-data";
+import { horseListingSelect } from "@/lib/horses/listing-data";
 
-export const featuredHorseInclude = {
-  ...horseListingInclude,
-  featureMetrics: true,
+export const featuredHorseSelect = {
+  ...horseListingSelect,
+  featureMetrics: {
+    select: {
+      profileViews: true,
+      clickThroughs: true,
+      lastProfileViewAt: true,
+      lastClickThroughAt: true,
+    },
+  },
   _count: {
     select: {
       savedByUsers: true,

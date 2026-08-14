@@ -13,7 +13,14 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
     }
 
-    const seller = await prisma.sellerProfile.findUnique({ where: { userId: session.user.id } });
+    const seller = await prisma.sellerProfile.findUnique({
+      where: { userId: session.user.id },
+      select: {
+        id: true,
+        adminDisabledAt: true,
+        adminDisableReason: true,
+      },
+    });
 
     if (!seller) {
       return NextResponse.json({ error: "Seller profile not found." }, { status: 404 });
@@ -81,7 +88,12 @@ export async function GET(req: Request) {
       return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
     }
 
-    const seller = await prisma.sellerProfile.findUnique({ where: { userId: session.user.id } });
+    const seller = await prisma.sellerProfile.findUnique({
+      where: { userId: session.user.id },
+      select: {
+        id: true,
+      },
+    });
 
     if (!seller) {
       return NextResponse.json({ error: "Seller profile not found." }, { status: 404 });

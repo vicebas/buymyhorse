@@ -16,6 +16,9 @@ export type HorseListingPayload = {
   pricingVisibilityOptionId: string | null;
   colorOptionId: string | null;
   importStatusOptionId: string | null;
+  sire: string | null;
+  dam: string | null;
+  damSire: string | null;
   sireOptionId: string | null;
   damOptionId: string | null;
   damSireOptionId: string | null;
@@ -47,6 +50,9 @@ export function buildHorseListingMutation(payload: HorseListingPayload) {
     pricingVisibilityOptionId: payload.pricingVisibilityOptionId,
     colorOptionId: payload.colorOptionId,
     importStatusOptionId: payload.importStatusOptionId,
+    sire: payload.sire,
+    dam: payload.dam,
+    damSire: payload.damSire,
     sireOptionId: payload.sireOptionId,
     damOptionId: payload.damOptionId,
     damSireOptionId: payload.damSireOptionId,

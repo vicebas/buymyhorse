@@ -4,8 +4,8 @@ import { authOptions } from "@/lib/auth/options";
 import ResolvedAppHeader from "@/components/layout/resolved-app-header";
 import MainHeader from "@/components/layout/main-header";
 import DashboardExperience from "@/components/dashboard/dashboard-experience";
-import { featuredHorseInclude, getFeaturedHorses } from "@/lib/horses/featured";
-import { horseListingInclude, isHorseListingAvailable, mapHorseToCard } from "@/lib/horses/listing-data";
+import { featuredHorseSelect, getFeaturedHorses } from "@/lib/horses/featured";
+import { horseListingSelect, isHorseListingAvailable, mapHorseToCard } from "@/lib/horses/listing-data";
 import { getHeaderCTAs } from "@/lib/mybarn/primary-cta";
 
 export default async function UserDashboardPage() {
@@ -28,7 +28,7 @@ export default async function UserDashboardPage() {
             : Promise.resolve([]),
         prisma.horse.findMany({
             where: baseHorseWhere,
-            include: featuredHorseInclude,
+            select: featuredHorseSelect,
             orderBy: [{ updatedAt: "desc" }],
             take: 120,
         }),
@@ -43,13 +43,13 @@ export default async function UserDashboardPage() {
     const contentHorsesRaw = hasFollows
         ? await prisma.horse.findMany({
             where: { ...baseHorseWhere, sellerProfileId: { in: followedSellerIds } },
-            include: horseListingInclude,
+            select: horseListingSelect,
             orderBy: [{ updatedAt: "desc" }],
             take: 24,
           })
         : await prisma.horse.findMany({
             where: { ...baseHorseWhere, isPlatformFeatured: false },
-            include: horseListingInclude,
+            select: horseListingSelect,
             orderBy: [{ createdAt: "desc" }],
             take: 48,
           });

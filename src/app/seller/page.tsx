@@ -49,24 +49,63 @@ export default async function SellerPage() {
         where: {
             userId: session.user.id,
         },
-        include: {
+        select: {
+            id: true,
+            displayName: true,
+            slug: true,
+            logo: true,
+            adminDisabledAt: true,
+            adminDisableReason: true,
             horses: {
                 orderBy: {
                     createdAt: "desc",
                 },
-                include: {
-                    breedOption: true,
-                    sexOption: true,
-                    primaryDiscipline: true,
-                    pricingVisibilityOption: true,
+                select: {
+                    id: true,
+                    name: true,
+                    image: true,
+                    isPublished: true,
+                    adminDisabledAt: true,
+                    age: true,
+                    height: true,
+                    location: true,
+                    breed: true,
+                    gender: true,
+                    discipline: true,
+                    level: true,
+                    breedOption: {
+                        select: {
+                            label: true,
+                        },
+                    },
+                    sexOption: {
+                        select: {
+                            label: true,
+                        },
+                    },
+                    primaryDiscipline: {
+                        select: {
+                            label: true,
+                        },
+                    },
+                    pricingVisibilityOption: {
+                        select: {
+                            label: true,
+                        },
+                    },
                     featureMetrics: {
                         select: {
                             profileViews: true,
                         },
                     },
                     divisionTags: {
-                        include: {
-                            divisionOption: true,
+                        select: {
+                            context: true,
+                            divisionOption: {
+                                select: {
+                                    label: true,
+                                },
+                            },
                         },
                     },
                     attachedEquiTags: {

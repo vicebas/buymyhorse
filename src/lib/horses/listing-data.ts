@@ -1,5 +1,134 @@
 import { HorseDivisionContext } from "@/generated/prisma/enums";
 
+export const horseListingSelect = {
+  id: true,
+  name: true,
+  age: true,
+  height: true,
+  image: true,
+  location: true,
+  isPublished: true,
+  isPlatformFeatured: true,
+  updatedAt: true,
+  createdAt: true,
+  deletedAt: true,
+  adminDisabledAt: true,
+  breed: true,
+  gender: true,
+  discipline: true,
+  level: true,
+  sire: true,
+  dam: true,
+  damSire: true,
+  sellerProfile: {
+    select: {
+      displayName: true,
+      slug: true,
+      adminDisabledAt: true,
+    },
+  },
+  breedOption: {
+    select: {
+      label: true,
+    },
+  },
+  sexOption: {
+    select: {
+      label: true,
+    },
+  },
+  primaryDiscipline: {
+    select: {
+      label: true,
+    },
+  },
+  pricingVisibilityOption: {
+    select: {
+      label: true,
+    },
+  },
+  colorOption: {
+    select: {
+      label: true,
+    },
+  },
+  importStatusOption: {
+    select: {
+      label: true,
+    },
+  },
+  sireOption: {
+    select: {
+      label: true,
+    },
+  },
+  damOption: {
+    select: {
+      label: true,
+    },
+  },
+  damSireOption: {
+    select: {
+      label: true,
+    },
+  },
+  secondaryDisciplines: {
+    select: {
+      discipline: {
+        select: {
+          label: true,
+        },
+      },
+    },
+  },
+  divisionTags: {
+    select: {
+      context: true,
+      divisionOption: {
+        select: {
+          label: true,
+          sortOrder: true,
+          discipline: {
+            select: {
+              label: true,
+            },
+          },
+        },
+      },
+    },
+  },
+  idealRiders: {
+    select: {
+      idealRiderOption: {
+        select: {
+          label: true,
+          sortOrder: true,
+        },
+      },
+    },
+  },
+  saleTypes: {
+    select: {
+      saleTypeOption: {
+        select: {
+          label: true,
+          sortOrder: true,
+        },
+      },
+    },
+  },
+  horseTypes: {
+    select: {
+      horseTypeOption: {
+        select: {
+          label: true,
+          sortOrder: true,
+        },
+      },
+    },
+  },
+} as const;
+
 export const horseListingInclude = {
   sellerProfile: {
     select: {
@@ -104,21 +233,24 @@ export function getHorsePricingVisibilityLabel(horse: {
 }
 
 export function getHorseSireLabel(horse: {
+  sire?: string | null;
   sireOption?: { label: string } | null;
 }) {
-  return horse.sireOption?.label || null;
+  return horse.sire?.trim() || horse.sireOption?.label || null;
 }
 
 export function getHorseDamLabel(horse: {
+  dam?: string | null;
   damOption?: { label: string } | null;
 }) {
-  return horse.damOption?.label || null;
+  return horse.dam?.trim() || horse.damOption?.label || null;
 }
 
 export function getHorseDamSireLabel(horse: {
+  damSire?: string | null;
   damSireOption?: { label: string } | null;
 }) {
-  return horse.damSireOption?.label || null;
+  return horse.damSire?.trim() || horse.damSireOption?.label || null;
 }
 
 export function getHorseDivisionLabelsByContext(horse: {
