@@ -224,8 +224,102 @@ newgrp docker
 
 ### 4.4 Clone the repository
 
+#### Option A — HTTPS with a GitHub Personal Access Token (recommended for public machines)
+
+Using a Personal Access Token (PAT) avoids leaving an SSH key on a public or shared machine and lets you scope and revoke access at any time.
+
+**Step 1 — Create a PAT on GitHub**
+
+1. Log in to GitHub and go to **Settings → Developer settings → Personal access tokens**.
+2. Choose one of the two token types:
+
+   | Type | When to use |
+   |------|-------------|
+   | **Fine-grained token** (recommended) | Restrict to a single repo and grant only read access |
+   | **Classic token** | Simpler; grant only the `repo` scope |
+
+3. **Fine-grained token creation:**
+   - Click **"Generate new token (beta)"**.
+   - Set an **Expiration** (e.g. 7 days — expire it soon after deployment).
+   - Under **Repository access** choose **"Only select repositories"** and pick this repo.
+   - Under **Permissions → Contents** choose **"Read-only"**.
+   - Click **Generate token** and **copy it immediately** — GitHub shows it only once.
+
+4. **Classic token creation (alternative):**
+   - Click **"Generate new token (classic)"**.
+   - Set an **Expiration** (e.g. 7 days).
+   - Tick only the **`repo`** scope.
+   - Click **Generate token** and **copy it immediately**.
+
+**Step 2 — Clone using the token**
+
 ```bash
-git clone https://github.com/your-org/horseroster.git /home/ubuntu/horseroster
+# Replace <YOUR_TOKEN> with the token you just copied
+git clone https://<YOUR_TOKEN>@github.com/vicebas/buymyhorse.git /home/ubuntu/horseroster
+cd /home/ubuntu/horseroster
+```
+
+> ⚠️ **Security note for public / shared machines:** The token embedded in the clone URL is saved in plain text inside `.git/config`. Remove it immediately after cloning:
+
+```bash
+# Strip the token from the remote URL so it is no longer stored on disk
+git remote set-url origin https://github.com/vicebas/buymyhorse.git
+```
+
+Future `git pull` commands will ask for credentials; supply your GitHub username and the token when prompted, or use the credential helper in Step 3.
+
+**Step 3 — (Optional) Store the token temporarily in memory**
+
+If you need to run `git pull` during the session without re-entering the token, store it in memory only (not on disk):
+
+```bash
+# Cache credentials in memory for 1 hour (3600 seconds)
+git config credential.helper 'cache --timeout=3600'
+```
+
+After the cache expires the token is forgotten automatically. Never use `git config credential.helper store` on a public machine — that writes credentials to a plain-text file.
+
+**Step 4 — Revoke the token when you are done**
+
+Once the server is deployed and you no longer need to push or pull, revoke the token:
+
+1. Go to **GitHub → Settings → Developer settings → Personal access tokens**.
+2. Find the token you created and click **Delete**.
+
+---
+
+#### Option B — SSH deploy key (for automated / long-lived deployments)
+
+If you prefer SSH and plan to redeploy regularly from this machine:
+
+```bash
+# Generate a new key pair on the EC2 instance (no passphrase for automation)
+ssh-keygen -t ed25519 -C "horseroster-ec2-deploy" -f ~/.ssh/horseroster_deploy -N ""
+
+# Print the public key — copy this
+cat ~/.ssh/horseroster_deploy.pub
+```
+
+1. Go to **GitHub → repository → Settings → Deploy keys → Add deploy key**.
+2. Paste the public key, give it a name (e.g. `EC2 deploy`), and leave **Allow write access** unchecked (read-only is sufficient).
+3. Click **Add key**.
+
+Configure SSH to use the key for this host:
+
+```bash
+cat >> ~/.ssh/config << 'EOF'
+Host github-horseroster
+  HostName github.com
+  User git
+  IdentityFile ~/.ssh/horseroster_deploy
+  IdentitiesOnly yes
+EOF
+```
+
+Then clone using the custom host alias:
+
+```bash
+git clone git@github-horseroster:vicebas/buymyhorse.git /home/ubuntu/horseroster
 cd /home/ubuntu/horseroster
 ```
 
