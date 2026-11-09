@@ -34,6 +34,34 @@ function getPrivateBucketName() {
   return requiredEnv("AWS_PRIVATE_BUCKET_NAME");
 }
 
+function encodeRfc5987Value(value: string) {
+  return encodeURIComponent(value).replace(/[!'()*]/g, (character) =>
+    `%${character.charCodeAt(0).toString(16).toUpperCase()}`
+  );
+}
+
+export function buildAttachmentContentDisposition(fileName: string) {
+  const originalFileName =
+    fileName
+      .split(/[\\/]/)
+      .pop()
+      ?.replace(/[\u0000-\u001f\u007f]/g, "")
+      .trim() || "download";
+  const asciiFileName =
+    originalFileName
+      .normalize("NFKD")
+      .replace(/[\u2018\u2019\u201a\u201b]/g, "'")
+      .replace(/[\u201c\u201d\u201e\u201f]/g, "")
+      .replace(/[\u2013\u2014]/g, "-")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/[^\x20-\x7e]/g, "")
+      .replace(/["\\]/g, "")
+      .trim()
+      .slice(0, 180) || "download";
+
+  return `attachment; filename="${asciiFileName}"; filename*=UTF-8''${encodeRfc5987Value(originalFileName)}`;
+}
+
 export function getPublicAssetBaseUrl() {
   if (!PUBLIC_ASSET_BASE_URL) {
     console.log('process.env', process.env);
@@ -259,7 +287,7 @@ export async function createPrivateDownloadUrl({
     Key: key,
     ResponseContentType: contentType || undefined,
     ResponseContentDisposition: fileName
-      ? `attachment; filename="${fileName.replace(/"/g, "")}"`
+      ? buildAttachmentContentDisposition(fileName)
       : undefined,
   });
 
