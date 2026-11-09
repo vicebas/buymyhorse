@@ -16,9 +16,10 @@ interface PageProps {
 export default async function HorseAccessPage({ params }: PageProps) {
   const { id } = await params;
   const session = await getServerSession(authOptions);
+  const accessPath = `/horses/${id}/access`;
 
   if (!session?.user?.id) {
-    redirect("/login");
+    redirect(`/login?callbackUrl=${encodeURIComponent(accessPath)}`);
   }
 
   const headerVariant = await getUserAppHeaderVariant(session.user.id);

@@ -227,11 +227,12 @@ export async function POST(req: Request, { params }: RouteContext) {
       return upsertedGrant;
     });
 
-    const accessUrl = `${appOrigin}/horses/${horse.id}/access`;
+    const accessPath = `/access/grants/${grant.id}`;
+    const accessUrl = `${appOrigin}${accessPath}`;
 
     if (needsSetup) {
       const resetToken = await createPasswordResetToken(recipient.id);
-      setupUrl = `${appOrigin}/reset-password?token=${encodeURIComponent(resetToken)}&callbackUrl=${encodeURIComponent(accessUrl)}`;
+      setupUrl = `${appOrigin}/reset-password?token=${encodeURIComponent(resetToken)}&callbackUrl=${encodeURIComponent(accessPath)}`;
     }
 
     let warning: string | null = null;
