@@ -14,10 +14,13 @@ export function getSendGridClient(): typeof sgMail {
   return sgMail
 }
 
-export function getSendGridFrom(): string {
-  const from = process.env.SENDGRID_FROM_EMAIL
-  if (!from) {
+export function getSendGridFrom(): { email: string; name: string } {
+  const email = process.env.SENDGRID_FROM_EMAIL
+  if (!email) {
     throw new Error("SENDGRID_FROM_EMAIL is not set")
   }
-  return from
+  return {
+    email,
+    name: "HorseRoster",
+  }
 }

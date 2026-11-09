@@ -103,5 +103,20 @@ export async function sendDirectVaultShareEmail(params: {
   const from = getSendGridFrom()
   const template = directVaultShareTemplate(params)
 
-  await sg.send({ from, to: template.to, subject: template.subject, text: template.text, html: template.html })
+  await sg.send({
+    from,
+    to: template.to,
+    subject: template.subject,
+    text: template.text,
+    html: template.html,
+    trackingSettings: {
+      clickTracking: {
+        enable: false,
+        enableText: false,
+      },
+      openTracking: {
+        enable: false,
+      },
+    },
+  })
 }
